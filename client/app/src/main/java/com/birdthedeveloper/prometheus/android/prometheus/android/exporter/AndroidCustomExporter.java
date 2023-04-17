@@ -20,6 +20,3 @@ public class AndroidCustomExporter extends Collector {
         return mfs;
     }
 }
-
-    // Registration
-    //static final YourCustomCollector requests = new YourCustomCollector().register()
