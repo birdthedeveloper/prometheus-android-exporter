@@ -12,12 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.ui.theme.PrometheusAndroidExporterTheme
 import io.prometheus.client.Collector
-//import io.prometheus.client.
+import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.exporter.common.TextFormat
+import java.io.StringWriter
 
 class MainActivity : ComponentActivity() {
 
     // register custom prometheus exporter
-    val requests: AndroidCustomExporter = AndroidCustomExporter().register()
+    val collectorRegistry: CollectorRegistry = CollectorRegistry()
+    val customExporter: AndroidCustomExporter = AndroidCustomExporter()
+        .register(collectorRegistry)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,15 +39,9 @@ class MainActivity : ComponentActivity() {
     }
 
     fun CollectMetrics(): String{
-        //TODO convert this to string, so that it can be pushed through pushprox
-        val collected: List<Collector.MetricFamilySamples> = requests.collect()
-        collected.forEach { element ->
-            element.help
-        }
-        //TextFormat()
-        //TODO how to format this metric using not my function ?
-        //TODO find this function in prometheus source code
-        return ""
+        val writer = StringWriter()
+        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
+        return writer.toString()
     }
 
     @Composable
