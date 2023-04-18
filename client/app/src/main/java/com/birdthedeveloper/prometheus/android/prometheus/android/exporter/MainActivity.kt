@@ -1,6 +1,7 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
 
 import android.os.Bundle
+import android.text.BoringLayout.Metrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,13 +23,14 @@ import java.io.StringWriter
 
 class MainActivity : ComponentActivity() {
 
-    // register custom prometheus exporter
-    val collectorRegistry: CollectorRegistry = CollectorRegistry()
-    val customExporter: AndroidCustomExporter = AndroidCustomExporter("dummy")
-        .register(collectorRegistry)
+    private val collectorRegistry: CollectorRegistry = CollectorRegistry()
+    private lateinit var metricsEngine: MetricsEngine
+    private lateinit var customExporter: AndroidCustomExporter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initialize()
+
         setContent {
             PrometheusAndroidExporterTheme {
                 // A surface container using the 'background' color from the theme
@@ -40,6 +42,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun initialize (){
+        metricsEngine = MetricsEngine(this.applicationContext)
+        customExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
     fun CollectMetrics(): String{

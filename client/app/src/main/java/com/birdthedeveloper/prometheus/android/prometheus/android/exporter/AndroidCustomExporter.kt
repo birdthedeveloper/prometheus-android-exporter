@@ -7,35 +7,27 @@ import kotlinx.coroutines.runBlocking
 import java.util.Arrays
 import kotlinx.coroutines.*
 
-class AndroidCustomExporter(name: String) : Collector() {
+class AndroidCustomExporter(metricEngine: MetricsEngine) : Collector() {
+    private val metricsEngineRef = metricEngine
 
-
-//TODO pass context here, get baterry percentage from metrics engine
     override fun collect(): List<MetricFamilySamples> {
         val mfs: MutableList<MetricFamilySamples> = ArrayList()
-        // With no labels.
-        mfs.add(GaugeMetricFamily("my_gauge", "help", 42.0))
-        // With labels
-        val labeledGauge = GaugeMetricFamily("my_other_gauge", "help", Arrays.asList("labelname"))
-        labeledGauge.addMetric(listOf("foo"), 4.0)
-        labeledGauge.addMetric(listOf("bar"), 5.0)
-        mfs.add(labeledGauge)
-        println("Start blocking")
+
+        // metrics definitions
+        collectBatteryStatus(mfs)
+
         return mfs
     }
 
-    fun collectBaterryStatus(mfs: MutableList<MetricFamilySamples>) {
+    fun collectBatteryStatus(mfs: MutableList<MetricFamilySamples>) {
         //TODO
-        val baterryPercentageGauge = GaugeMetricFamily(
-            "baterry_percentage",
-            "Baterry percentage", listOf(),
+        val batteryPercentageGauge = GaugeMetricFamily(
+            "battery_percentage",
+            "Current battery percentage", listOf(),
         )
 
-
-
-        //baterryPercentageGauge.addMetric()
-
-
+        val batteryPercentage : Double = metricsEngineRef.getBatteryPercentage().toDouble()
+        batteryPercentageGauge.addMetric(listOf(), batteryPercentage)
+        mfs.add(batteryPercentageGauge)
     }
-
 }
