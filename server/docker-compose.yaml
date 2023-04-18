@@ -1,10 +1,13 @@
-# nginx, pushprox, prometheus, grafana stack
+# This docker compose file spins up the following containers:
+#   - nginx reverse proxy
+#   - prometheus time-series database
+#   - grafana monitoring dashboard
+#   - pushprox prometheus proxy for traversing NAT 
 
 version: '3.9'
 
 services:
 
-  # monitoring dashboard for prometheus
   grafana:
     container_name: grafana
     hostname: grafana
@@ -13,7 +16,6 @@ services:
     networks:
       - common-network
 
-  # reverse proxy
   nginx:
     container_name: nginx
     image: nginx:1.23.4
@@ -27,7 +29,6 @@ services:
       - common-network
     restart: on-failure
 
-  # proxy for prometheus to traverse NAT
   pushprox:
     container_name: pushprox
     hostname: pushprox
@@ -35,12 +36,13 @@ services:
     networks:
       - common-network
 
-  # prometheus time-series database
   prometheus:
     container_name: prometheus
     hostname: prometheus
     image: bitnami/prometheus:2.43.0
     restart: on-failure
+    volumes:
+      - ${PWD}/configuration/prometheus.yaml:/etc/prometheus/prometheus.yml
     networks:
       - common-network
 
