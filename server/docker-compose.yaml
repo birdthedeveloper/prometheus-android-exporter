@@ -1,0 +1,38 @@
+# nginx, pushprox, prometheus, grafana stack
+
+version: '3.9'
+
+services:
+
+  # monitoring dashboard for prometheus
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:8.5.22
+    restart: on-failure
+    networks:
+      - common-network
+
+  # reverse proxy
+  nginx:
+    container_name: nginx
+    image: nginx:1.23.4
+    networks:
+      - common-network
+
+  # proxy for prometheus to traverse NAT
+  pushprox:
+    image: prometheuscommunity/pushprox:master
+
+  # prometheus time-series database
+  prometheus:
+    container_name: prometheus
+    image: bitnami/prometheus:2.43.0
+    volumes: 
+      - ./
+    restart: on-failure
+    networks:
+      - common-network
+
+networks:
+  common-network:
+    driver: bridge
