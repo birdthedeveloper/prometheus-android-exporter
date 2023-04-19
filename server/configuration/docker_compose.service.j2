@@ -1,0 +1,15 @@
+[Unit]
+Description=Custom 
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/home/{{ new_user_name }}
+ExecStart= docker compose up -d --remove-orphans
+ExecStop= docker compose down
+User={{ new_user_name }}
+Group={{ new_user_name }}
+
+[Install]
+WantedBy=multi-user.target

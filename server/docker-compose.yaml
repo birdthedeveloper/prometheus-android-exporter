@@ -15,6 +15,8 @@ services:
     restart: on-failure
     networks:
       - common-network
+    volumes:
+      - grafana-data:/var/lib/grafana
 
   nginx:
     container_name: nginx
@@ -45,6 +47,9 @@ services:
       - ${PWD}/configuration/prometheus.yaml:/etc/prometheus/prometheus.yml
     networks:
       - common-network
+
+volumes:
+  grafana-data:
 
 networks:
   common-network:

@@ -4,20 +4,118 @@
   hosts: android-prometheus-exporter-target-server
   remote_user: root
 
+  vars:
+    new_user_name: androidexporter
+    new_user_password: change-this-in-production
+
   tasks:
-    - name: Assert linux distribution is Rocky Linux
+    - name: Assert linux distribution is some RedHat linux
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family == "RedHat"
+          - (ansible_distribution_major_version | int == 8) or (ansible_distribution_major_version | int == 9)
 
-    - name: Install docker
+    - name: Install docker and docker compose
+      block:
+        - name: Uninstall distribution docker if present
+          ansible.builtin.dnf:
+            name: "{{ item }}"
+            state: absent
+          loop:
+            - docker
+            - docker-common
+            - docker-engine
 
-    - name: Install docker compose
+        - name: Add docker repository
+          ansible.builtin.yum_repository:
+            name: docker-ce
+            state: present
+            description: Docker ce repo by docker
+            enabled: true
+            baseurl: "{{ 'https://download.docker.com/linux/centos/' + ansible_distribution_major_version + '/x86_64/stable' }}"
+            gpgcheck: true
+            gpgkey: "https://download.docker.com/linux/centos/gpg"
 
-    - name: Create user androidexporter
+        - name: Install Docker CE and docker compose from official docker repository
+          ansible.builtin.yum:
+            name:
+              - docker-ce
+              - docker-ce-cli
+              - containerd.io
+              - docker-compose-plugin
+            state: present
+            update_cache: true
 
-    - name: 
+        - name: Install 'docker' package from pip for ansible commands
+          ansible.builtin.pip:
+            name: docker
+            state: present
 
+        - name: Enable and start docker service
+          ansible.builtin.service:
+            name: docker.service
+            state: started
+            enabled: true
 
-#TODO create user androidexporter
-#TODO install docker
-#TODO install docker compose
-#TODO copy files over
-#TODO create folder structure
+        - name: Add user androidexporter to docker group
+          ansible.builtin.user:
+            name: androidexporter
+            groups: docker
+            append: true
+          register: add_docker_group
+
+        - name: Reset ssh connection for user group changes to take place
+          ansible.builtin.meta: reset_connection
+          when: add_docker_group.changed
+
+    - name: Create new user
+      ansible.builtin.user:
+        name: "{{ new_user_name }}"
+        shell: /bin/bash
+        groups: wheel
+        append: true
+        password: "{{ new_user_password | password_hash('sha512', general.password_salt) }}"
+
+    - name: Execute the following as the new user
+      become: true
+      become_user: "{{ new_user_name }}"
+      tags: configuration
+      block:
+        - name: Copy configuration files
+          ansible.posix.synchronize:
+            src: ./configuration
+            dest: "{{ '/home/' + new_user_name + '/configuration' }}"
+            owner: "{{ new_user_name }}"
+            group: "{{ new_user_name }}"
+            mode: 0644
+            force: true
+          register: config_files
+
+        - name: Pull images
+          community.docker.docker_compose:
+            pull: true
+            recreate: always
+            project_src: "{{ '/home/' + new_user_name }}"
+
+        - name: Start docker compose
+          community.docker.docker_compose:
+            state: present
+            project_src: "{{ '/home/' + new_user_name }}"
+            restarted: "{{ config_files.changed | bool }}"
+
+    - name: Create docker compose systemd service
+      block:
+        - name: Copy docker compose unit file
+          ansible.builtin.template:
+            src: ./configuration/docker_compose.service.j2
+            dest: /etc/systemd/system/docker_compose.service
+            owner: root
+            group: root
+            force: true
+            mode: 0644
+
+        - name: Enable and start systemd docker compose service
+          ansible.builtin.service:
+            name: docker_compose.service
+            state: started
+            enabled: true
