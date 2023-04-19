@@ -1,2 +1,2 @@
-[android-prometheus-exporter-target-server]
-139.144.68.186
+[android_prometheus_exporter_target_server]
+143.42.59.63 ansible_ssh_private_key_file=../credentials/key

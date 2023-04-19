@@ -16,13 +16,13 @@ services:
     networks:
       - common-network
     volumes:
-      - grafana-data:/var/lib/grafana
+      - grafana-data:/var/lib/grafana #TODO add grafana datasource prometheus by default
 
   nginx:
     container_name: nginx
     image: nginx:1.23.4
     volumes:
-      - ${PWD}/configuration/nginx.conf:/etc/nginx/nginx.conf
+      - ./configuration/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - 3000:3000 # grafana port
       - 8080:8080 # pushprox port
@@ -44,7 +44,7 @@ services:
     image: bitnami/prometheus:2.43.0
     restart: on-failure
     volumes:
-      - ${PWD}/configuration/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - ./configuration/prometheus.yaml:/etc/prometheus/prometheus.yml
     networks:
       - common-network
 
