@@ -16,7 +16,8 @@ services:
     networks:
       - common-network
     volumes:
-      - grafana-data:/var/lib/grafana #TODO add grafana datasource prometheus by default
+      - grafana-data:/var/lib/grafana
+      - ./configuration/grafana_prometheus.yml:/etc/grafana/provisioning/datasources/grafana_prometheus.yml
 
   nginx:
     container_name: nginx
