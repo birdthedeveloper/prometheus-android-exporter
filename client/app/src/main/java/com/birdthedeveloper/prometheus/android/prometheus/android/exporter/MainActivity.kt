@@ -27,6 +27,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var metricsEngine: MetricsEngine
     private lateinit var customExporter: AndroidCustomExporter
 
+    private lateinit var pushProxClient : PushProxClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize()
@@ -52,6 +54,20 @@ class MainActivity : ComponentActivity() {
     fun CollectMetrics(): String{
         val writer = StringWriter()
         TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
+
+        // initialize PushProx
+        pushProxClient = PushProxClient(
+            config = PushProxConfig(
+                "test.example.com",
+                "143.42.59.63",
+                1,
+                5,
+                true
+
+            )
+        )
+        pushProxClient.startBackground()
+
         return writer.toString()
     }
 

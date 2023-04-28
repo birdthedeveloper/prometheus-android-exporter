@@ -47,9 +47,22 @@ android {
 }
 
 dependencies {
-    // custom dependencies
+    // custom - prometheus client java library
     implementation 'io.prometheus:simpleclient:0.16.0'
     implementation 'io.prometheus:simpleclient_common:0.16.0'
+
+    // custom - exponential backoff
+    implementation("io.github.reugn:kotlin-backoff:0.4.0")
+
+    // custom - kotlin coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-RC"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0-RC"
+
+    // custom - ktor web client
+    implementation("io.ktor:ktor-server-core:2.2.4")
+    runtimeOnly("io.ktor:ktor-client-core:2.2.4")
+    implementation("io.ktor:ktor-client-cio:2.2.4")
+
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
