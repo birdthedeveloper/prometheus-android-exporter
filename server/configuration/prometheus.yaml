@@ -10,4 +10,8 @@ scrape_configs:
   
   - job_name: "android phones"
     proxy_url: "http://pushprox:8080" #TODO add mobile phones here
+    static_configs:
+      - targets: [
+          "test.example.com"
+        ]
 

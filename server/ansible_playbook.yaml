@@ -105,6 +105,7 @@
             mode: 0644
             force: true
           register: config_files
+          tags: config
 
         - name: Copy docker-compose.yaml
           ansible.builtin.copy:
@@ -115,19 +116,22 @@
             mode: 0644
             force: true
           register: compose_file
+          tags: config
 
         - name: Pull images
           community.docker.docker_compose:
             pull: true
             project_src: "{{ '/home/' + new_user_name }}"
+          tags: config
 
         - name: Start docker compose
           community.docker.docker_compose:
             state: present
             project_src: "{{ '/home/' + new_user_name }}"
             restarted: "{{ (config_files.changed | bool) or (compose_file.changed | bool) }}"
+          tags: config
 
-    - name: Create docker compose systemd service
+    - name: Create docker compose systemd service to start docker compose on boot
       block:
         - name: Copy docker compose unit file
           ansible.builtin.template:

@@ -18,6 +18,7 @@ import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.ui.th
 import io.prometheus.client.Collector
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.StringWriter
 
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var metricsEngine: MetricsEngine
     private lateinit var customExporter: AndroidCustomExporter
 
+    private var pushProxStarted : Boolean = false
     private lateinit var pushProxClient : PushProxClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,22 +53,32 @@ class MainActivity : ComponentActivity() {
         customExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
-    fun CollectMetrics(): String{
+    private suspend fun reallyCollectMetrics() : String {
+        delay(500)
+        val writer = StringWriter()
+        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
+        return writer.toString()
+    }
+
+    private fun CollectMetrics(): String{
         val writer = StringWriter()
         TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
 
         // initialize PushProx
-        pushProxClient = PushProxClient(
-            config = PushProxConfig(
-                "test.example.com",
-                "143.42.59.63",
-                1,
-                5,
-                true
-
+        if (!pushProxStarted) {
+            pushProxClient = PushProxClient(
+                config = PushProxConfig(
+                    "test.example.com",
+                    "http://143.42.59.63:8080",
+                    1,
+                    5,
+                    collectorRegistry,
+                    ::reallyCollectMetrics,
+                )
             )
-        )
-        pushProxClient.startBackground()
+            pushProxClient.startBackground()
+            pushProxStarted = true
+        }
 
         return writer.toString()
     }
