@@ -27,6 +27,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.system.exitProcess
 import kotlin.time.Duration
 
 // Counters for monitoring the pushprox itself, compatible with the reference implementation in go.
@@ -84,6 +85,9 @@ data class PushProxConfig(
     val performScrape: suspend () -> String,
 )
 
+// error in parsing HTTP header "Id" from HTTP request from Prometheus
+class PushProxIdParseException(message: String) : Exception(message)
+
 // This is a stripped down kotlin implementation of github.com/prometheus-community/PushProx client
 class PushProxClient(config: PushProxConfig) {
     //TODO dispose this thing - delete http client
@@ -135,10 +139,15 @@ class PushProxClient(config: PushProxConfig) {
 
     }
 
+    // get value of HTTP header "Id" from response body
     private fun getIdFromResponseBody(responseBody: String) : String {
-        //TODO implement this
-        return "5"
-        //TODO throw custom exception if this is wrong
+
+        val regexOptions = setOf<RegexOption>(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)
+        val match = Regex("^Id: (.*)", regexOptions).find(responseBody)
+        match?: throw PushProxIdParseException("Did not find header Id")
+
+        val (id) = match.destructured
+        return id
     }
 
     // responseBody: response body of /poll request
@@ -158,9 +167,10 @@ class PushProxClient(config: PushProxConfig) {
         try{
             log("scraped metrics in doPush", scrapedMetrics)
             val scrapeId : String = getIdFromResponseBody(responseBody)
+            log("scrapeId", scrapeId)
             val response : HttpResponse = client.request(pushURL) {
                 header("id", scrapeId)
-                header("X-prometheus-scrape-timeout", "4") //TODO this is dummy for now
+                //header("X-prometheus-scrape-timeout", "4") //TODO this is dummy for now
                 method = HttpMethod.Post
 
                 setBody(scrapedMetrics)
@@ -175,10 +185,6 @@ class PushProxClient(config: PushProxConfig) {
     }
 
     private fun handleErr(){
-        //TODO implement
-    }
-
-    private fun doScrape() {
         //TODO implement
     }
 
