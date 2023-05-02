@@ -40,11 +40,23 @@ class PrometheusServer(config: PrometheusServerConfig){
         return result
     }
 
+    private fun getLandingPage() : String{
+        return """
+            <html>
+			<head><title>Android Exporter</title></head>
+			<body>
+			<h1>Android Exporter</h1>
+			<p><a href="/metrics">Metrics</a></p>
+			</body>
+			</html>
+        """.trimIndent()
+    }
+
     private fun configureServer(){
         server = embeddedServer(CIO, port = config.port) {
             routing {
                 get("/") {
-                    call.respondText("Prometheus Android Exporter")
+                    call.respondText(getLandingPage())
                 }
                 get("/metrics") {
                     call.respondText(getMetrics())
