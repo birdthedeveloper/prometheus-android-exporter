@@ -1,0 +1,12 @@
+# Simple run of prometheus database with a configuration file on localhost
+
+version: '3.9'
+
+services:
+  prometheus:
+    container_name: prometheus
+    image: bitnami/prometheus:2.43.0
+    restart: on-failure
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+    network_mode: host

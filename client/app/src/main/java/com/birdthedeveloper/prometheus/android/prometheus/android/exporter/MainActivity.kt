@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.BoringLayout.Metrics
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -22,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.StringWriter
 
+//https://www.geeksforgeeks.org/how-to-launch-an-application-automatically-on-system-boot-up-in-android/
 class MainActivity : ComponentActivity() {
 
     private val collectorRegistry: CollectorRegistry = CollectorRegistry()
@@ -83,12 +85,28 @@ class MainActivity : ComponentActivity() {
         return writer.toString()
     }
 
+    private fun startPromServer(){
+        //TODO impl
+        val promServer : PrometheusServer = PrometheusServer(
+            config = PrometheusServerConfig(
+                8080,
+                ::reallyCollectMetrics
+            )
+        )
+        promServer.startBackground()
+    }
+
     @Composable
     fun PrometheusHomepage() {
-        Button(onClick = {
-            println(CollectMetrics())
-        }){
-            Text("Click this button")
+        Column {
+            Button(onClick = {
+                println(CollectMetrics())
+            }) {
+                Text("Click this button")
+            }
+            Button(onClick = ::startPromServer){
+                Text("Prometheus server")
+            }
         }
     }
 }
@@ -96,6 +114,7 @@ class MainActivity : ComponentActivity() {
 //TODO how to call coroutine / async from custom collector
 //TODO how to extract any hw system metric from android API
 //TODO how to get permission on first application start only
+//TODO viewmodel, state management
 
 //class GlobalViewModel : ViewModel() {
 //    val state = mutableStateOf<Int>(Resource.Success(i))
