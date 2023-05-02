@@ -24,6 +24,13 @@ import kotlinx.coroutines.launch
 import java.io.StringWriter
 
 //https://www.geeksforgeeks.org/how-to-launch-an-application-automatically-on-system-boot-up-in-android/
+
+// reference android app architecture
+//https://github.dev/google-developer-training/basic-android-kotlin-compose-training-unscramble
+
+
+// reference for sharing the view model accross whole application
+// just acces viewmodel instance using viewmodel() function in composable fun
 class MainActivity : ComponentActivity() {
 
     private val collectorRegistry: CollectorRegistry = CollectorRegistry()

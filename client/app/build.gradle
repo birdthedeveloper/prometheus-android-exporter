@@ -66,6 +66,9 @@ dependencies {
     implementation "io.ktor:ktor-server-cio:2.3.0"
     implementation "io.ktor:ktor-server-core:2.3.0"
 
+    // view model for Jetpack Compose
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
+
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
