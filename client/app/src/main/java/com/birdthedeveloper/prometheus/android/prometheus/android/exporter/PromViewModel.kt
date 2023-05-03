@@ -11,6 +11,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.StringWriter
 
+enum class ConfigFileState {
+    LOADING,
+    ERROR, // file not found or was not parsed
+    MISSING,
+    SUCCESS
+}
+
 data class PromUiState(
     val tabIndex : Int = 0,
     val serverTurnedOn : Boolean = false,
@@ -18,6 +25,7 @@ data class PromUiState(
     val serverPort : Int? = null, // if null, use default port
     val fqdn : String = "",
     val pushProxURL : String = "",
+    val configFileState : ConfigFileState = ConfigFileState.LOADING,
 )
 
 private val TAG : String = "PROMVIEWMODEL"

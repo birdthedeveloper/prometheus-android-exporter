@@ -30,21 +30,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.StringWriter
 
+//TODO
 //https://www.geeksforgeeks.org/how-to-launch-an-application-automatically-on-system-boot-up-in-android/
 
-// reference android app architecture
-//https://github.dev/google-developer-training/basic-android-kotlin-compose-training-unscramble
-
-
-// reference for sharing the view model accross whole application
 class MainActivity : ComponentActivity() {
-
-    private val collectorRegistry: CollectorRegistry = CollectorRegistry()
-    private lateinit var metricsEngine: MetricsEngine
-    private lateinit var customExporter: AndroidCustomExporter
-
-    private var pushProxStarted : Boolean = false
-    private lateinit var pushProxClient : PushProxClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,21 +70,13 @@ class MainActivity : ComponentActivity() {
                     promViewModel = promViewModel,
                 )
             }
-            composable("homepage") { HomePage(navController = navController, promViewModel = promViewModel) }
+            composable("homepage") {
+                HomePage(
+                    navController = navController,
+                    promViewModel = promViewModel
+                )
+            }
             composable("license") { LicensePage(navController = navController)}
         }
-    }}
-
-//    private fun initialize (){
-//        metricsEngine = MetricsEngine(this.applicationContext)
-//        customExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
-//    }
-//
-//    private suspend fun reallyCollectMetrics() : String {
-//        delay(500)
-//        val writer = StringWriter()
-//        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
-//        return writer.toString()
-//    }
-
-
+    }
+}

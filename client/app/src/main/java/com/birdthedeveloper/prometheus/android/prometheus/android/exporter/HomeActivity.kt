@@ -212,3 +212,13 @@ private fun PushProxPage(
         }
     }
 }
+
+//TODO asap: 4 screens: loading, file error, file loaded, file missing - already implemented
+
+@Composable
+private fun LoadingPage(){
+    val progress : Float by remember { mutableStateOf(0.0f) }
+    //TODO finish this thing
+}
+//TODO
+//https://foso.github.io/Jetpack-Compose-Playground/material/circularprogressindicator/
