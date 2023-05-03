@@ -37,7 +37,6 @@ import java.io.StringWriter
 
 
 // reference for sharing the view model accross whole application
-// just access viewmodel instance using viewmodel() function in composable fun
 class MainActivity : ComponentActivity() {
 
     private val collectorRegistry: CollectorRegistry = CollectorRegistry()
@@ -82,9 +81,9 @@ class MainActivity : ComponentActivity() {
                     promViewModel = promViewModel,
                 )
             }
-            composable("homepage") { HomePage(navController = navController) }
+            composable("homepage") { HomePage(navController = navController, promViewModel = promViewModel) }
         }
-    }
+    }}
 
 //    private fun initialize (){
 //        metricsEngine = MetricsEngine(this.applicationContext)
@@ -98,37 +97,4 @@ class MainActivity : ComponentActivity() {
 //        return writer.toString()
 //    }
 
-//    private fun CollectMetrics(): String{
-//        val writer = StringWriter()
-//        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
-//
-//        // initialize PushProx
-//        if (!pushProxStarted) {
-//            pushProxClient = PushProxClient(
-//                config = PushProxConfig(
-//                    "test.example.com",
-//                    "http://143.42.59.63:8080",
-//                    1,
-//                    5,
-//                    collectorRegistry,
-//                    ::reallyCollectMetrics,
-//                )
-//            )
-//            pushProxClient.startBackground()
-//            pushProxStarted = true
-//        }
-//
-//        return writer.toString()
-//    }
 
-//    private fun startPromServer(){
-//        //TODO impl
-//        val promServer : PrometheusServer = PrometheusServer(
-//            config = PrometheusServerConfig(
-//                8080,
-//                ::reallyCollectMetrics
-//            )
-//        )
-//        promServer.startBackground()
-//    }
-}

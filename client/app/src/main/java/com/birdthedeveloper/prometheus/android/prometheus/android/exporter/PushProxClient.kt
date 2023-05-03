@@ -19,39 +19,36 @@ import kotlinx.coroutines.launch
  * Counters for monitoring the pushprox itself, compatible with the reference
  * implementation in golang, source: https://github.dev/prometheus-community/PushProx
  */
-private class Counters(collectorRegistry: CollectorRegistry?) {
-    private val collectorRegistry : CollectorRegistry?
-    private lateinit var scrapeErrorCounter : Counter
-    private lateinit var pushErrorCounter : Counter
-    private lateinit var pollErrorCounter : Counter
-    private var enabled : Boolean = false
+private class Counters(collectorRegistry: CollectorRegistry) {
+    private val collectorRegistry : CollectorRegistry
+    private val scrapeErrorCounter : Counter
+    private val pushErrorCounter : Counter
+    private val pollErrorCounter : Counter
 
     init {
         this.collectorRegistry = collectorRegistry
-        if (collectorRegistry != null){
-            this.enabled = true
 
-            // following 3 counters are compatible with reference implementation
-            scrapeErrorCounter = Counter.build()
-                .name("pushprox_client_scrape_errors_total")
-                .help("Number of scrape errors")
-                .register(collectorRegistry)
-            pushErrorCounter = Counter.build()
-                .name("pushprox_client_push_errors_total")
-                .help("Number of push errors")
-                .register(collectorRegistry)
-            pollErrorCounter = Counter.build()
-                .name("pushprox_client_poll_errors_total")
-                .help("Number of poll errors")
-                .register(collectorRegistry)
-        }
+        // following 3 counters are compatible with reference implementation
+        scrapeErrorCounter = Counter.build()
+            .name("pushprox_client_scrape_errors_total")
+            .help("Number of scrape errors")
+            .register(collectorRegistry)
+        pushErrorCounter = Counter.build()
+            .name("pushprox_client_push_errors_total")
+            .help("Number of push errors")
+            .register(collectorRegistry)
+        pollErrorCounter = Counter.build()
+            .name("pushprox_client_poll_errors_total")
+            .help("Number of poll errors")
+            .register(collectorRegistry)
+
     }
 
-    fun scrapeError(){ if (enabled) scrapeErrorCounter.inc() }
+    fun scrapeError(){ scrapeErrorCounter.inc() }
 
-    fun pushError(){ if (enabled) pushErrorCounter.inc() }
+    fun pushError(){ pushErrorCounter.inc() }
 
-    fun pollError(){ if (enabled) pollErrorCounter.inc() }
+    fun pollError(){ pollErrorCounter.inc() }
 }
 
 // Configuration object for this pushprox client

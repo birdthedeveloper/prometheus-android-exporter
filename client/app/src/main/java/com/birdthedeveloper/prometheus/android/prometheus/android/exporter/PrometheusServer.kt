@@ -16,12 +16,15 @@ data class PrometheusServerConfig(
     val performScrape : suspend () -> String,
 )
 
+private val TAG = "PROMETHEUS_SERVER"
+
 // Expose metrics on given port using Ktor http server with CIO engine
 class PrometheusServer(){
     private var isRunning : Boolean = false
 
     fun startInBackground(config : PrometheusServerConfig){
         if (!isRunning){
+            Log.v(TAG, "Starting prometheus server")
             isRunning = true
             //TODO dispose server
 
@@ -67,7 +70,7 @@ class PrometheusServer(){
                 get("/metrics") {
                     call.respondText(getMetrics(config.performScrape))
                 }
-            }
+            } //TODO 404 page
         }
     }
 

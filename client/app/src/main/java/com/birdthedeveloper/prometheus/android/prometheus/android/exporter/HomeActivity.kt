@@ -34,7 +34,7 @@ private val TAG = "HOMEPAGE"
 @Composable
 fun HomePage(
     modifier : Modifier = Modifier,
-    promViewModel: PromViewModel = viewModel(),
+    promViewModel: PromViewModel,
     navController: NavHostController,
 ) {
     val tabs = mapOf(0 to "Server", 1 to "PushProx")
@@ -68,17 +68,30 @@ fun HomePage(
             }
         }
         when(uiState.tabIndex){
-            0 -> ServerPage()
-            1 -> PushProxPage()
+            0 -> ServerPage(promViewModel)
+            1 -> PushProxPage(promViewModel)
         }
     }
+}
 
-    //TODO tabview
+private fun onCheckedChange(
+    value : Boolean,
+    promViewModel: PromViewModel,
+    showDialog : MutableState<String>
+){
+    if (value) {
+        val result : String? = promViewModel.turnServerOn()
+        if(result != null){
+            showDialog.value = result
+        }
+    } else {
+        promViewModel.turnServerOff()
+    }
 }
 
 @Composable
 private fun ServerPage(
-    promViewModel: PromViewModel = viewModel()
+    promViewModel: PromViewModel
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
@@ -102,45 +115,22 @@ private fun ServerPage(
         if(showDialogText.value != ""){
             AlertDialog(
                 onDismissRequest = { showDialogText.value = "" },
-                title = {Text ("Error") },
+                title = { Text ("Error") },
                 text = { Text(showDialogText.value) },
                 dismissButton = {
                     Button(
-                        onClick = {
-                            showDialogText.value = ""
-                        }
-                    ){
-                        Text("OK")
-                    }
+                        onClick = { showDialogText.value = "" }
+                    ){ Text("OK") }
                 },
-                confirmButton = {
-
-                }
+                confirmButton = {}
             )
         }
-    }
-    //TODO asap
-}
-
-
-private fun onCheckedChange(
-    value : Boolean,
-    promViewModel: PromViewModel,
-    showDialog : MutableState<String>
-){
-    if (value) {
-        val result : String? = promViewModel.turnServerOn()
-        if(result != null){
-            showDialog.value = result
-        }
-    } else {
-        promViewModel.turnServerOff()
     }
 }
 
 @Composable
 private fun PushProxPage(
-    promViewModel: PromViewModel = viewModel()
+    promViewModel: PromViewModel
 ){
     Text("PushProx config page")
     //TODO implement this
