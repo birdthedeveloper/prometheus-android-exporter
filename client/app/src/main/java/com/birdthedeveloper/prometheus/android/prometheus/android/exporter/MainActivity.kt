@@ -72,7 +72,6 @@ class MainActivity : ComponentActivity() {
         promViewModel : PromViewModel
     ){
         val startDestination : String = "homepage"
-
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -87,17 +86,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initialize (){
-        metricsEngine = MetricsEngine(this.applicationContext)
-        customExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
-    }
-
-    private suspend fun reallyCollectMetrics() : String {
-        delay(500)
-        val writer = StringWriter()
-        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
-        return writer.toString()
-    }
+//    private fun initialize (){
+//        metricsEngine = MetricsEngine(this.applicationContext)
+//        customExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
+//    }
+//
+//    private suspend fun reallyCollectMetrics() : String {
+//        delay(500)
+//        val writer = StringWriter()
+//        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
+//        return writer.toString()
+//    }
 
 //    private fun CollectMetrics(): String{
 //        val writer = StringWriter()
@@ -122,14 +121,14 @@ class MainActivity : ComponentActivity() {
 //        return writer.toString()
 //    }
 
-    private fun startPromServer(){
-        //TODO impl
-        val promServer : PrometheusServer = PrometheusServer(
-            config = PrometheusServerConfig(
-                8080,
-                ::reallyCollectMetrics
-            )
-        )
-        promServer.startBackground()
-    }
+//    private fun startPromServer(){
+//        //TODO impl
+//        val promServer : PrometheusServer = PrometheusServer(
+//            config = PrometheusServerConfig(
+//                8080,
+//                ::reallyCollectMetrics
+//            )
+//        )
+//        promServer.startBackground()
+//    }
 }

@@ -88,10 +88,9 @@ class PushProxClient(
         if(!isRunning){
             isRunning = true
 
-            HttpClient().use { client ->
-                val context : PushProxContext = processConfig(client, config)
-                loop(context)
-            }
+            val client : HttpClient = HttpClient() //TODO close this thing
+            val context : PushProxContext = processConfig(client, config)
+            loop(context)
         }
     }
 

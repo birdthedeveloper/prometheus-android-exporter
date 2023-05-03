@@ -10,29 +10,31 @@ import io.ktor.server.routing.routing
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-fun something(){
-    //TODO
-
-}
-
 // Configuration object for PrometheusServer class
 data class PrometheusServerConfig(
     val port : Int,
     val performScrape : suspend () -> String,
 )
 
-// Expose metrics on given port using Ktor http server
-class PrometheusServer(config: PrometheusServerConfig){
-    private  val config : PrometheusServerConfig
-    private lateinit var server : ApplicationEngine
+// Expose metrics on given port using Ktor http server with CIO engine
+class PrometheusServer(){
 
-    init {
-        this.config = config
+    fun startBackground(config : PrometheusServerConfig){
+        //TODO dispose server
+
+        val server = configureServer(config)
+        GlobalScope.launch {
+            launch{
+                server.start(wait = true)
+            }
+        }
+
+        log("startBackground", "done")
     }
 
-    private suspend fun getMetrics() : String{
+    private suspend fun getMetrics(performScrape: suspend () -> String) : String{
         val result : String = try{
-            config.performScrape()
+            performScrape()
         }catch(e: Exception){
             ""
         }
@@ -52,29 +54,19 @@ class PrometheusServer(config: PrometheusServerConfig){
         """.trimIndent()
     }
 
-    private fun configureServer(){
-        server = embeddedServer(CIO, port = config.port) {
+    private fun configureServer(config : PrometheusServerConfig) : ApplicationEngine{
+        return embeddedServer(CIO, port = config.port) {
             routing {
                 get("/") {
                     call.respondText(getLandingPage())
                 }
                 get("/metrics") {
-                    call.respondText(getMetrics())
+                    call.respondText(getMetrics(config.performScrape))
                 }
             }
         }
     }
 
-    fun startBackground(){
-        configureServer()
-
-        GlobalScope.launch {
-            launch{
-                server.start(wait = true)
-            }
-        }
-        log("startBackground", "done")
-    }
 
     private fun log(title: String, text: String) {
         Log.v("PROMETHEUS SERVER", "$title: $text")
