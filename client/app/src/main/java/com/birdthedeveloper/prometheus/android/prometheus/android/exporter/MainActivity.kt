@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable("homepage") { HomePage(navController = navController, promViewModel = promViewModel) }
+            composable("license") { LicensePage(navController = navController)}
         }
     }}
 
