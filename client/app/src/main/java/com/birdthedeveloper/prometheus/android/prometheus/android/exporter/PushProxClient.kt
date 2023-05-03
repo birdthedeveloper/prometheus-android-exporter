@@ -92,7 +92,15 @@ class PushProxClient(
     }
 
     private fun processConfig(client : HttpClient, config : PushProxConfig) : PushProxContext {
-        val modifiedProxyURL = config.proxyUrl.trim('/')
+        var modifiedProxyURL = config.proxyUrl.trim('/')
+
+        if(
+            !modifiedProxyURL.startsWith("http://") &&
+            !modifiedProxyURL.startsWith("https://")
+        ){
+            modifiedProxyURL = "http://$modifiedProxyURL"
+        }
+
         val pollURL : String = "$modifiedProxyURL/poll"
         val pushURL : String = "$modifiedProxyURL/push"
 

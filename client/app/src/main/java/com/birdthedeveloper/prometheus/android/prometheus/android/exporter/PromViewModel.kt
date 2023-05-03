@@ -16,8 +16,8 @@ data class PromUiState(
     val serverTurnedOn : Boolean = false,
     val pushProxTurnedOn : Boolean = false,
     val serverPort : Int? = null, // if null, use default port
-    val fqdn : String? = null,
-    val pushProxURL : String? = null,
+    val fqdn : String = "",
+    val pushProxURL : String = "",
 )
 
 private val TAG : String = "PROMVIEWMODEL"
@@ -101,8 +101,11 @@ class PromViewModel(): ViewModel() {
     }
 
     private fun validatePushProxSettings() : String? {
-        _uiState.value.pushProxURL?: return "Please fill in PushProx URL with port"
-        _uiState.value.fqdn?: return "Please fill in your Fully Qualified Domain Name"
+        val fqdn = _uiState.value.fqdn.trim()
+        val url = _uiState.value.pushProxURL.trim()
+
+        if( fqdn.isEmpty() ) return "Fully Qualified Domain Name cannot be empty!"
+        if( url.isEmpty() ) return "PushProx URL cannot be empty!"
 
         return null
     }
@@ -119,8 +122,8 @@ class PromViewModel(): ViewModel() {
             pushProxClient.startBackground(
                 PushProxConfig(
                     performScrape = ::performScrape,
-                    fqdn = _uiState.value.fqdn!!,
-                    proxyUrl = _uiState.value.pushProxURL!!,
+                    fqdn = _uiState.value.fqdn.trim(),
+                    proxyUrl = _uiState.value.pushProxURL.trim(),
                 )
             )
         }catch(e : Exception){
