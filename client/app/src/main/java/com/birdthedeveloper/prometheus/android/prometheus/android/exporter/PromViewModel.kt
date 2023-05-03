@@ -18,9 +18,10 @@ data class PromUiState(
     val pushProxURL : String? = null,
 )
 
-val TAG : String = "PROMVIEWMODEL"
+private val TAG : String = "PROMVIEWMODEL"
 
 class PromViewModel(): ViewModel() {
+    private val DEFAULT_SERVER_PORT : Int = 10101 //TODO register with prometheus community
     private val _uiState = MutableStateFlow(PromUiState())
     val uiState : StateFlow<PromUiState> = _uiState.asStateFlow()
 
@@ -34,6 +35,10 @@ class PromViewModel(): ViewModel() {
 
     init {
         Log.v(TAG, "initializing promviewmodel")
+    }
+
+    fun getDefaultPort() : Int {
+        return DEFAULT_SERVER_PORT
     }
 
     fun setApplicationContext(getContext : () -> Context){
@@ -54,7 +59,6 @@ class PromViewModel(): ViewModel() {
     }
 
     private fun getPromServerPort() : Int{
-        val DEFAULT_SERVER_PORT : Int = 10101 //TODO register with prometheus community
         return if(_uiState.value.serverPort != null){
             _uiState.value.serverPort!!
         }else{
