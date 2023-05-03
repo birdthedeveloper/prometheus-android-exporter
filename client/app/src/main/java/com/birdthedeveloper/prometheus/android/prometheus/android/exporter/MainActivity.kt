@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -47,7 +49,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //initialize()
+
+        val promViewModel: PromViewModel = ViewModelProvider(this)[PromViewModel::class.java]
+        promViewModel.setApplicationContext { this.applicationContext }
 
         setContent {
             PrometheusAndroidExporterTheme {
@@ -56,7 +60,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    PromNavigation()
+                    PromNavigation(promViewModel = promViewModel)
                 }
             }
         }
@@ -64,7 +68,8 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun PromNavigation(
-        navController : NavHostController = rememberNavController()
+        navController : NavHostController = rememberNavController(),
+        promViewModel : PromViewModel
     ){
         val startDestination : String = "homepage"
 
@@ -72,7 +77,12 @@ class MainActivity : ComponentActivity() {
             navController = navController,
             startDestination = startDestination,
         ){
-            composable("settings") { SettingsPage(navController = navController) }
+            composable("settings") {
+                SettingsPage(
+                    navController = navController,
+                    promViewModel = promViewModel,
+                )
+            }
             composable("homepage") { HomePage(navController = navController) }
         }
     }
@@ -89,28 +99,28 @@ class MainActivity : ComponentActivity() {
         return writer.toString()
     }
 
-    private fun CollectMetrics(): String{
-        val writer = StringWriter()
-        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
-
-        // initialize PushProx
-        if (!pushProxStarted) {
-            pushProxClient = PushProxClient(
-                config = PushProxConfig(
-                    "test.example.com",
-                    "http://143.42.59.63:8080",
-                    1,
-                    5,
-                    collectorRegistry,
-                    ::reallyCollectMetrics,
-                )
-            )
-            pushProxClient.startBackground()
-            pushProxStarted = true
-        }
-
-        return writer.toString()
-    }
+//    private fun CollectMetrics(): String{
+//        val writer = StringWriter()
+//        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
+//
+//        // initialize PushProx
+//        if (!pushProxStarted) {
+//            pushProxClient = PushProxClient(
+//                config = PushProxConfig(
+//                    "test.example.com",
+//                    "http://143.42.59.63:8080",
+//                    1,
+//                    5,
+//                    collectorRegistry,
+//                    ::reallyCollectMetrics,
+//                )
+//            )
+//            pushProxClient.startBackground()
+//            pushProxStarted = true
+//        }
+//
+//        return writer.toString()
+//    }
 
     private fun startPromServer(){
         //TODO impl
@@ -122,49 +132,4 @@ class MainActivity : ComponentActivity() {
         )
         promServer.startBackground()
     }
-
-    @Composable
-    fun PrometheusHomepage() {
-        Column {
-            Button(onClick = {
-                println(CollectMetrics())
-            }) {
-                Text("Click this button")
-            }
-            Button(onClick = ::startPromServer){
-                Text("Prometheus server")
-            }
-        }
-    }
 }
-
-//TODO how to call coroutine / async from custom collector
-//TODO how to extract any hw system metric from android API
-//TODO how to get permission on first application start only
-//TODO viewmodel, state management
-
-//class GlobalViewModel : ViewModel() {
-//    val state = mutableStateOf<Int>(Resource.Success(i))
-//
-//    fun deleteItem(id: Int) {
-//        viewModelScope.launch {
-//            deleteItemInternal(id).collect { response ->
-//                state.value = response
-//            }
-//        }
-//    }
-//
-//    suspend fun deleteItemInternal(id: Int) = flow {
-//        try {
-//            emit(Resource.Loading)
-//            delay(1000)
-//            if (id % 3 == 0) {
-//                throw IllegalStateException("error on third")
-//            }
-//            emit(Resource.Success(id))
-//        } catch (e: Exception) {
-//            emit(Resource.Failure(e.message ?: e.toString()))
-//        }
-//    }
-//}
-//

@@ -5,7 +5,6 @@ import io.github.reugn.kotlin.backoff.StrategyBackoff
 import io.github.reugn.kotlin.backoff.strategy.ExponentialStrategy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -16,8 +15,10 @@ import io.prometheus.client.Counter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-// Counters for monitoring the pushprox itself, compatible with the reference
-// implementation in golang, source: https://github.dev/prometheus-community/PushProx
+/**
+ * Counters for monitoring the pushprox itself, compatible with the reference
+ * implementation in golang, source: https://github.dev/prometheus-community/PushProx
+ */
 private class Counters(collectorRegistry: CollectorRegistry?) {
     private val collectorRegistry : CollectorRegistry?
     private lateinit var scrapeErrorCounter : Counter
@@ -55,65 +56,69 @@ private class Counters(collectorRegistry: CollectorRegistry?) {
 
 // Configuration object for this pushprox client
 data class PushProxConfig(
-    val myFqdn: String,
+    val fqdn: String,
     val proxyURL: String,
-    val retryInitialWaitSeconds: Int = 1, //TODO will this be even used?
-    val retryMaxWaitSeconds: Int = 5, //TODO will this be even used?
-    val collectorRegistry: CollectorRegistry? = null,
     val performScrape: suspend () -> String,
 )
 
 // Error in parsing HTTP header "Id" from HTTP request from Prometheus
 class PushProxIdParseException(message: String) : Exception(message)
 
+// Context object for pushprox internal functions to avoid global variables
+data class PushProxContext(
+    val client : HttpClient,
+    val pollUrl : String,
+    val pushUrl : String,
+    val backoff : StrategyBackoff<Unit>,
+    val fqdn : String,
+    val performScrape: suspend () -> String,
+)
+
 // This is a stripped down kotlin implementation of github.com/prometheus-community/PushProx client
-class PushProxClient(config: PushProxConfig) {
-
-    //TODO dispose this thing - delete http client - something like the bellow stuff
-    //val status = HttpClient().use { client ->
-    //    // ...
-    //}
-
-    private val config: PushProxConfig
-    private val pollURL: String
-    private val pushURL: String
-    private lateinit var client: HttpClient
-    private lateinit var counters : Counters
-
-    init {
-        this.config = config
-
-        // make sure proxyURL ends without '/'
-        val modifiedProxyURL = config.proxyURL.trim('/')
-        log("ModifiedUrl", modifiedProxyURL)
-
-        pollURL = "$modifiedProxyURL/poll"
-        pushURL = "$modifiedProxyURL/push"
-    }
-
-    // Initialize resources - heavier objects
-    private fun setup(){
-        // init counters if they are enabled
-        counters = Counters(config.collectorRegistry)
-        client = HttpClient(CIO)
-    }
+class PushProxClient(
+    private val collectorRegistry: CollectorRegistry
+) {
+    private val counters : Counters = Counters(collectorRegistry)
+    private val retryInitialWaitSeconds : Int = 1
+    private val retryMaxWaitSeconds : Int = 5
+    private var isRunning : Boolean = false
 
     // Use this function to start exporting metrics to pushprox in the background
-    public fun startBackground() {
-        setup()
-        loop(newBackoffFromFlags())
+    fun startBackground(config: PushProxConfig) {
+        if(!isRunning){
+            isRunning = true
+
+            HttpClient().use { client ->
+                val context : PushProxContext = processConfig(client, config)
+                loop(context)
+            }
+        }
+    }
+
+    private fun processConfig(client : HttpClient, config : PushProxConfig) : PushProxContext {
+        val modifiedProxyURL = config.proxyURL.trim('/')
+        val pollURL : String = "$modifiedProxyURL/poll"
+        val pushURL : String = "$modifiedProxyURL/push"
+
+        return PushProxContext(
+            client,
+            pollURL,
+            pushURL,
+            newBackoffFromFlags(),
+            config.fqdn,
+            config.performScrape,
+        )
     }
 
     // Continuous poll from android phone to pushprox gateway
-    private suspend fun doPoll(){
+    private suspend fun doPoll(context : PushProxContext){
         log("poll", "polling now")
-        log(pollURL, pollURL)
-        val response : HttpResponse = client.post(pollURL){
-            setBody(config.myFqdn)
+        val response : HttpResponse = context.client.post(context.pollUrl){
+            setBody(context.fqdn)
         }
         log("here", "here")
         val responseBody: String = response.body<String>()
-        doPush(responseBody)
+        doPush(context, responseBody)
     }
 
     // get value of HTTP header "Id" from response body
@@ -139,11 +144,11 @@ class PushProxClient(config: PushProxConfig) {
     }
 
     // Parameter responseBody: response body of /poll request
-    private suspend fun doPush(pollResponseBody : String) {
+    private suspend fun doPush(context : PushProxContext, pollResponseBody : String) {
         // perform scrape
         lateinit var scrapedMetrics : String
         try {
-            scrapedMetrics = config.performScrape()
+            scrapedMetrics = context.performScrape()
         }catch(e : Exception){
             counters.scrapeError()
             log("scrape exception", e.toString())
@@ -154,7 +159,7 @@ class PushProxClient(config: PushProxConfig) {
             val scrapeId : String = getIdFromResponseBody(pollResponseBody)
             val pushResponseBody: String = composeRequestBody(scrapedMetrics, scrapeId)
 
-            val response : HttpResponse = client.request(pushURL) {
+            val response : HttpResponse = context.client.request(context.pushUrl) {
                 method = HttpMethod.Post
                 setBody(pushResponseBody)
             }
@@ -171,24 +176,24 @@ class PushProxClient(config: PushProxConfig) {
         return StrategyBackoff<Unit>(
             strategy = ExponentialStrategy(
                 expBase = 2,
-                baseDelayMs = (config.retryInitialWaitSeconds * 1000).toLong(),
-                maxDelayMs = (config.retryMaxWaitSeconds * 1000).toLong(),
+                baseDelayMs = (retryInitialWaitSeconds * 1000).toLong(),
+                maxDelayMs = (retryMaxWaitSeconds * 1000).toLong(),
             ),
         )
     }
 
     //TODO migrate to work manager
-    private fun loop(backoff: StrategyBackoff<Unit>) {
+    private fun loop(context : PushProxContext) {
         // fire and forget a new coroutine
         GlobalScope.launch {
             launch {
                 while (true) {
                     val job = launch {
                         log("pushprox main loop", "loop start")
-                        var result = backoff.withRetries {
+                        var result = context.backoff.withRetries {
                             // register poll error using try-catch block
                             try {
-                                doPoll()
+                                doPoll(context)
                             } catch (e: Exception) {
                                 log("exception encountered!", e.toString())
                                 counters.pollError()

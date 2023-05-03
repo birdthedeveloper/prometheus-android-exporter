@@ -17,7 +17,7 @@ fun something(){
 
 // Configuration object for PrometheusServer class
 data class PrometheusServerConfig(
-    val port : Int = 8080,
+    val port : Int,
     val performScrape : suspend () -> String,
 )
 
