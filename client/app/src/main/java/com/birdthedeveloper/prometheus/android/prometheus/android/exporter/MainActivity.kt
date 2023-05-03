@@ -15,6 +15,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.ui.theme.PrometheusAndroidExporterTheme
 import io.prometheus.client.Collector
 import io.prometheus.client.CollectorRegistry
@@ -30,7 +35,7 @@ import java.io.StringWriter
 
 
 // reference for sharing the view model accross whole application
-// just acces viewmodel instance using viewmodel() function in composable fun
+// just access viewmodel instance using viewmodel() function in composable fun
 class MainActivity : ComponentActivity() {
 
     private val collectorRegistry: CollectorRegistry = CollectorRegistry()
@@ -42,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initialize()
+        //initialize()
 
         setContent {
             PrometheusAndroidExporterTheme {
@@ -51,9 +56,24 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    PrometheusHomepage()
+                    PromNavigation()
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun PromNavigation(
+        navController : NavHostController = rememberNavController()
+    ){
+        val startDestination : String = "homepage"
+
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+        ){
+            composable("settings") { SettingsPage(navController = navController) }
+            composable("homepage") { HomePage(navController = navController) }
         }
     }
 
