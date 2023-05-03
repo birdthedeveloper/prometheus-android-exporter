@@ -1,7 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
 
 import android.content.Context
-import android.text.BoringLayout.Metrics
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import io.prometheus.client.CollectorRegistry
@@ -15,12 +14,11 @@ data class PromUiState(
     val serverTurnedOn : Boolean = false,
     val pushProxTurnedOn : Boolean = false,
     val serverPort : Int? = null, // if null, use default port
-    val myFqdn : String? = null,
+    val fqdn : String? = null,
     val pushProxURL : String? = null,
 )
 
 val TAG : String = "PROMVIEWMODEL"
-val DEFAULT_SERVER_PORT : Int = 10101 //TODO register with prometheus community
 
 class PromViewModel(): ViewModel() {
     private val _uiState = MutableStateFlow(PromUiState())
@@ -55,10 +53,37 @@ class PromViewModel(): ViewModel() {
         }
     }
 
+    private fun getPromServerPort() : Int{
+        val DEFAULT_SERVER_PORT : Int = 10101 //TODO register with prometheus community
+        return if(_uiState.value.serverPort != null){
+            _uiState.value.serverPort!!
+        }else{
+            DEFAULT_SERVER_PORT
+        }
+    }
+
+    private suspend fun performScrape() : String {
+        return ""
+    }
+
     // if result is not null, it contains an error message
     fun turnServerOn() : String?{
-        //TODO implement
+        try{
+            prometheusServer.startInBackground(
+                PrometheusServerConfig(
+                    getPromServerPort(),
+                    ::performScrape
+                )
+            )
+        }catch(e : Exception){
+            return "Prometheus server failed!"
+        }
 
+        _uiState.update { current ->
+            current.copy(
+                serverTurnedOn = true
+            )
+        }
         return null;
     }
 
@@ -66,9 +91,39 @@ class PromViewModel(): ViewModel() {
         //TODO implement
     }
 
+    private fun validatePushProxSettings() : String? {
+        _uiState.value.pushProxURL?: return "Please fill in PushProx URL with port"
+        _uiState.value.fqdn?: return "Please fill in your Fully Qualified Domain Name"
+
+        return null
+    }
+
     // if result is not null, it contains an error message
     fun turnPushProxOn() : String?{
-        //TODO implement
+
+        val error : String? = validatePushProxSettings()
+        if(error != null){
+            return error
+        }
+
+        try{
+            pushProxClient.startBackground(
+                PushProxConfig(
+                    performScrape = ::performScrape,
+                    fqdn = _uiState.value.fqdn!!,
+                    proxyUrl = _uiState.value.pushProxURL!!,
+                )
+            )
+        }catch(e : Exception){
+            return "PushProx client failed!"
+        }
+
+        _uiState.update { current ->
+            current.copy(
+                pushProxTurnedOn = true
+            )
+        }
+
         return null
     }
 
@@ -77,10 +132,18 @@ class PromViewModel(): ViewModel() {
     }
 
     fun updatePushProxURL(url : String){
-        //TODO implement
+        _uiState.update { current ->
+            current.copy(
+                pushProxURL = url
+            )
+        }
     }
 
     fun updatePushProxFQDN(fqdn : String){
-        //TODO implement
+        _uiState.update { current ->
+            current.copy(
+                fqdn = fqdn
+            )
+        }
     }
 }

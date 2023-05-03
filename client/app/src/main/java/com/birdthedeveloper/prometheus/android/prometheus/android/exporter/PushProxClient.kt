@@ -57,7 +57,7 @@ private class Counters(collectorRegistry: CollectorRegistry?) {
 // Configuration object for this pushprox client
 data class PushProxConfig(
     val fqdn: String,
-    val proxyURL: String,
+    val proxyUrl: String,
     val performScrape: suspend () -> String,
 )
 
@@ -95,7 +95,7 @@ class PushProxClient(
     }
 
     private fun processConfig(client : HttpClient, config : PushProxConfig) : PushProxContext {
-        val modifiedProxyURL = config.proxyURL.trim('/')
+        val modifiedProxyURL = config.proxyUrl.trim('/')
         val pollURL : String = "$modifiedProxyURL/poll"
         val pushURL : String = "$modifiedProxyURL/push"
 

@@ -18,18 +18,22 @@ data class PrometheusServerConfig(
 
 // Expose metrics on given port using Ktor http server with CIO engine
 class PrometheusServer(){
+    private var isRunning : Boolean = false
 
-    fun startBackground(config : PrometheusServerConfig){
-        //TODO dispose server
+    fun startInBackground(config : PrometheusServerConfig){
+        if (!isRunning){
+            isRunning = true
+            //TODO dispose server
 
-        val server = configureServer(config)
-        GlobalScope.launch {
-            launch{
-                server.start(wait = true)
+            val server = configureServer(config)
+            GlobalScope.launch {
+                launch{
+                    server.start(wait = true)
+                }
             }
-        }
 
-        log("startBackground", "done")
+            log("startBackground", "done")
+        }
     }
 
     private suspend fun getMetrics(performScrape: suspend () -> String) : String{
