@@ -87,25 +87,6 @@ private fun TabPage(
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        TopAppBar(
-            title = {
-                Text("Android Exporter")
-            },
-            actions = {
-                IconButton(
-                    onClick = {
-                        navController.navigate("settings"){
-                            launchSingleTop = true
-                        }
-                    }
-                ){
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Settings"
-                    )
-                }
-            }
-        )
         TabRow(selectedTabIndex = uiState.tabIndex) {
             tabs.forEach{ (index, text) ->
                 Tab(text = {Text(text)},
@@ -259,11 +240,6 @@ private fun PushProxPage(
     }
 }
 
-//TODO asap: 4 screens: loading, file error, file loaded, file missing - already implemented
-//TODO what's left of UI?
-//TODO turn server off, turn pushprox off - connected with WorkManager
-//TODO persistance - data store kotlin - with flows
-
 @Composable
 private fun LoadingPage(){
     Column (
@@ -283,7 +259,7 @@ private fun ConfigFileErrorPage(
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    //TODO
+    //TODO implement this
     Text("Config File error page")
 }
 
@@ -293,7 +269,7 @@ private fun ConfigFileSuccessPage(
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    //TODO
+    //TODO implement this
     Text("config file success page")
 }
 

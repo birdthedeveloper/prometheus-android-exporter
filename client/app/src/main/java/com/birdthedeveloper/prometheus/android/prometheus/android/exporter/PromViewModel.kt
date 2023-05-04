@@ -3,12 +3,16 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.io.StringWriter
 
 enum class ConfigFileState {
@@ -43,7 +47,13 @@ class PromViewModel(): ViewModel() {
     private lateinit var androidCustomExporter: AndroidCustomExporter
 
     init {
-        Log.v(TAG, "initializing promviewmodel")
+        Log.v(TAG, "Checking for configuration file")
+        viewModelScope.launch {
+            delay(1000)
+            _uiState.update { current ->
+                current.copy(configFileState = ConfigFileState.MISSING)
+            }
+        }
     }
 
     fun getDefaultPort() : Int {
