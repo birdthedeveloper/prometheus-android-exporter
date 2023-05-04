@@ -1,14 +1,20 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.Switch
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
@@ -33,10 +39,50 @@ private val TAG = "HOMEPAGE"
 
 @Composable
 fun HomePage(
-    modifier : Modifier = Modifier,
     promViewModel: PromViewModel,
     navController: NavHostController,
 ) {
+    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ){
+        TopAppBar(
+            title = {
+                Text("Android Exporter")
+            },
+            actions = {
+                IconButton(
+                    onClick = {
+                        navController.navigate("settings"){
+                            launchSingleTop = true
+                        }
+                    }
+                ){
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Settings"
+                    )
+                }
+            }
+        )
+
+        // depending on whether the configuration file is present
+        when(uiState.configFileState){
+            ConfigFileState.ERROR -> ConfigFileErrorPage(promViewModel = promViewModel)
+            ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel)
+            ConfigFileState.LOADING -> LoadingPage()
+            ConfigFileState.MISSING -> TabPage(promViewModel, navController)
+        }
+    }
+
+}
+
+@Composable
+private fun TabPage(
+    promViewModel: PromViewModel,
+    navController: NavHostController,
+){
     val tabs = mapOf(0 to "Server", 1 to "PushProx")
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
@@ -214,11 +260,40 @@ private fun PushProxPage(
 }
 
 //TODO asap: 4 screens: loading, file error, file loaded, file missing - already implemented
+//TODO what's left of UI?
+//TODO turn server off, turn pushprox off - connected with WorkManager
+//TODO persistance - data store kotlin - with flows
 
 @Composable
 private fun LoadingPage(){
-    val progress : Float by remember { mutableStateOf(0.0f) }
-    //TODO finish this thing
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Spacer(modifier = Modifier.height(50.dp))
+        Text(text = "Checking for configuration file")
+        Spacer(modifier = Modifier.height(20.dp))
+        CircularProgressIndicator(modifier = Modifier.size(size = 36.dp))
+    }
 }
-//TODO
-//https://foso.github.io/Jetpack-Compose-Playground/material/circularprogressindicator/
+
+@Composable
+private fun ConfigFileErrorPage(
+    promViewModel: PromViewModel,
+){
+    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+
+    //TODO
+    Text("Config File error page")
+}
+
+@Composable
+private fun ConfigFileSuccessPage(
+    promViewModel: PromViewModel,
+){
+    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+
+    //TODO
+    Text("config file success page")
+}
+
