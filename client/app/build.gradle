@@ -73,6 +73,9 @@ dependencies {
     def nav_version = "2.5.3"
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
+    // custom - work manager
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
+
 
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
@@ -86,8 +89,4 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
-}
-
-dependencies {
-
 }

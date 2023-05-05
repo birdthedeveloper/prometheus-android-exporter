@@ -4,9 +4,16 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.Operation
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,28 +34,28 @@ data class PromUiState(
     val serverTurnedOn : Boolean = false,
     val pushProxTurnedOn : Boolean = false,
     val serverPort : Int? = null, // if null, use default port
-    val fqdn : String = "",
-    val pushProxURL : String = "",
+    val fqdn : String = "test.example.com",
+    val pushProxURL : String = "143.42.59.63:8080",
     val configFileState : ConfigFileState = ConfigFileState.LOADING,
 )
 
 private val TAG : String = "PROMVIEWMODEL"
 
 class PromViewModel(): ViewModel() {
+    // constants
     private val DEFAULT_SERVER_PORT : Int = 10101 //TODO register with prometheus community
+    private val PROM_UNIQUE_WORK : String = "prom_unique_job"
+
+
     private val _uiState = MutableStateFlow(PromUiState())
     val uiState : StateFlow<PromUiState> = _uiState.asStateFlow()
 
-    // app - level components
-    private val collectorRegistry: CollectorRegistry = CollectorRegistry()
-    private lateinit var pushProxClient : PushProxClient
-    private val prometheusServer : PrometheusServer = PrometheusServer()
-    private lateinit var metricsEngine: MetricsEngine
-    private lateinit var androidCustomExporter: AndroidCustomExporter
+    private lateinit var getContext: () -> Context
 
     init {
         Log.v(TAG, "Checking for configuration file")
         viewModelScope.launch {
+            //TODO check for configuration file
             delay(1000)
             _uiState.update { current ->
                 current.copy(configFileState = ConfigFileState.MISSING)
@@ -60,13 +67,8 @@ class PromViewModel(): ViewModel() {
         return DEFAULT_SERVER_PORT
     }
 
-    fun setApplicationContext(getContext : () -> Context){
-        // initalize app - level components
-        metricsEngine = MetricsEngine(getContext())
-        androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
-        pushProxClient = PushProxClient(collectorRegistry)
-        //TODO somehow this PushProx definition does not work here
-        // -> fix it
+    fun initializeWithApplicationContext(getContext : () -> Context){
+        this.getContext = getContext
     }
 
     fun updateTabIndex(index : Int){
@@ -85,22 +87,16 @@ class PromViewModel(): ViewModel() {
         }
     }
 
-    private suspend fun performScrape() : String {
-        val writer : StringWriter = StringWriter()
-        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
-
-        return writer.toString()
-    }
-
     // if result is not null, it contains an error message
     fun turnServerOn() : String?{
         try{
-            prometheusServer.startInBackground(
-                PrometheusServerConfig(
-                    getPromServerPort(),
-                    ::performScrape
-                )
-            )
+            //TODO rewrite asap
+//            prometheusServer.startInBackground(
+//                PrometheusServerConfig(
+//                    getPromServerPort(),
+//                    ::performScrape
+//                )
+//            )
         }catch(e : Exception){
             Log.v(TAG, e.toString())
             return "Prometheus server failed!"
@@ -119,8 +115,8 @@ class PromViewModel(): ViewModel() {
     }
 
     private fun validatePushProxSettings() : String? {
-        val fqdn = _uiState.value.fqdn.trim()
-        val url = _uiState.value.pushProxURL.trim()
+        val fqdn = _uiState.value.fqdn.trim().trim('\n')
+        val url = _uiState.value.pushProxURL.trim().trim('\n')
 
         if( fqdn.isEmpty() ) return "Fully Qualified Domain Name cannot be empty!"
         if( url.isEmpty() ) return "PushProx URL cannot be empty!"
@@ -128,25 +124,42 @@ class PromViewModel(): ViewModel() {
         return null
     }
 
+    private fun launchPushProxUsingWorkManager(){
+        val workManagerInstance = WorkManager.getInstance(getContext())
+
+        // worker configuration
+        val inputData : Data = PushProxConfig(
+            pushProxFqdn = _uiState.value.fqdn,
+            pushProxUrl = _uiState.value.pushProxURL,
+        ).toData()
+
+        // constraints
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+            .build()
+
+        // setup worker request
+        val workerRequest = OneTimeWorkRequestBuilder<PushProxWorker>()
+            .setInputData(inputData)
+            .setConstraints(constraints)
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        // enqueue
+        workManagerInstance.beginUniqueWork(
+            PROM_UNIQUE_WORK,
+            ExistingWorkPolicy.KEEP,
+            workerRequest,
+        ).enqueue()
+    }
+
     // if result is not null, it contains an error message
     fun turnPushProxOn() : String?{
-
         val error : String? = validatePushProxSettings()
-        if(error != null){
-            return error
-        }
+        if(error != null){ return error }
 
-        try{
-            pushProxClient.startBackground(
-                PushProxConfig(
-                    performScrape = ::performScrape,
-                    fqdn = _uiState.value.fqdn.trim(),
-                    proxyUrl = _uiState.value.pushProxURL.trim(),
-                )
-            )
-        }catch(e : Exception){
-            return "PushProx client failed!"
-        }
+        // idempotent call
+        launchPushProxUsingWorkManager()
 
         _uiState.update { current ->
             current.copy(
@@ -158,7 +171,14 @@ class PromViewModel(): ViewModel() {
     }
 
     fun turnPushProxOff(){
-        //TODO implement
+        val workerManagerInstance = WorkManager.getInstance(getContext())
+        workerManagerInstance.cancelUniqueWork(PROM_UNIQUE_WORK)
+
+        _uiState.update {current ->
+            current.copy(
+                pushProxTurnedOn = false
+            )
+        }
     }
 
     fun updatePushProxURL(url : String){

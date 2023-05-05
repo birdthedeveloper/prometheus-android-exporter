@@ -12,6 +12,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMethod
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -51,13 +52,6 @@ private class Counters(collectorRegistry: CollectorRegistry) {
     fun pollError(){ pollErrorCounter.inc() }
 }
 
-// Configuration object for this pushprox client
-data class PushProxConfig(
-    val fqdn: String,
-    val proxyUrl: String,
-    val performScrape: suspend () -> String,
-)
-
 // Error in parsing HTTP header "Id" from HTTP request from Prometheus
 class PushProxIdParseException(message: String) : Exception(message)
 
@@ -68,31 +62,26 @@ data class PushProxContext(
     val pushUrl : String,
     val backoff : StrategyBackoff<Unit>,
     val fqdn : String,
-    val performScrape: suspend () -> String,
 )
 
 // This is a stripped down kotlin implementation of github.com/prometheus-community/PushProx client
 class PushProxClient(
-    private val collectorRegistry: CollectorRegistry
+    collectorRegistry: CollectorRegistry,
+    private val performScrape: suspend () -> String
 ) {
     private val counters : Counters = Counters(collectorRegistry)
     private val retryInitialWaitSeconds : Int = 1
     private val retryMaxWaitSeconds : Int = 5
-    private var isRunning : Boolean = false
 
     // Use this function to start exporting metrics to pushprox in the background
-    fun startBackground(config: PushProxConfig) {
-        if(!isRunning){
-            isRunning = true
-
+    suspend fun startBackground(config: PushProxConfig) {
             val client : HttpClient = HttpClient() //TODO close this thing
             val context : PushProxContext = processConfig(client, config)
             loop(context)
-        }
     }
 
     private fun processConfig(client : HttpClient, config : PushProxConfig) : PushProxContext {
-        var modifiedProxyURL = config.proxyUrl.trim('/')
+        var modifiedProxyURL = config.pushProxUrl.trim('/')
 
         if(
             !modifiedProxyURL.startsWith("http://") &&
@@ -109,8 +98,7 @@ class PushProxClient(
             pollURL,
             pushURL,
             newBackoffFromFlags(),
-            config.fqdn,
-            config.performScrape,
+            config.pushProxFqdn,
         )
     }
 
@@ -143,7 +131,6 @@ class PushProxClient(
             "X-Prometheus-Scrape-Timeout: 9.5\r\n"
 
         val result : String = httpHeaders + "\r\n" + scrapedMetrics
-        log("result", result)
         return result
     }
 
@@ -152,7 +139,7 @@ class PushProxClient(
         // perform scrape
         lateinit var scrapedMetrics : String
         try {
-            scrapedMetrics = context.performScrape()
+            scrapedMetrics = performScrape()
         }catch(e : Exception){
             counters.scrapeError()
             log("scrape exception", e.toString())
@@ -173,7 +160,6 @@ class PushProxClient(
             log("push exception", e.toString())
             return
         }
-
     }
 
     private fun newBackoffFromFlags() : StrategyBackoff<Unit> {
@@ -187,27 +173,27 @@ class PushProxClient(
     }
 
     //TODO migrate to work manager
-    private fun loop(context : PushProxContext) {
-        // fire and forget a new coroutine
-        GlobalScope.launch {
-            launch {
-                while (true) {
-                    val job = launch {
-                        log("pushprox main loop", "loop start")
-                        var result = context.backoff.withRetries {
-                            // register poll error using try-catch block
-                            try {
-                                doPoll(context)
-                            } catch (e: Exception) {
-                                log("exception encountered!", e.toString())
-                                counters.pollError()
-                                throw e
-                            }
-                        }
-                    }
-                    job.join() // wait for the job to finish
-                }
+    private suspend fun loop(context : PushProxContext) {
+        var shouldContinue : Boolean = true
+        while (shouldContinue) {
+            log("pushprox main loop", "loop start")
+            // register poll error using try-catch block
+            try {
+                doPoll(context)
+            }catch(e : CancellationException){
+                shouldContinue = false
             }
+            catch (e: Exception) {
+                for(exception in e.suppressed){
+                    if(exception is CancellationException){
+                        shouldContinue = false
+                    }
+                }
+                log("exception encountered!", e.toString())
+                counters.pollError()
+                throw e
+            }
+            log("pushprox main loop", "loop end")
         }
     }
 

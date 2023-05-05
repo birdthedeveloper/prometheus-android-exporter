@@ -159,10 +159,10 @@ private fun onCheckedChangePushProx(
     value : Boolean,
     promViewModel: PromViewModel,
     showDialog : MutableState<String>
-){
+) {
     if (value) {
-        val result : String? = promViewModel.turnPushProxOn()
-        if(result != null){
+        val result: String? = promViewModel.turnPushProxOn()
+        if (result != null) {
             showDialog.value = result
         }
     } else {
@@ -176,7 +176,7 @@ private fun PushProxPage(
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    // if showDialogText == "", do not display alert dialog
+    // if showDialogText is empty string, do not display alert dialog
     val showDialogText : MutableState<String> = remember { mutableStateOf("") }
 
     Column(
@@ -193,8 +193,20 @@ private fun PushProxPage(
             modifier = Modifier.padding(bottom = 30.dp)
         )
 
+        if(uiState.pushProxTurnedOn){
+            Text(
+                text = """
+                    To edit PushProx proxy URL or FQDN, turn it off first.
+                """.trimIndent(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+        }
+
         TextField(
             value = uiState.fqdn,
+            singleLine = true,
+            enabled = !uiState.pushProxTurnedOn,
             onValueChange = {
                 promViewModel.updatePushProxFQDN(it)
             },
@@ -206,6 +218,8 @@ private fun PushProxPage(
 
         TextField(
             value = uiState.pushProxURL,
+            singleLine = true,
+            enabled = !uiState.pushProxTurnedOn,
             onValueChange = {
                 promViewModel.updatePushProxURL(it)
             },
