@@ -178,20 +178,22 @@ class PushProxClient(
         while (shouldContinue) {
             log("pushprox main loop", "loop start")
             // register poll error using try-catch block
-            try {
-                doPoll(context)
-            }catch(e : CancellationException){
-                shouldContinue = false
-            }
-            catch (e: Exception) {
-                for(exception in e.suppressed){
-                    if(exception is CancellationException){
-                        shouldContinue = false
-                    }
+            var result = context.backoff.withRetries {
+                try {
+                    doPoll(context)
+                }catch(e : CancellationException){
+                    shouldContinue = false
                 }
-                log("exception encountered!", e.toString())
-                counters.pollError()
-                throw e
+                catch (e: Exception) {
+                    for(exception in e.suppressed){
+                        if(exception is CancellationException){
+                            shouldContinue = false
+                        }
+                    }
+                    log("exception encountered!", e.toString())
+                    counters.pollError()
+                    throw e
+                }
             }
             log("pushprox main loop", "loop end")
         }

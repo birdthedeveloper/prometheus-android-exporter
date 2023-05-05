@@ -1,5 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
 
+import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -20,11 +21,17 @@ class PushProxWorker(
     parameters : WorkerParameters
 ): CoroutineWorker(context, parameters){
 
+    private val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as
+                NotificationManager
+
     override suspend fun doWork():Result {
         //TODO implement this
         val cache: PushProxWorkerCache = PushProxWorkerCache.getInstance {
             return@getInstance context
         }
+
+        setForeground(createForegroundInfo())
 
         try{
             val pushProxConfig : PushProxConfig = PushProxConfig.fromData(inputData)
@@ -38,6 +45,29 @@ class PushProxWorker(
 
         return Result.success()
     }
+
+    private fun createForegroundInfo(): ForegroundInfo {
+        val id = "channel_id"
+        val title = "title"
+        val cancel = "cancel_download"
+        // This PendingIntent can be used to cancel the worker
+        val intent = WorkManager.getInstance(applicationContext)
+            .createCancelPendingIntent(getId())
+
+        val notification = NotificationCompat.Builder(applicationContext, id)
+            .setContentTitle(title)
+            .setTicker(title)
+            .setContentText("progress")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(true)
+            // Add the cancel action to the notification which can
+            // be used to cancel the worker
+            .addAction(android.R.drawable.ic_delete, cancel, intent)
+            .build()
+
+        return ForegroundInfo(notificationId, notification)
+    }
+    
 }
 
 // thread-safe singleton
