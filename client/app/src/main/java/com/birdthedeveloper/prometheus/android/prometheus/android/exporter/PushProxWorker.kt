@@ -65,7 +65,7 @@ class PushProxWorker(
             .addAction(android.R.drawable.ic_delete, cancel, intent)
             .build()
 
-        return ForegroundInfo(notificationId, notification)
+        return ForegroundInfo(1, notification)
     }
     
 }
