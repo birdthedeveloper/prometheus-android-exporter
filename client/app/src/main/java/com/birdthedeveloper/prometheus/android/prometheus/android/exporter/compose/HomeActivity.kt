@@ -1,9 +1,9 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,7 +14,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.Switch
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
@@ -68,11 +67,25 @@ fun HomePage(
         )
 
         // depending on whether the configuration file is present
-        when(uiState.configFileState){
-            ConfigFileState.ERROR -> ConfigFileErrorPage(promViewModel = promViewModel)
-            ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel)
-            ConfigFileState.LOADING -> LoadingPage()
-            ConfigFileState.MISSING -> TabPage(promViewModel, navController)
+//        when(uiState.configFileState){
+//            ConfigFileState.ERROR -> ConfigFileErrorPage(promViewModel = promViewModel)
+//            ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel)
+//            ConfigFileState.LOADING -> LoadingPage()
+//            ConfigFileState.MISSING -> TabPage(promViewModel, navController)
+//        }
+        Column(
+            modifier = Modifier.fillMaxHeight().weight(1f)
+        ) {
+            Text("something")
+        }
+        
+        Button(
+            onClick = { print("TODO") },
+            modifier = Modifier
+                .height(40.dp)
+                .fillMaxWidth()
+        ) {
+            Text(text = "Start")
         }
     }
 
@@ -266,7 +279,7 @@ private fun RemoteWritePage(
 private fun LoadingPage(){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxHeight()
     ) {
         Spacer(modifier = Modifier.height(50.dp))
         Text(text = "Checking for configuration file")

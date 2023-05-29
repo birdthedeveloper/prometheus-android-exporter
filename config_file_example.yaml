@@ -19,10 +19,12 @@ pushprox:
 # Settings specific to backfilling metrics using prometheus remote write
 # 
 # Please note that remote_write may be limited by a receiving backend on 
-# how old the backfilled metrics can be. 
+# how old the backfilled time series can be.
 remote_write:
 
-  scrape_interval: # default is 30 seconds 
+  # scrape interval in seconds
+  scrape_interval: 30 # default
   enabled: false # default
 
-  remote_write_endpoint: # default
+  # where to post metrics
+  remote_write_endpoint: # string, no default value provided

@@ -1,4 +1,4 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     promViewModel = promViewModel
                 )
             }
-            composable("license") { LicensePage(navController = navController)}
+            composable("license") { LicensePage(navController = navController) }
         }
     }
 }

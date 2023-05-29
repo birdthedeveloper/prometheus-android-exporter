@@ -76,6 +76,10 @@ dependencies {
     // custom - work manager
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
+    // custom - yaml configuration parsing
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.1")
+
+
 
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
