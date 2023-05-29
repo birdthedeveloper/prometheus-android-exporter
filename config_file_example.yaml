@@ -1,0 +1,28 @@
+# This is a configuration file example for prometheus android exporter.
+
+# Settings specific to exporting metrics using a HTTP server
+prometheus_server:
+
+  enabled: true # default
+  port: 10101 # default
+
+# Settings specific to pushing metrics to pushprox proxy
+# This is handy for traversing network topologies such as NAT
+pushprox:
+
+  enabled: false # default
+  # fully qualified domain name
+  fqdn: # string, no default value provided
+
+  proxy_url: # string, no default value provided
+
+# Settings specific to backfilling metrics using prometheus remote write
+# 
+# Please note that remote_write may be limited by a receiving backend on 
+# how old the backfilled metrics can be. 
+remote_write:
+
+  scrape_interval: # default is 30 seconds 
+  enabled: false # default
+
+  remote_write_endpoint: # default

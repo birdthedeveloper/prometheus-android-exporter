@@ -97,6 +97,7 @@ private fun TabPage(
         when(uiState.tabIndex){
             0 -> ServerPage(promViewModel)
             1 -> PushProxPage(promViewModel)
+            2 -> RemoteWritePage(promViewModel)
         }
     }
 }
@@ -252,6 +253,13 @@ private fun PushProxPage(
             )
         }
     }
+}
+
+@Composable
+private fun RemoteWritePage(
+    viewModel: PromViewModel
+){
+
 }
 
 @Composable
