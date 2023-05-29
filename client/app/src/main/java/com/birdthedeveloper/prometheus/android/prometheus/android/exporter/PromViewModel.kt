@@ -9,18 +9,16 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.Operation
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
+import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxConfig
+import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxWorker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.StringWriter
 
 enum class ConfigFileState {
     LOADING,

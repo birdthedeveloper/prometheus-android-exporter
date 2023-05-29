@@ -1,12 +1,8 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.util.Log
 import io.prometheus.client.Collector
-import io.prometheus.client.Collector.MetricFamilySamples
 import io.prometheus.client.GaugeMetricFamily
-import kotlinx.coroutines.runBlocking
-import java.util.Arrays
-import kotlinx.coroutines.*
 
 private val TAG = "ANDROID_EXPORTER"
 

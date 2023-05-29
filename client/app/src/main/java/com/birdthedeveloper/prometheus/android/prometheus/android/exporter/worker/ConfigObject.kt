@@ -1,4 +1,4 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import androidx.work.Data
 
@@ -7,7 +7,7 @@ data class PushProxConfig(
     val pushProxFqdn : String,
 ){
     companion object{
-        fun fromData(data : Data) : PushProxConfig{
+        fun fromData(data : Data) : PushProxConfig {
             return PushProxConfig(
                 data.getString("0")!!,
                 data.getString("1")!!,

@@ -1,4 +1,4 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.util.Log
 import io.ktor.server.application.call

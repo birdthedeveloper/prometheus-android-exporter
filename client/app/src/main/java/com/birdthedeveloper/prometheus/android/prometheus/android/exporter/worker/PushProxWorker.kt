@@ -1,17 +1,16 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
-import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.R
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
-import kotlinx.coroutines.delay
 import java.io.StringWriter
 
 private val TAG = "PUSH_PROX_WORKER"

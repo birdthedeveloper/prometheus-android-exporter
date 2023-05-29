@@ -1,4 +1,4 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.util.Log
 import io.github.reugn.kotlin.backoff.StrategyBackoff
@@ -13,8 +13,6 @@ import io.ktor.http.HttpMethod
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 /**
  * Counters for monitoring the pushprox itself, compatible with the reference
