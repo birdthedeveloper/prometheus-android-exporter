@@ -113,8 +113,8 @@ private fun TabPage(
         }
         when(uiState.tabIndex){
             0 -> PrometheusServerPage(promViewModel, Modifier)
-            1 -> PushProxPage(promViewModel, Modifier)
-            2 -> RemoteWritePage(promViewModel, Modifier)
+            1 -> PushProxPage(promViewModel)
+            2 -> RemoteWritePage(promViewModel)
         }
     }
 }
@@ -174,26 +174,9 @@ private fun PrometheusServerPage(
     }
 }
 
-//TODO delete this thing
-//private fun onCheckedChangePushProx(
-//    value : Boolean,
-//    promViewModel: PromViewModel,
-//    showDialog : MutableState<String>
-//) {
-//    if (value) {
-//        val result: String? = promViewModel.turnPushProxOn()
-//        if (result != null) {
-//            showDialog.value = result
-//        }
-//    } else {
-//        promViewModel.turnPushProxOff()
-//    }
-//}
-
 @Composable
 private fun PushProxPage(
     promViewModel: PromViewModel,
-    modifier: Modifier
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
@@ -201,7 +184,7 @@ private fun PushProxPage(
     val showDialogText : MutableState<String> = remember { mutableStateOf("") }
 
     Column(
-        modifier = modifier,
+        modifier = Modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -269,12 +252,11 @@ private fun PushProxPage(
 @Composable
 private fun RemoteWritePage(
     promViewModel: PromViewModel,
-    modifier: Modifier,
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
     Column (
-        modifier = modifier,
+        modifier = Modifier,
     ) {
         //TODO implement this
         Text("Remote write configuration")
