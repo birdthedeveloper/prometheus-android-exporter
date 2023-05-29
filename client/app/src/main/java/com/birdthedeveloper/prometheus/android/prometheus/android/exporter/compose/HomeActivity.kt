@@ -48,7 +48,7 @@ fun HomePage(
     ){
         TopAppBar(
             title = {
-                Text("Android Exporter")
+                Text("Prometheus Android Exporter")
             },
             actions = {
                 IconButton(
@@ -66,26 +66,28 @@ fun HomePage(
             }
         )
 
-        // depending on whether the configuration file is present
-//        when(uiState.configFileState){
-//            ConfigFileState.ERROR -> ConfigFileErrorPage(promViewModel = promViewModel)
-//            ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel)
-//            ConfigFileState.LOADING -> LoadingPage()
-//            ConfigFileState.MISSING -> TabPage(promViewModel, navController)
-//        }
-        Column(
+        Column (
             modifier = Modifier.fillMaxHeight().weight(1f)
         ) {
-            Text("something")
+            // depending on whether the configuration file is present
+            when(uiState.configFileState) {
+                ConfigFileState.ERROR -> ConfigFileErrorPage(
+                    promViewModel = promViewModel,
+                    Modifier
+                )
+
+                ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel, Modifier)
+                ConfigFileState.LOADING -> LoadingPage(Modifier)
+                ConfigFileState.MISSING -> TabPage(promViewModel, navController, Modifier)
+            }
         }
-        
-        Button(
-            onClick = { print("TODO") },
-            modifier = Modifier
-                .height(40.dp)
-                .fillMaxWidth()
-        ) {
-            Text(text = "Start")
+
+        if (uiState.configFileState == ConfigFileState.MISSING
+            || uiState.configFileState == ConfigFileState.SUCCESS
+        ){
+            Button(onClick = { /*TODO*/ }, modifier = Modifier) {
+
+            }
         }
     }
 
@@ -95,11 +97,13 @@ fun HomePage(
 private fun TabPage(
     promViewModel: PromViewModel,
     navController: NavHostController,
+    modifier: Modifier,
+
 ){
-    val tabs = mapOf(0 to "Server", 1 to "PushProx")
+    val tabs = mapOf(0 to "Prom Server", 1 to "PushProx", 2 to "Remote write")
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
         TabRow(selectedTabIndex = uiState.tabIndex) {
             tabs.forEach{ (index, text) ->
                 Tab(text = {Text(text)},
@@ -108,9 +112,9 @@ private fun TabPage(
             }
         }
         when(uiState.tabIndex){
-            0 -> ServerPage(promViewModel)
-            1 -> PushProxPage(promViewModel)
-            2 -> RemoteWritePage(promViewModel)
+            0 -> PrometheusServerPage(promViewModel, Modifier)
+            1 -> PushProxPage(promViewModel, Modifier)
+            2 -> RemoteWritePage(promViewModel, Modifier)
         }
     }
 }
@@ -131,8 +135,9 @@ private fun onCheckedChangeServer(
 }
 
 @Composable
-private fun ServerPage(
-    promViewModel: PromViewModel
+private fun PrometheusServerPage(
+    promViewModel: PromViewModel,
+    modifier: Modifier
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
@@ -169,24 +174,26 @@ private fun ServerPage(
     }
 }
 
-private fun onCheckedChangePushProx(
-    value : Boolean,
-    promViewModel: PromViewModel,
-    showDialog : MutableState<String>
-) {
-    if (value) {
-        val result: String? = promViewModel.turnPushProxOn()
-        if (result != null) {
-            showDialog.value = result
-        }
-    } else {
-        promViewModel.turnPushProxOff()
-    }
-}
+//TODO delete this thing
+//private fun onCheckedChangePushProx(
+//    value : Boolean,
+//    promViewModel: PromViewModel,
+//    showDialog : MutableState<String>
+//) {
+//    if (value) {
+//        val result: String? = promViewModel.turnPushProxOn()
+//        if (result != null) {
+//            showDialog.value = result
+//        }
+//    } else {
+//        promViewModel.turnPushProxOff()
+//    }
+//}
 
 @Composable
 private fun PushProxPage(
-    promViewModel: PromViewModel
+    promViewModel: PromViewModel,
+    modifier: Modifier
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
@@ -194,7 +201,7 @@ private fun PushProxPage(
     val showDialogText : MutableState<String> = remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -242,15 +249,6 @@ private fun PushProxPage(
             },
         )
 
-        Switch(
-            checked = uiState.pushProxTurnedOn,
-            onCheckedChange = {value : Boolean? ->
-                if(value != null){
-                    onCheckedChangePushProx(value, promViewModel, showDialogText)
-                }
-            }
-        )
-
         // conditional alert dialog
         if(showDialogText.value != ""){
             AlertDialog(
@@ -270,16 +268,26 @@ private fun PushProxPage(
 
 @Composable
 private fun RemoteWritePage(
-    viewModel: PromViewModel
+    promViewModel: PromViewModel,
+    modifier: Modifier,
 ){
+    val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
+    Column (
+        modifier = modifier,
+    ) {
+        //TODO implement this
+        Text("Remote write configuration")
+    }
 }
 
 @Composable
-private fun LoadingPage(){
+private fun LoadingPage(
+    modifier: Modifier
+){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxHeight()
+        modifier = modifier,
     ) {
         Spacer(modifier = Modifier.height(50.dp))
         Text(text = "Checking for configuration file")
@@ -291,20 +299,29 @@ private fun LoadingPage(){
 @Composable
 private fun ConfigFileErrorPage(
     promViewModel: PromViewModel,
+    modifier: Modifier,
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    //TODO implement this
-    Text("Config File error page")
+    Column(
+        modifier = modifier,
+    ){
+        //TODO implement this
+        Text("Config File error page")
+    }
 }
 
 @Composable
 private fun ConfigFileSuccessPage(
     promViewModel: PromViewModel,
+    modifier: Modifier,
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    //TODO implement this
-    Text("config file success page")
+    Column (
+        modifier = modifier
+    ) {
+        //TODO implement this
+        Text("Config file success page")
+    }
 }
-

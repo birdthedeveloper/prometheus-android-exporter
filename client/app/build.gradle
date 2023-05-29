@@ -47,6 +47,8 @@ android {
 }
 
 dependencies {
+    def core_version = "1.10.1"
+
     // custom - prometheus client java library
     implementation 'io.prometheus:simpleclient:0.16.0'
     implementation 'io.prometheus:simpleclient_common:0.16.0'
@@ -68,6 +70,7 @@ dependencies {
 
     // custom - view model for Jetpack Compose
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
+    implementation "androidx.core:core-ktx:$core_version"
 
     // custom - navigation for Jetpack Compose
     def nav_version = "2.5.3"

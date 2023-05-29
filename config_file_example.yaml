@@ -23,8 +23,8 @@ pushprox:
 remote_write:
 
   # scrape interval in seconds
-  scrape_interval: 30 # default
   enabled: false # default
+  scrape_interval: 30 # default
 
   # where to post metrics
   remote_write_endpoint: # string, no default value provided
