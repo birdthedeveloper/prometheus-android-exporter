@@ -3,16 +3,18 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.comp
 import androidx.work.Data
 import androidx.work.workDataOf
 
-//@Serializable
+private val defaultPrometheusServerPort : Int = 10101  //TODO register with prometheus foundation
+private val defaultRemoteWriteScrapeInterval : Int = 30
+
 data class PromConfiguration(
     // the following are default values for various configuration settings
     val prometheusServerEnabled : Boolean = true,
-    val prometheusServerPort : Int = 10101, //TODO register with prometheus foundation
+    val prometheusServerPort : Int = defaultPrometheusServerPort,
     val pushproxEnabled : Boolean = false,
     val pushproxFqdn : String? = null,
     val pushproxProxyUrl : String? = null,
     val remoteWriteEnabled : Boolean = false,
-    val remoteWriteScrapeInterval : Int = 30,
+    val remoteWriteScrapeInterval : Int = defaultRemoteWriteScrapeInterval,
     val remoteWriteEndpoint : String? = null,
 ) {
     private val filepath : String = ""
@@ -24,10 +26,15 @@ data class PromConfiguration(
         }
 
         fun fromWorkData(data : Data) : PromConfiguration{
-            //TODO implement this
             return PromConfiguration(
                 prometheusServerEnabled = data.getBoolean("0", true),
-                //prometheusServerPort = data.getInt("1", )
+                prometheusServerPort = data.getInt("1", defaultPrometheusServerPort),
+                pushproxEnabled = data.getBoolean("2", false),
+                pushproxFqdn = data.getString("3"),
+                pushproxProxyUrl = data.getString("4"),
+                remoteWriteEnabled = data.getBoolean("5", false),
+                remoteWriteScrapeInterval = data.getInt("6", defaultRemoteWriteScrapeInterval),
+                remoteWriteEndpoint = data.getString("7"),
             )
         }
 
