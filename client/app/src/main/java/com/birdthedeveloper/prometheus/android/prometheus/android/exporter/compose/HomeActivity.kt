@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -99,38 +98,23 @@ private fun TabPage(
     navController: NavHostController,
     modifier: Modifier,
 
-){
+) {
     val tabs = mapOf(0 to "Prom Server", 1 to "PushProx", 2 to "Remote write")
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column(modifier = modifier) {
         TabRow(selectedTabIndex = uiState.tabIndex) {
-            tabs.forEach{ (index, text) ->
-                Tab(text = {Text(text)},
+            tabs.forEach { (index, text) ->
+                Tab(text = { Text(text) },
                     selected = index == uiState.tabIndex,
                     onClick = { promViewModel.updateTabIndex(index) })
             }
         }
-        when(uiState.tabIndex){
+        when (uiState.tabIndex) {
             0 -> PrometheusServerPage(promViewModel, Modifier)
             1 -> PushProxPage(promViewModel)
             2 -> RemoteWritePage(promViewModel)
         }
-    }
-}
-
-private fun onCheckedChangeServer(
-    value : Boolean,
-    promViewModel: PromViewModel,
-    showDialog : MutableState<String>
-){
-    if (value) {
-        val result : String? = promViewModel.turnServerOn()
-        if(result != null){
-            showDialog.value = result
-        }
-    } else {
-        promViewModel.turnServerOff()
     }
 }
 
@@ -149,12 +133,14 @@ private fun PrometheusServerPage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = "Turn on Android Exporter on default port ${promViewModel.getDefaultPort()}")
+        Text(
+            text = "Turn on Android Exporter on port ${uiState.promConfig.prometheusServerPort}"
+        )
         Switch(
-            checked = uiState.serverTurnedOn,
+            checked = uiState.promConfig.prometheusServerEnabled,
             onCheckedChange = {value : Boolean? ->
                 if(value != null){
-                    onCheckedChangeServer(value, promViewModel, showDialogText)
+                    promViewModel.updatePromConfig(UpdatePromConfig.prometheusServerEnabled, value)
                 }
             }
         )
@@ -197,22 +183,11 @@ private fun PushProxPage(
             modifier = Modifier.padding(bottom = 30.dp)
         )
 
-        if(uiState.pushProxTurnedOn){
-            Text(
-                text = """
-                    To edit PushProx proxy URL or FQDN, turn it off first.
-                """.trimIndent(),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-        }
-
         TextField(
-            value = uiState.fqdn,
+            value = uiState.promConfig.pushproxFqdn,
             singleLine = true,
-            enabled = !uiState.pushProxTurnedOn,
             onValueChange = {
-                promViewModel.updatePushProxFQDN(it)
+                promViewModel.updatePromConfig(UpdatePromConfig.pushproxFqdn, it)
             },
             label = {
                 Text(text = "Fully Qualified Domain Name")
@@ -221,11 +196,10 @@ private fun PushProxPage(
         )
 
         TextField(
-            value = uiState.pushProxURL,
+            value = uiState.promConfig.pushproxProxyUrl,
             singleLine = true,
-            enabled = !uiState.pushProxTurnedOn,
             onValueChange = {
-                promViewModel.updatePushProxURL(it)
+                promViewModel.updatePromConfig(UpdatePromConfig.pushproxProxyUrl, it)
             },
             label = {
                 Text(text = "PushProx proxy URL")

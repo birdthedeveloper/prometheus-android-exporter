@@ -11,37 +11,41 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxConfig
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxWorker
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 enum class ConfigFileState {
     LOADING,
-    ERROR, // file not found or was not parsed
+    ERROR, // file was not parsed succesfully
     MISSING,
     SUCCESS
 }
 
+enum class UpdatePromConfig {
+    prometheusServerEnabled,
+    prometheusServerPort,
+    pushproxEnabled,
+    pushproxFqdn,
+    pushproxProxyUrl,
+    remoteWriteEnabled,
+    remoteWriteScrapeInterval,
+    remoteWriteEndpoint,
+}
+
 data class PromUiState(
     val tabIndex : Int = 0,
-    val serverTurnedOn : Boolean = false,
-    val pushProxTurnedOn : Boolean = false,
-    val serverPort : Int? = null, // if null, use default port
-    val fqdn : String = "test.example.com",
-    val pushProxURL : String = "143.42.59.63:8080",
+    val promConfig: PromConfiguration = PromConfiguration(),
     val configFileState : ConfigFileState = ConfigFileState.LOADING,
 )
 
 private val TAG : String = "PROMVIEWMODEL"
 
 class PromViewModel(): ViewModel() {
-    // constants
-    private val DEFAULT_SERVER_PORT : Int = 10101 //TODO register with prometheus community
     private val PROM_UNIQUE_WORK : String = "prom_unique_job"
 
 
@@ -50,23 +54,44 @@ class PromViewModel(): ViewModel() {
 
     private lateinit var getContext: () -> Context
 
+
     init {
+        loadConfigurationFile()
+    }
+
+    private fun loadConfigurationFile(){
         Log.v(TAG, "Checking for configuration file")
         viewModelScope.launch {
-            //TODO check for configuration file
-            delay(1000)
-            _uiState.update { current ->
-                current.copy(configFileState = ConfigFileState.MISSING)
+
+            val fileExists = PromConfiguration.configFileExists(context = getContext())
+            if (fileExists) {
+                val tempPromConfiguration : PromConfiguration
+                try {
+                    tempPromConfiguration = PromConfiguration.loadFromConfigFile()
+
+                    _uiState.update { current ->
+                        current.copy(
+                            promConfig = tempPromConfiguration,
+                            configFileState = ConfigFileState.SUCCESS,
+                        )
+                    }
+
+                }catch (e : Exception){
+                    _uiState.update { current ->
+                        current.copy(configFileState = ConfigFileState.ERROR)
+                    }
+                }
+            }else{
+                _uiState.update { current ->
+                    current.copy(configFileState = ConfigFileState.MISSING)
+                }
             }
         }
     }
 
-    fun getDefaultPort() : Int {
-        return DEFAULT_SERVER_PORT
-    }
-
     fun initializeWithApplicationContext(getContext : () -> Context){
         this.getContext = getContext
+        loadConfigurationFile()
     }
 
     fun updateTabIndex(index : Int){
@@ -77,59 +102,11 @@ class PromViewModel(): ViewModel() {
         }
     }
 
-    private fun getPromServerPort() : Int{
-        return if(_uiState.value.serverPort != null){
-            _uiState.value.serverPort!!
-        }else{
-            DEFAULT_SERVER_PORT
-        }
-    }
-
-    // if result is not null, it contains an error message
-    fun turnServerOn() : String?{
-        try{
-            //TODO rewrite asap
-//            prometheusServer.startInBackground(
-//                PrometheusServerConfig(
-//                    getPromServerPort(),
-//                    ::performScrape
-//                )
-//            )
-        }catch(e : Exception){
-            Log.v(TAG, e.toString())
-            return "Prometheus server failed!"
-        }
-
-        _uiState.update { current ->
-            current.copy(
-                serverTurnedOn = true
-            )
-        }
-        return null;
-    }
-
-    fun turnServerOff(){
-        //TODO implement
-    }
-
-    private fun validatePushProxSettings() : String? {
-        val fqdn = _uiState.value.fqdn.trim().trim('\n')
-        val url = _uiState.value.pushProxURL.trim().trim('\n')
-
-        if( fqdn.isEmpty() ) return "Fully Qualified Domain Name cannot be empty!"
-        if( url.isEmpty() ) return "PushProx URL cannot be empty!"
-
-        return null
-    }
-
-    private fun launchPushProxUsingWorkManager(){
+    fun startWorker(){
         val workManagerInstance = WorkManager.getInstance(getContext())
 
         // worker configuration
-        val inputData : Data = PushProxConfig(
-            pushProxFqdn = _uiState.value.fqdn,
-            pushProxUrl = _uiState.value.pushProxURL,
-        ).toData()
+        val inputData : Data = _uiState.value.promConfig.toWorkData()
 
         // constraints
         val constraints = Constraints.Builder()
@@ -151,47 +128,54 @@ class PromViewModel(): ViewModel() {
         ).enqueue()
     }
 
-    // if result is not null, it contains an error message
-    fun turnPushProxOn() : String?{
-        val error : String? = validatePushProxSettings()
-        if(error != null){ return error }
-
-        // idempotent call
-        launchPushProxUsingWorkManager()
-
-        _uiState.update { current ->
-            current.copy(
-                pushProxTurnedOn = true
-            )
-        }
-
-        return null
-    }
-
-    fun turnPushProxOff(){
+    fun stopWorker(){
+        //TODO implement this thingy
         val workerManagerInstance = WorkManager.getInstance(getContext())
         workerManagerInstance.cancelUniqueWork(PROM_UNIQUE_WORK)
-
-        _uiState.update {current ->
-            current.copy(
-                pushProxTurnedOn = false
-            )
-        }
     }
 
-    fun updatePushProxURL(url : String){
-        _uiState.update { current ->
-            current.copy(
-                pushProxURL = url
-            )
-        }
-    }
-
-    fun updatePushProxFQDN(fqdn : String){
-        _uiState.update { current ->
-            current.copy(
-                fqdn = fqdn
-            )
+    fun updatePromConfig(part : UpdatePromConfig, value : Any){
+        when(part){
+            UpdatePromConfig.prometheusServerEnabled -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    prometheusServerEnabled = value as Boolean
+                ))
+            }
+            UpdatePromConfig.prometheusServerPort -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    prometheusServerPort = value as Int,
+                ))
+            }
+            UpdatePromConfig.pushproxEnabled  -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    pushproxEnabled = value as Boolean,
+                ))
+            }
+            UpdatePromConfig.pushproxFqdn -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    pushproxFqdn = value as String,
+                ))
+            }
+            UpdatePromConfig.pushproxProxyUrl -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    pushproxProxyUrl = value as String,
+                ))
+            }
+            UpdatePromConfig.remoteWriteEnabled -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    remoteWriteEnabled = value as Boolean,
+                ))
+            }
+            UpdatePromConfig.remoteWriteScrapeInterval -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    remoteWriteScrapeInterval = value as Int,
+                ))
+            }
+            UpdatePromConfig.remoteWriteEndpoint -> _uiState.update { current ->
+                current.copy(promConfig = current.promConfig.copy(
+                    remoteWriteEndpoint = value as String,
+                ))
+            }
         }
     }
 }

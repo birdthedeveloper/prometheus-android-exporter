@@ -1,5 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
+import android.content.Context
 import androidx.work.Data
 import androidx.work.workDataOf
 
@@ -11,16 +12,17 @@ data class PromConfiguration(
     val prometheusServerEnabled : Boolean = true,
     val prometheusServerPort : Int = defaultPrometheusServerPort,
     val pushproxEnabled : Boolean = false,
-    val pushproxFqdn : String? = null,
-    val pushproxProxyUrl : String? = null,
+    val pushproxFqdn : String = "",
+    val pushproxProxyUrl : String = "",
     val remoteWriteEnabled : Boolean = false,
     val remoteWriteScrapeInterval : Int = defaultRemoteWriteScrapeInterval,
-    val remoteWriteEndpoint : String? = null,
+    val remoteWriteEndpoint : String = "",
 ) {
-    private val filepath : String = ""
+    private val filepath : String = "config.yaml"
+    private val alternativeFilepath : String = "config.yml"
 
     companion object {
-        suspend fun configFileExists(): Boolean {
+        suspend fun configFileExists(context : Context): Boolean {
             //TODO implement this asap
             return false
         }
@@ -30,11 +32,11 @@ data class PromConfiguration(
                 prometheusServerEnabled = data.getBoolean("0", true),
                 prometheusServerPort = data.getInt("1", defaultPrometheusServerPort),
                 pushproxEnabled = data.getBoolean("2", false),
-                pushproxFqdn = data.getString("3"),
-                pushproxProxyUrl = data.getString("4"),
+                pushproxFqdn = data.getString("3") ?: "",
+                pushproxProxyUrl = data.getString("4") ?: "",
                 remoteWriteEnabled = data.getBoolean("5", false),
                 remoteWriteScrapeInterval = data.getInt("6", defaultRemoteWriteScrapeInterval),
-                remoteWriteEndpoint = data.getString("7"),
+                remoteWriteEndpoint = data.getString("7") ?: "",
             )
         }
 
