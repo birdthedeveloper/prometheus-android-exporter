@@ -305,6 +305,9 @@ private fun ConfigFileErrorPage(
     ){
         //TODO implement this
         Text("Config File error page")
+        if (uiState.fileLoadException != null) {
+            Text(uiState.fileLoadException!!)
+        }
     }
 }
 

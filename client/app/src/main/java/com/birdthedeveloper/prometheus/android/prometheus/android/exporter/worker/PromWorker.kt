@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose.PromConfiguration
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.statement.HttpResponse
@@ -19,25 +20,18 @@ class PromWorker(
 ) : CoroutineWorker(context, parameters) {
 
     override suspend fun doWork(): Result {
-        //val inputConfiguration : PromConfiguration = PromConfiguration.fromWorkData(inputData)
+        val inputConfiguration : PromConfiguration = PromConfiguration.fromWorkData(inputData)
 
         while(true){
             Log.v(TAG, "Worker is working " + LocalDateTime.now().toString())
             //TODO curl localhost
 
             delay(1000L)
-            curlLocalhost()
         }
 
         //TODO implement this asap
 
         return Result.success()
-    }
-
-    private suspend fun curlLocalhost(){
-        val client = HttpClient(CIO)
-        val response: HttpResponse = client.get("http://localhost:8000")
-        Log.v(TAG, response.toString())
     }
 
 }

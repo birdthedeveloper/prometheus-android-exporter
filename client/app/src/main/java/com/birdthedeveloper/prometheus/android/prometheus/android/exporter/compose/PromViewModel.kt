@@ -1,6 +1,5 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
-import android.content.ComponentName
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -9,14 +8,10 @@ import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
-import androidx.work.multiprocess.RemoteListenableWorker
-import androidx.work.multiprocess.RemoteWorkerService
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PromWorker
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,7 +54,9 @@ data class PromUiState(
 
 
 class PromViewModel(): ViewModel() {
-    private val PROM_UNIQUE_WORK : String = "prom_unique_job"
+    companion object {
+        private const val PROM_UNIQUE_WORK : String = "prom_unique_job"
+    }
 
     private val _uiState = MutableStateFlow(PromUiState())
     val uiState : StateFlow<PromUiState> = _uiState.asStateFlow()
@@ -69,33 +66,31 @@ class PromViewModel(): ViewModel() {
     private fun loadConfigurationFile(){
         Log.v(TAG, "Checking for configuration file")
 
-        viewModelScope.launch {
-            Log.v(TAG, getContext().filesDir.absolutePath)
-            val fileExists = PromConfiguration.configFileExists(context = getContext())
-            if (fileExists) {
-                val tempPromConfiguration : PromConfiguration
-                try {
-                    tempPromConfiguration = PromConfiguration.loadFromConfigFile(getContext())
+        Log.v(TAG, getContext().filesDir.absolutePath)
+        val fileExists = PromConfiguration.configFileExists(context = getContext())
+        if (fileExists) {
+            val tempPromConfiguration : PromConfiguration
+            try {
+                tempPromConfiguration = PromConfiguration.loadFromConfigFile(getContext())
 
-                    _uiState.update { current ->
-                        current.copy(
-                            promConfig = tempPromConfiguration,
-                            configFileState = ConfigFileState.SUCCESS,
-                        )
-                    }
-
-                }catch (e : Exception){
-                    _uiState.update { current ->
-                        current.copy(
-                            configFileState = ConfigFileState.ERROR,
-                            fileLoadException = e.toString(),
-                        )
-                    }
-                }
-            }else{
                 _uiState.update { current ->
-                    current.copy(configFileState = ConfigFileState.MISSING)
+                    current.copy(
+                        promConfig = tempPromConfiguration,
+                        configFileState = ConfigFileState.SUCCESS,
+                    )
                 }
+
+            }catch (e : Exception){
+                _uiState.update { current ->
+                    current.copy(
+                        configFileState = ConfigFileState.ERROR,
+                        fileLoadException = e.toString(),
+                    )
+                }
+            }
+        }else {
+            _uiState.update { current ->
+                current.copy(configFileState = ConfigFileState.MISSING)
             }
         }
     }
