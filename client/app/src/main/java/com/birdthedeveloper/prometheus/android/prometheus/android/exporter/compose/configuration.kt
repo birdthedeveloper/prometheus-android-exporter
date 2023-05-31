@@ -21,7 +21,21 @@ data class PromConfigFile(
     val prometheus_server : PromServerConfigFile?,
     val pushprox : PushProxConfigFile?,
     val remote_write : RemoteWriteConfigFile?,
-)
+){
+    fun toPromConfiguration() : PromConfiguration{
+        return PromConfiguration(
+            pushproxProxyUrl = this.pushprox?.proxy_url ?: "",
+            remoteWriteScrapeInterval = this.remote_write?.scrape_interval
+                ?: defaultRemoteWriteScrapeInterval,
+            pushproxEnabled = this.pushprox?.enabled ?: false,
+            pushproxFqdn = this.pushprox?.fqdn ?: "",
+            remoteWriteEnabled = this.remote_write?.enabled ?: false,
+            remoteWriteEndpoint = this.remote_write?.remote_write_endpoint ?: "",
+            prometheusServerEnabled = this.prometheus_server?.enabled ?: true,
+            prometheusServerPort = this.prometheus_server?.port ?: defaultPrometheusServerPort,
+        )
+    }
+}
 @Serializable
 data class PromServerConfigFile(
     val enabled : Boolean?,
@@ -50,6 +64,23 @@ data class PromConfiguration(
     val remoteWriteScrapeInterval : Int = defaultRemoteWriteScrapeInterval,
     val remoteWriteEndpoint : String = "",
 ) {
+
+    fun toStructuredText() : String {
+        //TODO asap
+        return """
+            prometheus_server:
+                enabled: $prometheusServerEnabled
+                port: $prometheusServerPort
+            pushprox:
+                enabled: $pushproxEnabled
+                fqdn: "$pushproxFqdn"
+                proxy_url: "$pushproxProxyUrl"
+            remote_write:
+                enabled: $remoteWriteEnabled
+                scrape_interval: $remoteWriteScrapeInterval
+                remote_write_endpoint: "$remoteWriteEndpoint"
+        """.trimIndent()
+    }
 
     companion object {
         // data/user/0/com.birdthedeveloper.prometheus.android.prometheus.android.exporter/files
@@ -89,21 +120,15 @@ data class PromConfiguration(
                 throw Exception("configuration file does not exist!")
             }
 
-            //TODO implement this asap
+            val parsedYaml : PromConfigFile = Yaml.default.decodeFromString(
+                PromConfigFile.serializer(),
+                fileContents
+            )
 
-            try{
-                val parsedYaml : PromConfigFile = Yaml.default.decodeFromString(
-                    PromConfigFile.serializer(),
-                    fileContents
-                )
-                Log.v(TAG, parsedYaml.prometheus_server?.port.toString())
-            }catch (e : Exception){
-                Log.v(TAG, e.toString())
-                throw e
-            }
+            Log.v(TAG, parsedYaml.prometheus_server?.port.toString())
 
 
-            return PromConfiguration()
+            return parsedYaml.toPromConfiguration()
         }
     }
 

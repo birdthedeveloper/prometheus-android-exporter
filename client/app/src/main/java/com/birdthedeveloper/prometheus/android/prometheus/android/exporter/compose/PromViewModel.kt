@@ -54,6 +54,7 @@ data class PromUiState(
     val promConfig: PromConfiguration = PromConfiguration(),
     val configFileState : ConfigFileState = ConfigFileState.LOADING,
     val exporterState : ExporterState = ExporterState.NotRunning,
+    val fileLoadException : String? = null
 )
 
 
@@ -85,7 +86,10 @@ class PromViewModel(): ViewModel() {
 
                 }catch (e : Exception){
                     _uiState.update { current ->
-                        current.copy(configFileState = ConfigFileState.ERROR)
+                        current.copy(
+                            configFileState = ConfigFileState.ERROR,
+                            fileLoadException = e.toString(),
+                        )
                     }
                 }
             }else{

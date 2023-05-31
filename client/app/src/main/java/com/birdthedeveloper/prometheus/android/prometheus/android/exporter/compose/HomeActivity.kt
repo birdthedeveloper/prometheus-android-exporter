@@ -317,5 +317,6 @@ private fun ConfigFileSuccessPage(
     Column {
         //TODO implement this
         Text("Config file success page")
+        Text(uiState.promConfig.toStructuredText())
     }
 }
