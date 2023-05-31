@@ -98,19 +98,9 @@ data class PromConfiguration(
         }
 
         fun fromWorkData(data : Data) : PromConfiguration {
-            return PromConfiguration(
-                prometheusServerEnabled = data.getBoolean("0", true),
-                prometheusServerPort = data.getInt("1", defaultPrometheusServerPort),
-                pushproxEnabled = data.getBoolean("2", false),
-                pushproxFqdn = data.getString("3") ?: "",
-                pushproxProxyUrl = data.getString("4") ?: "",
-                remoteWriteEnabled = data.getBoolean("5", false),
-                remoteWriteScrapeInterval = data.getInt("6", defaultRemoteWriteScrapeInterval),
-                remoteWriteEndpoint = data.getString("7") ?: "",
-            )
-
-//            val data : String? = data.getString("json")
-//            return Json.decodeFromString<PromConfiguration>()
+            val jsonString : String = data.getString("json")
+                ?: throw Exception("PromConfiguration serialization not working correctly!")
+            return Json.decodeFromString<PromConfiguration>(jsonString)
         }
 
         suspend fun loadFromConfigFile(context : Context): PromConfiguration {
@@ -141,14 +131,7 @@ data class PromConfiguration(
 
     fun toWorkData() : Data{
         return workDataOf(
-            "0" to this.prometheusServerEnabled,
-            "1" to this.prometheusServerPort,
-            "2" to this.pushproxEnabled,
-            "3" to this.pushproxFqdn,
-            "4" to this.pushproxProxyUrl,
-            "5" to this.remoteWriteEnabled,
-            "6" to this.remoteWriteScrapeInterval,
-            "7" to this.remoteWriteEndpoint,
+            "json" to Json.encodeToString(serializer(), this)
         )
     }
 }
