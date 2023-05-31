@@ -40,9 +40,8 @@ class PrometheusServer() {
                 delay(Long.MAX_VALUE)
             }finally {
                 withContext(NonCancellable){
-                    Log.v(TAG, "3")
+                    Log.v(TAG, "Canceling Prometheus server")
                     server.stop()
-                    Log.v(TAG, "4")
                 }
             }
         }

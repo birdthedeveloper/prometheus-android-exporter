@@ -27,9 +27,8 @@ class PromWorker(
     parameters : WorkerParameters,
 ) : CoroutineWorker(context, parameters) {
 
-    private val collectorRegistry: CollectorRegistry = CollectorRegistry()
     private val metricsEngine : MetricsEngine = MetricsEngine(context)
-    private val pushProxClient = PushProxClient(collectorRegistry, ::performScrape)
+    private val pushProxClient = PushProxClient(::performScrape)
     private lateinit var androidCustomExporter : AndroidCustomExporter
 
     //TODO foreground notification
@@ -39,13 +38,13 @@ class PromWorker(
 
     private fun performScrape() : String{
         val writer = StringWriter()
-        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
+        TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
         return writer.toString()
     }
 
     private fun initializeWork(config : PromConfiguration){
         // initialize metrics
-        androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
+        androidCustomExporter = AndroidCustomExporter(metricsEngine).register()
     }
 
     private suspend fun startServices(config : PromConfiguration){

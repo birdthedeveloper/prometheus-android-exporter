@@ -10,45 +10,43 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMethod
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
+
+private const val TAG = "PUSHPROX_CLIENT"
+
+// configuration class for pushprox
+data class PushProxConfig(
+    val pushProxUrl : String,
+    val pushProxFqdn : String,
+    val registry : CollectorRegistry,
+)
 
 /**
  * Counters for monitoring the pushprox itself, compatible with the reference
  * implementation in golang, source: https://github.dev/prometheus-community/PushProx
  */
-private class Counters(collectorRegistry: CollectorRegistry) {
-    private val collectorRegistry : CollectorRegistry
-    private val scrapeErrorCounter : Counter
-    private val pushErrorCounter : Counter
-    private val pollErrorCounter : Counter
-
-    init {
-        this.collectorRegistry = collectorRegistry
-
-        // following 3 counters are compatible with reference implementation
-        scrapeErrorCounter = Counter.build()
-            .name("pushprox_client_scrape_errors_total")
-            .help("Number of scrape errors")
-            .register(collectorRegistry)
-        pushErrorCounter = Counter.build()
-            .name("pushprox_client_push_errors_total")
-            .help("Number of push errors")
-            .register(collectorRegistry)
-        pollErrorCounter = Counter.build()
+private class PushProxCounter(registry: CollectorRegistry) {
+    private val pushErrorCounter : Counter = Counter.build()
             .name("pushprox_client_poll_errors_total")
             .help("Number of poll errors")
-            .register(collectorRegistry)
+            .register(registry)
+    private val scrapeErrorCounter : Counter = Counter.build()
+            .name("pushprox_client_scrape_errors_total")
+            .help("Number of scrape errors")
+            .register(registry)
 
-    }
+    private val pollErrorCounter : Counter = Counter.build()
+            .name("pushprox_client_push_errors_total")
+            .help("Number of push errors")
+            .register(registry)
 
-    fun scrapeError(){ scrapeErrorCounter.inc() }
-
+    fun scrapeError(){ scrapeErrorCounter.inc()}
     fun pushError(){ pushErrorCounter.inc() }
-
     fun pollError(){ pollErrorCounter.inc() } //TODO use this thing
 }
 
-// Error in parsing HTTP header "Id" from HTTP request from Prometheus
+// Error in parsing HTTP header "Id" from HTTP request from Prometheus //TODO wtf
 class PushProxIdParseException(message: String) : Exception(message)
 
 // Context object for pushprox internal functions to avoid global variables
@@ -60,22 +58,28 @@ data class PushProxContext(
 )
 
 // This is a stripped down kotlin implementation of github.com/prometheus-community/PushProx client
-class PushProxClient(
-    collectorRegistry: CollectorRegistry,
-    private val performScrape: suspend () -> String
-) {
-    private val counters : Counters = Counters(collectorRegistry)
-    private val retryInitialWaitSeconds : Int = 1
-    private val retryMaxWaitSeconds : Int = 5
+class PushProxClient(config: PushProxConfig) {
+    private val counters : PushProxCounter = PushProxCounter(config.registry)
 
     // Use this function to start exporting metrics to pushprox in the background
-    suspend fun startBackground(config: PushProxConfig) {
-            val client : HttpClient = HttpClient() //TODO close this thing
-            val context : PushProxContext = processConfig(client, config)
+    suspend fun start(config: PushProxConfig) {
+        Log.v(TAG, "Starting pushprox client")
+
+        var client : HttpClient? = null
+        try {
+            client = HttpClient()
+            val context : PushProxContext = getPushProxContext(client, config)
             loop(context)
+        }finally {
+            withContext(NonCancellable){
+                Log.v(TAG, "Canceling pushprox client")
+                client?.close()
+            }
+        }
     }
 
-    private fun processConfig(client : HttpClient, config : PushProxConfig) : PushProxContext {
+
+    private fun getPushProxContext(client : HttpClient, config : PushProxConfig) : PushProxContext {
         var modifiedProxyURL = config.pushProxUrl.trim('/')
 
         if(
@@ -96,6 +100,7 @@ class PushProxClient(
         )
     }
 
+    //TODO refactor this function
     // Continuous poll from android phone to pushprox gateway
     private suspend fun doPoll(context : PushProxContext){
         log("poll", "polling now")
@@ -107,6 +112,7 @@ class PushProxClient(
         doPush(context, responseBody)
     }
 
+    //TODO refactor this function
     // get value of HTTP header "Id" from response body
     private fun getIdFromResponseBody(responseBody: String) : String {
 
@@ -118,14 +124,14 @@ class PushProxClient(
         return id
     }
 
+    //TODO refactor this function
     private fun composeRequestBody(scrapedMetrics: String, id : String) : String {
         val httpHeaders = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/plain; version=0.0.4; charset=utf-8\r\n" +
             "Id: $id\r\n" +
             "X-Prometheus-Scrape-Timeout: 9.5\r\n"
 
-        val result : String = httpHeaders + "\r\n" + scrapedMetrics
-        return result
+        return httpHeaders + "\r\n" + scrapedMetrics
     }
 
     // Parameter responseBody: response body of /poll request
@@ -158,11 +164,11 @@ class PushProxClient(
 
     //TODO migrate to work manager
     private suspend fun loop(context : PushProxContext) {
-        var shouldContinue : Boolean = true
-        while (shouldContinue) {
-            log("pushprox main loop", "loop start")
+        while (true) {
+            Log.v(TAG, "PushProxClient main loop start")
             // register poll error using try-catch block
             //TODO backoff strategy
+            //TODO asap
 //            var result = context.backoff.withRetries {
 //                try {
 //                    doPoll(context)
@@ -180,11 +186,7 @@ class PushProxClient(
 //                    throw e
 //                }
 //            }
-            log("pushprox main loop", "loop end")
+            Log.v(TAG,"PushProxClient main loop end")
         }
-    }
-
-    private fun log(title: String, text: String) {
-        Log.v("PUSHPROXCLIENT", "$title: $text")
     }
 }
