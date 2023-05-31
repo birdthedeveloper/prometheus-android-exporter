@@ -69,11 +69,12 @@ class PromViewModel(): ViewModel() {
         Log.v(TAG, "Checking for configuration file")
 
         viewModelScope.launch {
+            Log.v(TAG, getContext().filesDir.absolutePath)
             val fileExists = PromConfiguration.configFileExists(context = getContext())
             if (fileExists) {
                 val tempPromConfiguration : PromConfiguration
                 try {
-                    tempPromConfiguration = PromConfiguration.loadFromConfigFile()
+                    tempPromConfiguration = PromConfiguration.loadFromConfigFile(getContext())
 
                     _uiState.update { current ->
                         current.copy(

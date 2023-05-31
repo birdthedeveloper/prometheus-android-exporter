@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -37,7 +38,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0'
+        kotlinCompilerExtensionVersion '1.4.7'
     }
     packagingOptions {
         resources {
@@ -53,9 +54,6 @@ dependencies {
     // custom - prometheus client java library
     implementation 'io.prometheus:simpleclient:0.16.0'
     implementation 'io.prometheus:simpleclient_common:0.16.0'
-
-    // custom - exponential backoff
-    implementation("io.github.reugn:kotlin-backoff:0.4.0")
 
     // custom - kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-RC"
@@ -82,6 +80,7 @@ dependencies {
 
     // custom - yaml configuration parsing
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.1")
+    implementation("com.charleskorn.kaml:kaml:0.54.0")
 
 
 

@@ -1,8 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.util.Log
-import io.github.reugn.kotlin.backoff.StrategyBackoff
-import io.github.reugn.kotlin.backoff.strategy.ExponentialStrategy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -58,7 +56,6 @@ data class PushProxContext(
     val client : HttpClient,
     val pollUrl : String,
     val pushUrl : String,
-    val backoff : StrategyBackoff<Unit>,
     val fqdn : String,
 )
 
@@ -95,7 +92,6 @@ class PushProxClient(
             client,
             pollURL,
             pushURL,
-            newBackoffFromFlags(),
             config.pushProxFqdn,
         )
     }
@@ -160,39 +156,30 @@ class PushProxClient(
         }
     }
 
-    private fun newBackoffFromFlags() : StrategyBackoff<Unit> {
-        return StrategyBackoff<Unit>(
-            strategy = ExponentialStrategy(
-                expBase = 2,
-                baseDelayMs = (retryInitialWaitSeconds * 1000).toLong(),
-                maxDelayMs = (retryMaxWaitSeconds * 1000).toLong(),
-            ),
-        )
-    }
-
     //TODO migrate to work manager
     private suspend fun loop(context : PushProxContext) {
         var shouldContinue : Boolean = true
         while (shouldContinue) {
             log("pushprox main loop", "loop start")
             // register poll error using try-catch block
-            var result = context.backoff.withRetries {
-                try {
-                    doPoll(context)
-                }catch(e : CancellationException){
-                    shouldContinue = false
-                }
-                catch (e: Exception) {
-                    for(exception in e.suppressed){
-                        if(exception is CancellationException){
-                            shouldContinue = false
-                        }
-                    }
-                    log("exception encountered!", e.toString())
-                    counters.pollError()
-                    throw e
-                }
-            }
+            //TODO backoff strategy
+//            var result = context.backoff.withRetries {
+//                try {
+//                    doPoll(context)
+//                }catch(e : CancellationException){
+//                    shouldContinue = false
+//                }
+//                catch (e: Exception) {
+//                    for(exception in e.suppressed){
+//                        if(exception is CancellationException){
+//                            shouldContinue = false
+//                        }
+//                    }
+//                    log("exception encountered!", e.toString())
+//                    counters.pollError()
+//                    throw e
+//                }
+//            }
             log("pushprox main loop", "loop end")
         }
     }
