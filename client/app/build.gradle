@@ -81,6 +81,8 @@ dependencies {
     // custom - yaml configuration parsing
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.1")
     implementation("com.charleskorn.kaml:kaml:0.54.0")
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+
 
 
 

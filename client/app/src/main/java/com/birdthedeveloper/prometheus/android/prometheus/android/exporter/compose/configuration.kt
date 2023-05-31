@@ -9,6 +9,8 @@ import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import java.io.File
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 
 private const val TAG : String = "CONFIGURATION"
 
@@ -53,6 +55,8 @@ data class RemoteWriteConfigFile(
     val scrape_interval : Int?,
     val remote_write_endpoint : String?,
 )
+
+@Serializable
 data class PromConfiguration(
     // the following are default values for various configuration settings
     val prometheusServerEnabled : Boolean = true,
@@ -104,6 +108,9 @@ data class PromConfiguration(
                 remoteWriteScrapeInterval = data.getInt("6", defaultRemoteWriteScrapeInterval),
                 remoteWriteEndpoint = data.getString("7") ?: "",
             )
+
+//            val data : String? = data.getString("json")
+//            return Json.decodeFromString<PromConfiguration>()
         }
 
         suspend fun loadFromConfigFile(context : Context): PromConfiguration {
