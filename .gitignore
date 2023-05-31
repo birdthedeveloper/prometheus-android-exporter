@@ -1,1 +1,4 @@
 credentials/
+
+# configuration for working version of Android prometheus exporter
+config.yaml

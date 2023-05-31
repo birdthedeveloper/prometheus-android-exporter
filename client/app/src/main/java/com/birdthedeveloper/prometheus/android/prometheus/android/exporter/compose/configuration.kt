@@ -4,13 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.work.Data
 import androidx.work.workDataOf
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxConfig
 import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import java.io.File
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 
 private const val TAG : String = "CONFIGURATION"
 
@@ -56,6 +53,7 @@ data class RemoteWriteConfigFile(
     val remote_write_endpoint : String?,
 )
 
+// configuration of a work manager worker
 @Serializable
 data class PromConfiguration(
     // the following are default values for various configuration settings
@@ -70,7 +68,6 @@ data class PromConfiguration(
 ) {
 
     fun toStructuredText() : String {
-        //TODO asap
         return """
             prometheus_server:
                 enabled: $prometheusServerEnabled
@@ -108,24 +105,22 @@ data class PromConfiguration(
 
             val file = File(context.filesDir, filename)
             val alternativeFile = File(context.filesDir, alternativeFilename)
-            val fileContents : String
-            if (file.exists()){
-                fileContents = file.readText()
+            val fileContents : String = if (file.exists()){
+                file.readText()
             }else if (alternativeFile.exists()){
-                fileContents = alternativeFile.readText()
+                alternativeFile.readText()
             }else{
                 throw Exception("configuration file does not exist!")
             }
 
-            val parsedYaml : PromConfigFile = Yaml.default.decodeFromString(
+            val parsedConfig : PromConfigFile = Yaml.default.decodeFromString(
                 PromConfigFile.serializer(),
                 fileContents
             )
 
-            Log.v(TAG, parsedYaml.prometheus_server?.port.toString())
+            Log.v(TAG, parsedConfig.prometheus_server?.port.toString())
 
-
-            return parsedYaml.toPromConfiguration()
+            return parsedConfig.toPromConfiguration()
         }
     }
 

@@ -3,18 +3,18 @@
 # Settings specific to exporting metrics using a HTTP server
 prometheus_server:
 
-  enabled: false # default
-  port: 22322 # default
+  enabled: true # default
+  port: 10101 # default
 
 # Settings specific to pushing metrics to pushprox proxy
 # This is handy for traversing network topologies such as NAT
 pushprox:
 
-  enabled: true # default
+  enabled: false # default
   # fully qualified domain name
-  fqdn: "some-fqdn" # string, no default value provided
+  fqdn: # string, no default value provided
 
-  proxy_url: "url" # string, no default value provided
+  proxy_url: # string, no default value provided
 
 # Settings specific to backfilling metrics using prometheus remote write
 # 
@@ -23,8 +23,8 @@ pushprox:
 remote_write:
 
   # scrape interval in seconds
-  enabled: true # default
-  scrape_interval: 60 # default
+  enabled: false # default
+  scrape_interval: 30 # default
 
   # where to post metrics
-  remote_write_endpoint: "rem-wrirte" # string, no default value provided
+  remote_write_endpoint: # string, no default value provided

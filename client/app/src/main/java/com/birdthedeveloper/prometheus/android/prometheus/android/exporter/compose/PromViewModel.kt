@@ -99,9 +99,15 @@ class PromViewModel(): ViewModel() {
         when(_uiState.value.exporterState) {
             ExporterState.Running -> {
                 stopWorker()
+                _uiState.update { current ->
+                    current.copy(exporterState = ExporterState.NotRunning)
+                }
             }
             ExporterState.NotRunning -> {
                 startWorker()
+                _uiState.update { current ->
+                    current.copy(exporterState = ExporterState.Running)
+                }
             }
         }
     }
