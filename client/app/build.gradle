@@ -66,6 +66,7 @@ dependencies {
     // custom - ktor web server
     implementation "io.ktor:ktor-server-cio:2.3.0"
     implementation "io.ktor:ktor-server-core:2.3.0"
+    implementation "io.ktor:ktor-server-status-pages:2.3.0"
 
     // custom - view model for Jetpack Compose
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"

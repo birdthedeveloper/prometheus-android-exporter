@@ -45,7 +45,7 @@ private class Counters(collectorRegistry: CollectorRegistry) {
 
     fun pushError(){ pushErrorCounter.inc() }
 
-    fun pollError(){ pollErrorCounter.inc() }
+    fun pollError(){ pollErrorCounter.inc() } //TODO use this thing
 }
 
 // Error in parsing HTTP header "Id" from HTTP request from Prometheus

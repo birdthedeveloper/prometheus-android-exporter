@@ -1,81 +1,100 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.util.Log
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.engine.*
 import io.ktor.server.cio.*
+import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-// Configuration object for PrometheusServer class
+private const val TAG = "PROMETHEUS_SERVER"
+
+// Configuration object for PrometheusServer
 data class PrometheusServerConfig(
     val port : Int,
     val performScrape : suspend () -> String,
 )
 
-private val TAG = "PROMETHEUS_SERVER"
 
-// Expose metrics on given port using Ktor http server with CIO engine
-class PrometheusServer(){
-    private var isRunning : Boolean = false
-
-    fun startInBackground(config : PrometheusServerConfig){
-        if (!isRunning){
-            Log.v(TAG, "Starting prometheus server")
-            isRunning = true
-            //TODO dispose server
-
+// Expose metrics on given port using Ktor http server
+class PrometheusServer() {
+    companion object {
+        suspend fun start(config: PrometheusServerConfig) {
             val server = configureServer(config)
-            GlobalScope.launch {
-                launch{
-                    server.start(wait = true)
+            try{
+                Log.v(TAG, "Starting prometheus server")
+
+                Log.v(TAG, "2")
+                server.start()
+                Log.v(TAG, "5")
+                delay(10000000L)
+            }finally {
+                withContext(NonCancellable){
+                    Log.v(TAG, "3")
+                    server.stop()
+                    Log.v(TAG, "4")
                 }
             }
 
-            log("startBackground", "done")
-        }
-    }
-
-    private suspend fun getMetrics(performScrape: suspend () -> String) : String{
-        val result : String = try{
-            performScrape()
-        }catch(e: Exception){
-            ""
         }
 
-        return result
-    }
+        private fun getLandingPage(): String {
+            return """
+                <html>
+                <head><title>Android Exporter</title></head>
+                <body>
+                <h1>Android Exporter</h1>
+                <p><a href="/metrics">Metrics</a></p>
+                </body>
+                </html>
+            """.trimIndent()
+        }
 
-    private fun getLandingPage() : String{
-        return """
-            <html>
-			<head><title>Android Exporter</title></head>
-			<body>
-			<h1>Android Exporter</h1>
-			<p><a href="/metrics">Metrics</a></p>
-			</body>
-			</html>
-        """.trimIndent()
-    }
+        private fun notFoundPage(): String {
+            return """
+                <html>
+                <head><title>Not found</title></head>
+                <body>
+                <h1>Not found</h1>
+                <p><a href="/metrics">Metrics</a></p>
+                </body>
+                </html>
+            """.trimIndent()
+        }
 
-    private fun configureServer(config : PrometheusServerConfig) : ApplicationEngine{
-        return embeddedServer(CIO, port = config.port) {
-            routing {
-                get("/") {
-                    call.respondText(getLandingPage())
+        private fun configureServer(config: PrometheusServerConfig): ApplicationEngine {
+            //TODO testing of different providers (CIO, netty, jetty ... for performance)
+            return embeddedServer(CIO, port = config.port) {
+                install(StatusPages) {
+                    status(HttpStatusCode.NotFound) { call, status ->
+                        call.respondText(text = notFoundPage(), status = status)
+                    }
+                    exception<Throwable> { call, _ ->
+                        call.respondText(
+                            text = "Server error" ,
+                            status = HttpStatusCode.InternalServerError,
+                        )
+                    }
                 }
-                get("/metrics") {
-                    call.respondText(getMetrics(config.performScrape))
+                routing {
+                    get("/") {
+                        call.respondText(getLandingPage())
+                    }
+                    get("/metrics") {
+                        call.respondText(config.performScrape())
+                    }
                 }
-            } //TODO 404 page
+            }
         }
-    }
-
-
-    private fun log(title: String, text: String) {
-        Log.v("PROMETHEUS SERVER", "$title: $text")
     }
 }

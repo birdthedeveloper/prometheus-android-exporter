@@ -2,6 +2,7 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.work
 
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -11,6 +12,12 @@ import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.R
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose.PromConfiguration
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import java.io.StringWriter
 
 private const val TAG = "Worker"
@@ -41,30 +48,51 @@ class PromWorker(
         androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
-    private fun startServices(config : PromConfiguration){
-        if(config.prometheusServerEnabled){
-            //DO something
-        }
+    private suspend fun startServices(config : PromConfiguration){
+        var deferred = coroutineScope {
+            if(config.prometheusServerEnabled){
+                launch{
+                    Log.v(TAG, "1")
+                    PrometheusServer.start(
+                        PrometheusServerConfig(config.prometheusServerPort, ::performScrape),
+                    )
+                    Log.v(TAG, "7")
+                }
+                launch {
+//                    while(true){
+//                        Log.v(TAG, "aaaaaaaaa")
+//                        delay(500)
+//                    }
+                }
+                Log.v(TAG, "Prometheus server started.")
+            }
 
-        if(config.pushproxEnabled){
-            //DO something
-        }
+            if(config.pushproxEnabled){
+                launch {
 
-        if(config.remoteWriteEnabled){
-            //DO something
+                }
+
+                Log.v(TAG, "Pushprox client started.")
+            }
+
+            if(config.remoteWriteEnabled){
+                //DO something
+                Log.v(TAG, "Remote write service started.")
+            }
+
         }
     }
+
     override suspend fun doWork(): Result {
         val inputConfiguration : PromConfiguration = PromConfiguration.fromWorkData(inputData)
 
         // set foreground - //TODO is this right for the use case?
-        setForeground(createForegroundInfo())
+        //setForeground(createForegroundInfo())
 
         initializeWork(inputConfiguration)
         startServices(inputConfiguration)
 
         //TODO implement this asap
-
         return Result.success()
     }
 
