@@ -1,5 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
+import android.content.ComponentName
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -8,9 +9,13 @@ import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
+import androidx.work.multiprocess.RemoteListenableWorker
+import androidx.work.multiprocess.RemoteWorkerService
+import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PromWorker
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PushProxWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,50 +24,51 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
+private val TAG : String = "PROMVIEWMODEL"
+
 enum class ConfigFileState {
-    LOADING,
-    ERROR, // file was not parsed succesfully
-    MISSING,
-    SUCCESS
+    LOADING, // parsing configuration file now
+    ERROR, // file was not parsed successfully
+    MISSING, // no configuration file has been found
+    SUCCESS,
 }
 
 enum class UpdatePromConfig {
-    prometheusServerEnabled,
-    prometheusServerPort,
-    pushproxEnabled,
-    pushproxFqdn,
-    pushproxProxyUrl,
-    remoteWriteEnabled,
-    remoteWriteScrapeInterval,
-    remoteWriteEndpoint,
+    PrometheusServerEnabled,
+    PrometheusServerPort,
+    PushproxEnabled,
+    PushproxFqdn,
+    PushproxProxyUrl,
+    RemoteWriteEnabled,
+    RemoteWriteScrapeInterval,
+    RemoteWriteEndpoint,
+}
+
+enum class ExporterState{
+    Running,
+    NotRunning,
 }
 
 data class PromUiState(
     val tabIndex : Int = 0,
     val promConfig: PromConfiguration = PromConfiguration(),
     val configFileState : ConfigFileState = ConfigFileState.LOADING,
+    val exporterState : ExporterState = ExporterState.NotRunning,
 )
 
-private val TAG : String = "PROMVIEWMODEL"
 
 class PromViewModel(): ViewModel() {
     private val PROM_UNIQUE_WORK : String = "prom_unique_job"
-
 
     private val _uiState = MutableStateFlow(PromUiState())
     val uiState : StateFlow<PromUiState> = _uiState.asStateFlow()
 
     private lateinit var getContext: () -> Context
 
-
-    init {
-        loadConfigurationFile()
-    }
-
     private fun loadConfigurationFile(){
         Log.v(TAG, "Checking for configuration file")
-        viewModelScope.launch {
 
+        viewModelScope.launch {
             val fileExists = PromConfiguration.configFileExists(context = getContext())
             if (fileExists) {
                 val tempPromConfiguration : PromConfiguration
@@ -89,6 +95,17 @@ class PromViewModel(): ViewModel() {
         }
     }
 
+    fun toggleIsRunning(){
+        when(_uiState.value.exporterState) {
+            ExporterState.Running -> {
+                stopWorker()
+            }
+            ExporterState.NotRunning -> {
+                startWorker()
+            }
+        }
+    }
+
     fun initializeWithApplicationContext(getContext : () -> Context){
         this.getContext = getContext
         loadConfigurationFile()
@@ -102,7 +119,8 @@ class PromViewModel(): ViewModel() {
         }
     }
 
-    fun startWorker(){
+    private fun startWorker(){
+        Log.v(TAG, "Enqueuing work")
         val workManagerInstance = WorkManager.getInstance(getContext())
 
         // worker configuration
@@ -114,7 +132,7 @@ class PromViewModel(): ViewModel() {
             .build()
 
         // setup worker request
-        val workerRequest = OneTimeWorkRequestBuilder<PushProxWorker>()
+        val workerRequest = OneTimeWorkRequestBuilder<PromWorker>()
             .setInputData(inputData)
             .setConstraints(constraints)
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
@@ -128,50 +146,49 @@ class PromViewModel(): ViewModel() {
         ).enqueue()
     }
 
-    fun stopWorker(){
-        //TODO implement this thingy
+    private fun stopWorker(){
         val workerManagerInstance = WorkManager.getInstance(getContext())
         workerManagerInstance.cancelUniqueWork(PROM_UNIQUE_WORK)
     }
 
     fun updatePromConfig(part : UpdatePromConfig, value : Any){
         when(part){
-            UpdatePromConfig.prometheusServerEnabled -> _uiState.update { current ->
+            UpdatePromConfig.PrometheusServerEnabled -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     prometheusServerEnabled = value as Boolean
                 ))
             }
-            UpdatePromConfig.prometheusServerPort -> _uiState.update { current ->
+            UpdatePromConfig.PrometheusServerPort -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     prometheusServerPort = value as Int,
                 ))
             }
-            UpdatePromConfig.pushproxEnabled  -> _uiState.update { current ->
+            UpdatePromConfig.PushproxEnabled  -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     pushproxEnabled = value as Boolean,
                 ))
             }
-            UpdatePromConfig.pushproxFqdn -> _uiState.update { current ->
+            UpdatePromConfig.PushproxFqdn -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     pushproxFqdn = value as String,
                 ))
             }
-            UpdatePromConfig.pushproxProxyUrl -> _uiState.update { current ->
+            UpdatePromConfig.PushproxProxyUrl -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     pushproxProxyUrl = value as String,
                 ))
             }
-            UpdatePromConfig.remoteWriteEnabled -> _uiState.update { current ->
+            UpdatePromConfig.RemoteWriteEnabled -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     remoteWriteEnabled = value as Boolean,
                 ))
             }
-            UpdatePromConfig.remoteWriteScrapeInterval -> _uiState.update { current ->
+            UpdatePromConfig.RemoteWriteScrapeInterval -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     remoteWriteScrapeInterval = value as Int,
                 ))
             }
-            UpdatePromConfig.remoteWriteEndpoint -> _uiState.update { current ->
+            UpdatePromConfig.RemoteWriteEndpoint -> _uiState.update { current ->
                 current.copy(promConfig = current.promConfig.copy(
                     remoteWriteEndpoint = value as String,
                 ))

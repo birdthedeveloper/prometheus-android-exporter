@@ -1,16 +1,21 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Colors
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Switch
@@ -29,6 +34,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -66,7 +73,9 @@ fun HomePage(
         )
 
         Column (
-            modifier = Modifier.fillMaxHeight().weight(1f)
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f)
         ) {
             // depending on whether the configuration file is present
             when(uiState.configFileState) {
@@ -75,34 +84,66 @@ fun HomePage(
                     Modifier
                 )
 
-                ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel, Modifier)
+                ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel)
                 ConfigFileState.LOADING -> LoadingPage(Modifier)
-                ConfigFileState.MISSING -> TabPage(promViewModel, navController, Modifier)
+                ConfigFileState.MISSING -> TabPage(promViewModel, navController)
             }
         }
 
-        if (uiState.configFileState == ConfigFileState.MISSING
-            || uiState.configFileState == ConfigFileState.SUCCESS
-        ){
-            Button(onClick = { /*TODO*/ }, modifier = Modifier) {
+        StartStopButton(promViewModel)
+    }
+}
 
+@Composable
+private fun StartStopButton(
+    promViewModel: PromViewModel
+){
+    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+    val fileState : ConfigFileState = uiState.configFileState
+
+    val redColor : Color = Color(117, 8,8, 255)
+    val greenColor : Color = Color(0, 105 , 16,255)
+
+    if(fileState == ConfigFileState.SUCCESS || fileState == ConfigFileState.MISSING ) {
+        val buttonColor : Color
+        val buttonText : String
+
+        when(uiState.exporterState){
+            ExporterState.Running -> {
+                buttonText = "STOP"
+                buttonColor = redColor
             }
+            ExporterState.NotRunning -> {
+                buttonText = "START"
+                buttonColor = greenColor
+            }
+        }
+
+
+        Button(
+            onClick = {promViewModel.toggleIsRunning()},
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = buttonColor, contentColor = Color.White,
+            ),
+            shape = RoundedCornerShape(0),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+        ) {
+            Text(text = buttonText)
         }
     }
-
 }
 
 @Composable
 private fun TabPage(
     promViewModel: PromViewModel,
     navController: NavHostController,
-    modifier: Modifier,
-
 ) {
     val tabs = mapOf(0 to "Prom Server", 1 to "PushProx", 2 to "Remote write")
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
-    Column(modifier = modifier) {
+    Column {
         TabRow(selectedTabIndex = uiState.tabIndex) {
             tabs.forEach { (index, text) ->
                 Tab(text = { Text(text) },
@@ -140,7 +181,7 @@ private fun PrometheusServerPage(
             checked = uiState.promConfig.prometheusServerEnabled,
             onCheckedChange = {value : Boolean? ->
                 if(value != null){
-                    promViewModel.updatePromConfig(UpdatePromConfig.prometheusServerEnabled, value)
+                    promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerEnabled, value)
                 }
             }
         )
@@ -187,7 +228,7 @@ private fun PushProxPage(
             value = uiState.promConfig.pushproxFqdn,
             singleLine = true,
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.pushproxFqdn, it)
+                promViewModel.updatePromConfig(UpdatePromConfig.PushproxFqdn, it)
             },
             label = {
                 Text(text = "Fully Qualified Domain Name")
@@ -199,7 +240,7 @@ private fun PushProxPage(
             value = uiState.promConfig.pushproxProxyUrl,
             singleLine = true,
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.pushproxProxyUrl, it)
+                promViewModel.updatePromConfig(UpdatePromConfig.PushproxProxyUrl, it)
             },
             label = {
                 Text(text = "PushProx proxy URL")
@@ -270,13 +311,10 @@ private fun ConfigFileErrorPage(
 @Composable
 private fun ConfigFileSuccessPage(
     promViewModel: PromViewModel,
-    modifier: Modifier,
 ){
     val uiState : PromUiState by promViewModel.uiState.collectAsState()
 
-    Column (
-        modifier = modifier
-    ) {
+    Column {
         //TODO implement this
         Text("Config file success page")
     }
