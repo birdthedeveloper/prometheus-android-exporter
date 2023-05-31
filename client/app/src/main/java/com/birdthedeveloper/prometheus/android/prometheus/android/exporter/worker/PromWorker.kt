@@ -52,27 +52,17 @@ class PromWorker(
         var deferred = coroutineScope {
             if(config.prometheusServerEnabled){
                 launch{
-                    Log.v(TAG, "1")
                     PrometheusServer.start(
                         PrometheusServerConfig(config.prometheusServerPort, ::performScrape),
                     )
-                    Log.v(TAG, "7")
+                    Log.v(TAG, "Prometheus server started.")
                 }
-                launch {
-//                    while(true){
-//                        Log.v(TAG, "aaaaaaaaa")
-//                        delay(500)
-//                    }
-                }
-                Log.v(TAG, "Prometheus server started.")
             }
 
             if(config.pushproxEnabled){
                 launch {
 
                 }
-
-                Log.v(TAG, "Pushprox client started.")
             }
 
             if(config.remoteWriteEnabled){

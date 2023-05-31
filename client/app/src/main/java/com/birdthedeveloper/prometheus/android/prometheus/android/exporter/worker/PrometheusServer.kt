@@ -16,6 +16,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 
 private const val TAG = "PROMETHEUS_SERVER"
 
@@ -30,14 +31,13 @@ data class PrometheusServerConfig(
 class PrometheusServer() {
     companion object {
         suspend fun start(config: PrometheusServerConfig) {
-            val server = configureServer(config)
-            try{
-                Log.v(TAG, "Starting prometheus server")
+            Log.v(TAG, "Starting prometheus server")
 
-                Log.v(TAG, "2")
+            val server = configureServer(config)
+
+            try{
                 server.start()
-                Log.v(TAG, "5")
-                delay(10000000L)
+                delay(Long.MAX_VALUE)
             }finally {
                 withContext(NonCancellable){
                     Log.v(TAG, "3")
@@ -45,7 +45,6 @@ class PrometheusServer() {
                     Log.v(TAG, "4")
                 }
             }
-
         }
 
         private fun getLandingPage(): String {
