@@ -99,15 +99,9 @@ class PromViewModel(): ViewModel() {
         when(_uiState.value.exporterState) {
             ExporterState.Running -> {
                 stopWorker()
-                _uiState.update { current ->
-                    current.copy(exporterState = ExporterState.NotRunning)
-                }
             }
             ExporterState.NotRunning -> {
                 startWorker()
-                _uiState.update { current ->
-                    current.copy(exporterState = ExporterState.Running)
-                }
             }
         }
     }
@@ -125,36 +119,53 @@ class PromViewModel(): ViewModel() {
         }
     }
 
+    private fun validatePromConfiguration() : Boolean{
+        //TODO implement this, on missing fields, e.g. not valid, display alert dialog in UI
+        return true
+    }
+
     private fun startWorker(){
-        Log.v(TAG, "Enqueuing work")
-        val workManagerInstance = WorkManager.getInstance(getContext())
+        if (validatePromConfiguration()){
+            Log.v(TAG, "Enqueuing work")
+            val workManagerInstance = WorkManager.getInstance(getContext())
 
-        // worker configuration
-        val inputData : Data = _uiState.value.promConfig.toWorkData()
+            // worker configuration
+            val inputData : Data = _uiState.value.promConfig.toWorkData()
 
-        // constraints
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-            .build()
+            // constraints
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                .build()
 
-        // setup worker request
-        val workerRequest = OneTimeWorkRequestBuilder<PromWorker>()
-            .setInputData(inputData)
-            .setConstraints(constraints)
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .build()
+            // setup worker request
+            val workerRequest = OneTimeWorkRequestBuilder<PromWorker>()
+                .setInputData(inputData)
+                .setConstraints(constraints)
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
 
-        // enqueue
-        workManagerInstance.beginUniqueWork(
-            PROM_UNIQUE_WORK,
-            ExistingWorkPolicy.KEEP,
-            workerRequest,
-        ).enqueue()
+            // enqueue
+            workManagerInstance.beginUniqueWork(
+                PROM_UNIQUE_WORK,
+                ExistingWorkPolicy.KEEP,
+                workerRequest,
+            ).enqueue()
+
+            // set UI state
+            _uiState.update { current ->
+                current.copy(exporterState = ExporterState.Running)
+            }
+        }
     }
 
     private fun stopWorker(){
         val workerManagerInstance = WorkManager.getInstance(getContext())
         workerManagerInstance.cancelUniqueWork(PROM_UNIQUE_WORK)
+
+        // update UI state
+        _uiState.update { current ->
+            current.copy(exporterState = ExporterState.NotRunning)
+        }
     }
 
     fun updatePromConfig(part : UpdatePromConfig, value : Any){

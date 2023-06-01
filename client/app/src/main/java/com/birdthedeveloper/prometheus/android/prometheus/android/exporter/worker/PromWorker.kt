@@ -27,9 +27,10 @@ class PromWorker(
     parameters : WorkerParameters,
 ) : CoroutineWorker(context, parameters) {
 
+    private val collectorRegistry = CollectorRegistry()
     private val metricsEngine : MetricsEngine = MetricsEngine(context)
-    private val pushProxClient = PushProxClient(::performScrape)
     private lateinit var androidCustomExporter : AndroidCustomExporter
+    private lateinit var pushProxClient : PushProxClient
 
     //TODO foreground notification
     private val notificationManager =
@@ -44,7 +45,7 @@ class PromWorker(
 
     private fun initializeWork(config : PromConfiguration){
         // initialize metrics
-        androidCustomExporter = AndroidCustomExporter(metricsEngine).register()
+        androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
     private suspend fun startServices(config : PromConfiguration){
@@ -54,13 +55,20 @@ class PromWorker(
                     PrometheusServer.start(
                         PrometheusServerConfig(config.prometheusServerPort, ::performScrape),
                     )
-                    Log.v(TAG, "Prometheus server started.")
                 }
             }
 
             if(config.pushproxEnabled){
+                pushProxClient = PushProxClient(
+                    PushProxConfig(
+                        pushProxUrl = config.pushproxProxyUrl,
+                        performScrape = ::performScrape,
+                        pushProxFqdn = config.pushproxFqdn,
+                        registry = collectorRegistry,
+                    )
+                )
                 launch {
-
+                    pushProxClient.start()
                 }
             }
 
@@ -81,7 +89,6 @@ class PromWorker(
         initializeWork(inputConfiguration)
         startServices(inputConfiguration)
 
-        //TODO implement this asap
         return Result.success()
     }
 
