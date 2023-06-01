@@ -5,6 +5,7 @@ data class RemoteWriteConfiguration(
     val remote_write_endpoint : String,
 )
 
-class RemoteWrite {
+class RemoteWrite(config : RemoteWriteConfiguration) {
+
     //TODO implement this thing
 }
