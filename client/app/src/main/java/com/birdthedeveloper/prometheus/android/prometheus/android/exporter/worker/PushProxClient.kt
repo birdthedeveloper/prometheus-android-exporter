@@ -75,6 +75,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
             withContext(NonCancellable){
                 Log.v(TAG, "Canceling pushprox client")
                 client?.close()
+                Log.v(TAG, "PushProx http client canceled")
             }
         }
     }

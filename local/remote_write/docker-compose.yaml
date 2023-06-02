@@ -4,7 +4,7 @@ version: '3.9'
 
 services:
   prometheus:
-    container_name: prometheus
+    container_name: prometheus_remote_write
     image: bitnami/prometheus:2.43.0
     restart: on-failure
     volumes:
