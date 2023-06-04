@@ -42,7 +42,7 @@ private class PushProxCounter(registry: CollectorRegistry) {
             .help("Number of push errors")
             .register(registry)
 
-    fun scrapeError(){ scrapeErrorCounter.inc()}
+    fun scrapeError(){ scrapeErrorCounter.inc() }
     fun pushError(){ pushErrorCounter.inc() }
     fun pollError(){ pollErrorCounter.inc() }
 }

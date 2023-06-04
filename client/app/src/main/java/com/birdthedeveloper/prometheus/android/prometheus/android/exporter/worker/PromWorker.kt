@@ -31,6 +31,7 @@ class PromWorker(
     private val metricsEngine : MetricsEngine = MetricsEngine(context)
     private lateinit var androidCustomExporter : AndroidCustomExporter
     private lateinit var pushProxClient : PushProxClient
+    private lateinit var remoteWriteSender : RemoteWriteSender
 
     //TODO foreground notification
     private val notificationManager =
@@ -75,6 +76,16 @@ class PromWorker(
             if(config.remoteWriteEnabled){
                 //DO something
                 Log.v(TAG, "Remote write service started.")
+                remoteWriteSender = RemoteWriteSender(
+                    RemoteWriteConfiguration(
+                        config.remoteWriteScrapeInterval,
+                        config.remoteWriteEndpoint,
+                        ::performScrape,
+                    )
+                )
+
+                //TODO
+                remoteWriteSender.sendTestRequest()
             }
 
         }
