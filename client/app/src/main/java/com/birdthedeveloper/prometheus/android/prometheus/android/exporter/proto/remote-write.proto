@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package proto;
+
 message WriteRequest {
     repeated TimeSeries timeseries = 1;
     // Cortex uses this field to determine the source of the write request.
@@ -23,5 +25,5 @@ message Label {
 
 message Sample {
     double value    = 1;
-    int64 timestamp = 2;
+    int64 timestamp = 2; // in ms
 }
