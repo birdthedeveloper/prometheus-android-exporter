@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.protogen;
+package remote.write;
 
 message WriteRequest {
     repeated TimeSeries timeseries = 1;

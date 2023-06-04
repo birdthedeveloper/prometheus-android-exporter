@@ -4,6 +4,8 @@ plugins {
     id 'kotlinx-serialization'
 }
 
+apply plugin: 'com.google.protobuf'
+
 android {
     namespace 'com.birdthedeveloper.prometheus.android.prometheus.android.exporter'
     compileSdk 33
@@ -47,6 +49,17 @@ android {
     }
 }
 
+protobuf {
+    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation 'androidx.work:work-multiprocess:2.8.1'
     def core_version = "1.10.1"
@@ -83,6 +96,10 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.1")
     implementation("com.charleskorn.kaml:kaml:0.54.0")
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
+
+    // custom - protocol buffers
+    implementation 'com.google.protobuf:protobuf-javalite:3.20.1'
+    implementation 'com.google.protobuf:protobuf-kotlin-lite:3.20.1'
 
 
 
