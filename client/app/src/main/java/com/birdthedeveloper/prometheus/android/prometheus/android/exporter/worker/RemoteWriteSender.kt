@@ -22,18 +22,35 @@ data class RemoteWriteConfiguration(
     val performScrape: () -> String, //TODO this class needs it structured in objects
 )
 
+//TODO implement this thing
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
-    //TODO implement this thing
 
     private fun getRequestBody(): ByteArray {
-        val label: Label = Label.newBuilder()
-            .setName("labelNameTest")
-            .setValue("labelValueTest").build()
+        val label1: Label = Label.newBuilder()
+            .setName("code")
+            .setValue("200").build()
 
-        val nameLabel: Label = Label.newBuilder()
+        val label2: Label = Label.newBuilder()
+            .setName("handler")
+            .setValue("/static/*filepath").build()
+
+        val label3: Label = Label.newBuilder()
+            .setName("instance")
+            .setValue("localhost:9090").build()
+
+        val label4: Label = Label.newBuilder()
+            .setName("job")
+            .setValue("prometheus").build()
+
+        val label5: Label = Label.newBuilder()
             .setName("__name__")
-            .setValue("testremotewritemetriccccccccvv")
+            .setValue("prometheus_http_requests_total")
+            .build()
+
+        val specialLabel: Label = Label.newBuilder()
+            .setName("prometheus_android_exporter")
+            .setValue("remote_written")
             .build()
 
         val sample: RemoteWrite.Sample = RemoteWrite.Sample.newBuilder()
@@ -41,8 +58,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             .setTimestamp(System.currentTimeMillis()).build()
 
         val timeSeries: TimeSeries = TimeSeries.newBuilder()
-            .addLabels(label)
-            .addLabels(nameLabel)
+            .addAllLabels(listOf(label1, label2, label3, label4, label5, specialLabel))
             .addSamples(sample)
             .build()
 

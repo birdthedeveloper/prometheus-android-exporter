@@ -16,6 +16,11 @@ to run as ROOT. Exposes various hardware sensor metrics.
 
 # Client
 
+## To format code in android studio
+```
+CTRL + SHIFT + ALT + L
+```
+
 ## File configuration
 Client application is configurable via a configuration file.
 Place such file on your android device at a following path:
