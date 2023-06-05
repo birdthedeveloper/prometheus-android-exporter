@@ -1,6 +1,5 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,13 +14,13 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Colors
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Switch
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -29,13 +28,12 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -47,11 +45,11 @@ fun HomePage(
     promViewModel: PromViewModel,
     navController: NavHostController,
 ) {
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         TopAppBar(
             title = {
                 Text("Prometheus Android Exporter")
@@ -59,11 +57,11 @@ fun HomePage(
             actions = {
                 IconButton(
                     onClick = {
-                        navController.navigate("settings"){
+                        navController.navigate("settings") {
                             launchSingleTop = true
                         }
                     }
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
                         contentDescription = "Settings"
@@ -72,13 +70,13 @@ fun HomePage(
             }
         )
 
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(1f)
         ) {
             // depending on whether the configuration file is present
-            when(uiState.configFileState) {
+            when (uiState.configFileState) {
                 ConfigFileState.ERROR -> ConfigFileErrorPage(
                     promViewModel = promViewModel,
                     Modifier
@@ -91,28 +89,60 @@ fun HomePage(
         }
 
         StartStopButton(promViewModel)
+
+        if (uiState.configValidationException != null) {
+            ValidationExceptionDialog(promViewModel = promViewModel)
+        }
     }
+}
+
+@Composable
+private fun ValidationExceptionDialog(
+    promViewModel: PromViewModel
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
+
+    AlertDialog(
+        onDismissRequest = {},
+        title = {
+            Text(text = "Configuration not valid")
+        },
+        text = {
+            Text(text = uiState.configValidationException ?: "")
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    promViewModel.dismissValidationExceptionDialog()
+                }
+            ) {
+                Text(text = "Dismiss")
+            }
+        }
+    )
 }
 
 @Composable
 private fun StartStopButton(
     promViewModel: PromViewModel
-){
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
-    val fileState : ConfigFileState = uiState.configFileState
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
+    val fileState: ConfigFileState = uiState.configFileState
 
-    val redColor : Color = Color(117, 8,8, 255)
-    val greenColor : Color = Color(0, 105 , 16,255)
+    val redColor: Color = Color(117, 8, 8, 255)
+    val greenColor: Color = Color(0, 105, 16, 255)
 
-    if(fileState == ConfigFileState.SUCCESS || fileState == ConfigFileState.MISSING ) {
-        val buttonColor : Color
-        val buttonText : String
+    if (fileState == ConfigFileState.SUCCESS || fileState == ConfigFileState.MISSING) {
+        val buttonColor: Color
+        val buttonText: String
 
-        when(uiState.exporterState){
+        when (uiState.exporterState) {
             ExporterState.Running -> {
                 buttonText = "STOP"
                 buttonColor = redColor
             }
+
             ExporterState.NotRunning -> {
                 buttonText = "START"
                 buttonColor = greenColor
@@ -121,7 +151,7 @@ private fun StartStopButton(
 
 
         Button(
-            onClick = {promViewModel.toggleIsRunning()},
+            onClick = { promViewModel.toggleIsRunning() },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = buttonColor, contentColor = Color.White,
             ),
@@ -163,11 +193,11 @@ private fun TabPage(
 private fun PrometheusServerPage(
     promViewModel: PromViewModel,
     modifier: Modifier
-){
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     // if showDialogText == "", do not display alert dialog
-    val showDialogText : MutableState<String> = remember { mutableStateOf("") }
+    val showDialogText: MutableState<String> = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -179,21 +209,21 @@ private fun PrometheusServerPage(
         )
         Switch(
             checked = uiState.promConfig.prometheusServerEnabled,
-            onCheckedChange = {value : Boolean? ->
-                if(value != null){
+            onCheckedChange = { value: Boolean? ->
+                if (value != null) {
                     promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerEnabled, value)
                 }
             }
         )
-        if(showDialogText.value != ""){
+        if (showDialogText.value != "") {
             AlertDialog(
                 onDismissRequest = { showDialogText.value = "" },
-                title = { Text ("Error") },
+                title = { Text("Error") },
                 text = { Text(showDialogText.value) },
                 dismissButton = {
                     Button(
                         onClick = { showDialogText.value = "" }
-                    ){ Text("OK") }
+                    ) { Text("OK") }
                 },
                 confirmButton = {}
             )
@@ -204,11 +234,11 @@ private fun PrometheusServerPage(
 @Composable
 private fun PushProxPage(
     promViewModel: PromViewModel,
-){
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     // if showDialogText is empty string, do not display alert dialog
-    val showDialogText : MutableState<String> = remember { mutableStateOf("") }
+    val showDialogText: MutableState<String> = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -248,15 +278,15 @@ private fun PushProxPage(
         )
 
         // conditional alert dialog
-        if(showDialogText.value != ""){
+        if (showDialogText.value != "") {
             AlertDialog(
                 onDismissRequest = { showDialogText.value = "" },
-                title = { Text ("Error") },
+                title = { Text("Error") },
                 text = { Text(showDialogText.value) },
                 dismissButton = {
                     Button(
                         onClick = { showDialogText.value = "" }
-                    ){ Text("OK") }
+                    ) { Text("OK") }
                 },
                 confirmButton = {}
             )
@@ -267,10 +297,10 @@ private fun PushProxPage(
 @Composable
 private fun RemoteWritePage(
     promViewModel: PromViewModel,
-){
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
-    Column (
+    Column(
         modifier = Modifier,
     ) {
         //TODO implement this
@@ -281,8 +311,8 @@ private fun RemoteWritePage(
 @Composable
 private fun LoadingPage(
     modifier: Modifier
-){
-    Column (
+) {
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
@@ -297,12 +327,12 @@ private fun LoadingPage(
 private fun ConfigFileErrorPage(
     promViewModel: PromViewModel,
     modifier: Modifier,
-){
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier,
-    ){
+    ) {
         //TODO implement this
         Text("Config File error page")
         if (uiState.fileLoadException != null) {
@@ -314,8 +344,8 @@ private fun ConfigFileErrorPage(
 @Composable
 private fun ConfigFileSuccessPage(
     promViewModel: PromViewModel,
-){
-    val uiState : PromUiState by promViewModel.uiState.collectAsState()
+) {
+    val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column {
         //TODO implement this

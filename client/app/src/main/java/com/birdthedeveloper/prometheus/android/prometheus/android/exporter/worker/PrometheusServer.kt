@@ -4,26 +4,23 @@ import android.util.Log
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.install
-import io.ktor.server.engine.*
-import io.ktor.server.cio.*
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 
 private const val TAG = "PROMETHEUS_SERVER"
 
 // Configuration object for PrometheusServer
 data class PrometheusServerConfig(
-    val port : Int,
-    val performScrape : suspend () -> String,
+    val port: Int,
+    val performScrape: suspend () -> String,
 )
 
 
@@ -35,11 +32,11 @@ class PrometheusServer() {
 
             val server = configureServer(config)
 
-            try{
+            try {
                 server.start()
                 delay(Long.MAX_VALUE)
-            }finally {
-                withContext(NonCancellable){
+            } finally {
+                withContext(NonCancellable) {
                     Log.v(TAG, "Canceling Prometheus server")
                     server.stop()
                 }
@@ -79,7 +76,7 @@ class PrometheusServer() {
                     }
                     exception<Throwable> { call, _ ->
                         call.respondText(
-                            text = "Server error" ,
+                            text = "Server error",
                             status = HttpStatusCode.InternalServerError,
                         )
                     }

@@ -5,9 +5,9 @@ typealias MetricsScrape = String
 // define the contract for Remote Write Sender storage
 abstract class RemoteWriteSenderStorage {
     abstract fun writeScrapedSample(metricsScrape: MetricsScrape)
-    abstract fun getNumberOfScrapedSamples(number: Int) : List<MetricsScrape>
-    abstract fun removeNumberOfScrapedSamples(number : Int)
-    abstract fun isEmpty() : Boolean
+    abstract fun getNumberOfScrapedSamples(number: Int): List<MetricsScrape>
+    abstract fun removeNumberOfScrapedSamples(number: Int)
+    abstract fun isEmpty(): Boolean
 }
 
 class RemoteWriteSenderMemoryStorage : RemoteWriteSenderStorage() {

@@ -7,7 +7,7 @@ import android.os.BatteryManager
 
 class MetricsEngine(context: Context) {
     private val contextRef = context
-    public fun getBatteryPercentage() : Float{
+    public fun getBatteryPercentage(): Float {
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
             contextRef.registerReceiver(null, intFilter)
         }
@@ -19,7 +19,7 @@ class MetricsEngine(context: Context) {
             level * 100 / scale.toFloat()
         }
 
-        batteryPct?: return -1.0f
+        batteryPct ?: return -1.0f
         return batteryPct
     }
 }

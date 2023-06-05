@@ -12,48 +12,44 @@ import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.R
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose.PromConfiguration
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
 import java.io.StringWriter
 
 private const val TAG = "Worker"
 
 class PromWorker(
-    context : Context,
-    parameters : WorkerParameters,
+    context: Context,
+    parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters) {
 
     private val collectorRegistry = CollectorRegistry()
-    private val metricsEngine : MetricsEngine = MetricsEngine(context)
-    private lateinit var androidCustomExporter : AndroidCustomExporter
-    private lateinit var pushProxClient : PushProxClient
-    private lateinit var remoteWriteSender : RemoteWriteSender
+    private val metricsEngine: MetricsEngine = MetricsEngine(context)
+    private lateinit var androidCustomExporter: AndroidCustomExporter
+    private lateinit var pushProxClient: PushProxClient
+    private lateinit var remoteWriteSender: RemoteWriteSender
 
     //TODO foreground notification
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as
                 NotificationManager
 
-    private fun performScrape() : String{
+    private fun performScrape(): String {
         val writer = StringWriter()
         TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
         return writer.toString()
     }
 
-    private fun initializeWork(config : PromConfiguration){
+    private fun initializeWork(config: PromConfiguration) {
         // initialize metrics
         androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
-    private suspend fun startServices(config : PromConfiguration){
+    private suspend fun startServices(config: PromConfiguration) {
         var deferred = coroutineScope {
             Log.v(TAG, "before launched")
-            if(config.prometheusServerEnabled){
-                launch{
+            if (config.prometheusServerEnabled) {
+                launch {
                     PrometheusServer.start(
                         PrometheusServerConfig(config.prometheusServerPort, ::performScrape),
                     )
@@ -62,7 +58,7 @@ class PromWorker(
 
             Log.v(TAG, "launched")
 
-            if(config.pushproxEnabled){
+            if (config.pushproxEnabled) {
                 pushProxClient = PushProxClient(
                     PushProxConfig(
                         pushProxUrl = config.pushproxProxyUrl,
@@ -76,7 +72,7 @@ class PromWorker(
                 }
             }
 
-            if(config.remoteWriteEnabled){
+            if (config.remoteWriteEnabled) {
                 //DO something
                 Log.v(TAG, "Remote write service started.")
                 remoteWriteSender = RemoteWriteSender(
@@ -95,7 +91,7 @@ class PromWorker(
     }
 
     override suspend fun doWork(): Result {
-        val inputConfiguration : PromConfiguration = PromConfiguration.fromWorkData(inputData)
+        val inputConfiguration: PromConfiguration = PromConfiguration.fromWorkData(inputData)
 
         // set foreground - //TODO is this right for the use case?
         //setForeground(createForegroundInfo())

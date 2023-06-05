@@ -38,14 +38,14 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun PromNavigation(
-        navController : NavHostController = rememberNavController(),
-        promViewModel : PromViewModel
-    ){
-        val startDestination : String = "homepage"
+        navController: NavHostController = rememberNavController(),
+        promViewModel: PromViewModel
+    ) {
+        val startDestination: String = "homepage"
         NavHost(
             navController = navController,
             startDestination = startDestination,
-        ){
+        ) {
             composable("settings") {
                 SettingsPage(
                     navController = navController,

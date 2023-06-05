@@ -24,7 +24,7 @@ private val TAG = "SETTINGS_PAGE"
 fun SettingsPage(
     promViewModel: PromViewModel,
     navController: NavHostController,
-){
+) {
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -33,7 +33,7 @@ fun SettingsPage(
                 Text(text = "Settings")
             },
             navigationIcon = {
-                IconButton(onClick = {navController.navigateUp() }){
+                IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back",
@@ -46,10 +46,10 @@ fun SettingsPage(
             modifier = Modifier.fillMaxSize()
         ) {
             Button(
-                onClick = { navController.navigate("license")},
+                onClick = { navController.navigate("license") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray)
-            ){
+            ) {
                 Text(text = "License")
             }
         }
@@ -59,7 +59,7 @@ fun SettingsPage(
 @Composable
 fun LicensePage(
     navController: NavHostController,
-){
+) {
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -68,7 +68,7 @@ fun LicensePage(
                 Text(text = "License")
             },
             navigationIcon = {
-                IconButton(onClick = {navController.navigateUp() }){
+                IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back",

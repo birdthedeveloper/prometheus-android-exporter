@@ -4,28 +4,27 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlin.math.pow
 
-class ExponentialBackoff{
-    companion object{
-        private const val multiplier : Double = 2.0
+class ExponentialBackoff {
+    companion object {
+        private const val multiplier: Double = 2.0
         private const val initialDelay = 3.0 // seconds
 
-        suspend fun runWithBackoff(function : suspend () -> Unit, onException: () -> Unit){
-            var successfull : Boolean = false
+        suspend fun runWithBackoff(function: suspend () -> Unit, onException: () -> Unit) {
+            var successfull: Boolean = false
 
             var currentDelay = initialDelay
             var currentExpIndex = -1
 
-            while(!successfull){
+            while (!successfull) {
                 try {
                     function()
                     successfull = true
-                }catch (e : CancellationException){
+                } catch (e: CancellationException) {
                     successfull = true
-                }
-                catch (e : Exception){
+                } catch (e: Exception) {
                     // check for suppressed exceptions
-                    for(exception in e.suppressed){
-                        if(exception is CancellationException){
+                    for (exception in e.suppressed) {
+                        if (exception is CancellationException) {
                             successfull = true
                         }
                     }
