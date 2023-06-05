@@ -51,6 +51,7 @@ class PromWorker(
 
     private suspend fun startServices(config : PromConfiguration){
         var deferred = coroutineScope {
+            Log.v(TAG, "before launched")
             if(config.prometheusServerEnabled){
                 launch{
                     PrometheusServer.start(
@@ -58,6 +59,8 @@ class PromWorker(
                     )
                 }
             }
+
+            Log.v(TAG, "launched")
 
             if(config.pushproxEnabled){
                 pushProxClient = PushProxClient(

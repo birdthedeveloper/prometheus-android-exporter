@@ -101,7 +101,8 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-javalite:3.20.1'
     implementation 'com.google.protobuf:protobuf-kotlin-lite:3.20.1'
 
-
+    // snappy compression for remote write
+    implementation 'org.iq80.snappy:snappy:0.4'
 
 
     implementation 'androidx.core:core-ktx:1.10.1'

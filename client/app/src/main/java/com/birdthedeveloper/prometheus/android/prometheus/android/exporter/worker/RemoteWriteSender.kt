@@ -13,6 +13,8 @@ import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.TimeSeries
 import remote.write.RemoteWrite.WriteRequest
 
+import org.iq80.snappy.Snappy
+
 private const val TAG : String = "REMOTE_WRITE_SENDER"
 data class RemoteWriteConfiguration(
     val scrape_interval : Int,
@@ -28,12 +30,21 @@ class RemoteWriteSender(private val config : RemoteWriteConfiguration) {
         val label : Label = Label.newBuilder()
             .setName("labelNameTest")
             .setValue("labelValueTest").build()
+
+        val nameLabel : Label = Label.newBuilder()
+            .setName("__name__")
+            .setValue("testremotewritemetric2")
+            .build()
+
+        val secondsOffset = 3555
+
         val sample : RemoteWrite.Sample = RemoteWrite.Sample.newBuilder()
-            .setValue(55.0)
-            .setTimestamp(System.currentTimeMillis()).build()
+            .setValue(58.0)
+            .setTimestamp(System.currentTimeMillis() - 1000 * secondsOffset).build()
 
         val timeSeries: TimeSeries = TimeSeries.newBuilder()
             .addLabels(label)
+            .addLabels(nameLabel)
             .addSamples(sample)
             .build()
 
@@ -44,16 +55,15 @@ class RemoteWriteSender(private val config : RemoteWriteConfiguration) {
         return request.toByteArray()
     }
 
-    private fun encdeWithSnappy(data : ByteArray) : ByteArray {
-        // TODO implement this
-        // github.com/xerial/snappy-java
-        return data
+    private fun encodeWithSnappy(data : ByteArray) : ByteArray {
+        return Snappy.compress(data)
     }
 
     suspend fun sendTestRequest(){
+        Log.v(TAG, "sending to prometheus now")
         val client = HttpClient()
         val response = client.post(config.remote_write_endpoint){
-            setBody(getRequestBody())
+            setBody(encodeWithSnappy(getRequestBody()))
             headers{
                 append(HttpHeaders.ContentEncoding, "snappy")
                 append(HttpHeaders.ContentType, "application/protobuf")
@@ -63,6 +73,7 @@ class RemoteWriteSender(private val config : RemoteWriteConfiguration) {
         }
 
         Log.v(TAG, "Response status: ${response.status.toString()}")
+        Log.v(TAG, "body: ${response.body<String>()}")
 
         client.close()
     }
