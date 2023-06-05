@@ -12,6 +12,7 @@ pushprox:
 
   enabled: false # default
   # fully qualified domain name
+  # example: com.example.test
   fqdn: # string, no default value provided
 
   proxy_url: # string, no default value provided
@@ -20,6 +21,7 @@ pushprox:
 # 
 # Please note that remote_write may be limited by a receiving backend on 
 # how old the backfilled time series can be.
+# For prometheus this limit is set to 1 hour
 remote_write:
 
   # scrape interval in seconds
@@ -27,4 +29,6 @@ remote_write:
   scrape_interval: 30 # default
 
   # where to post metrics
-  remote_write_endpoint: # string, no default value provided
+  # data type: string, no default value provided
+  # example: http://localhost:9090/
+  remote_write_endpoint: 
