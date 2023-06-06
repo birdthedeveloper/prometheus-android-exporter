@@ -27,7 +27,7 @@ class PromWorker(
     private val metricsEngine: MetricsEngine = MetricsEngine(context)
     private lateinit var androidCustomExporter: AndroidCustomExporter
     private lateinit var pushProxClient: PushProxClient
-    private lateinit var remoteWriteSender: RemoteWriteSender
+    private var remoteWriteSender: RemoteWriteSender? = null
 
     //TODO foreground notification
     private val notificationManager =
@@ -45,18 +45,37 @@ class PromWorker(
         androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
+    private fun countSuccessfulScrape(){
+        remoteWriteSender?.countSuccessfulScrape()
+    }
+
     private suspend fun startServices(config: PromConfiguration) {
         var deferred = coroutineScope {
-            Log.v(TAG, "before launched")
-            if (config.prometheusServerEnabled) {
-                launch {
-                    PrometheusServer.start(
-                        PrometheusServerConfig(config.prometheusServerPort, ::performScrape),
+
+            if (config.remoteWriteEnabled) {
+                remoteWriteSender = RemoteWriteSender(
+                    RemoteWriteConfiguration(
+                        config.remoteWriteScrapeInterval,
+                        config.remoteWriteEndpoint,
+                        ::performScrape,
                     )
+                )
+                launch {
+                    remoteWriteSender?.start()
                 }
             }
 
-            Log.v(TAG, "launched")
+            if (config.prometheusServerEnabled) {
+                launch {
+                    PrometheusServer.start(
+                        PrometheusServerConfig(
+                            config.prometheusServerPort,
+                            ::performScrape,
+                            ::countSuccessfulScrape,
+                        ),
+                    )
+                }
+            }
 
             if (config.pushproxEnabled) {
                 pushProxClient = PushProxClient(
@@ -65,6 +84,7 @@ class PromWorker(
                         performScrape = ::performScrape,
                         pushProxFqdn = config.pushproxFqdn,
                         registry = collectorRegistry,
+                        countSuccessfulScrape = ::countSuccessfulScrape,
                     )
                 )
                 launch {
@@ -72,20 +92,7 @@ class PromWorker(
                 }
             }
 
-            if (config.remoteWriteEnabled) {
-                //DO something
-                Log.v(TAG, "Remote write service started.")
-                remoteWriteSender = RemoteWriteSender(
-                    RemoteWriteConfiguration(
-                        config.remoteWriteScrapeInterval,
-                        config.remoteWriteEndpoint,
-                        ::performScrape,
-                    )
-                )
 
-                //TODO
-                remoteWriteSender.sendTestRequest()
-            }
 
         }
     }

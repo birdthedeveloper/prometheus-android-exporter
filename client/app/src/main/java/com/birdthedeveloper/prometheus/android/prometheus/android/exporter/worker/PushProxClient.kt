@@ -21,6 +21,7 @@ data class PushProxConfig(
     val pushProxFqdn: String,
     val registry: CollectorRegistry,
     val performScrape: () -> String,
+    val countSuccessfulScrape: () -> Unit,
 )
 
 /**
@@ -158,6 +159,8 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
                 method = HttpMethod.Post
                 setBody(pushRequestBody)
             }
+
+            pushProxConfig.countSuccessfulScrape()
         } catch (e: Exception) {
             counters.pushError()
             Log.v(TAG, "Push exception ${e.toString()}")

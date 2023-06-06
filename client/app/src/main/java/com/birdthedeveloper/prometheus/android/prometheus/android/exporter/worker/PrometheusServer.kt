@@ -21,6 +21,7 @@ private const val TAG = "PROMETHEUS_SERVER"
 data class PrometheusServerConfig(
     val port: Int,
     val performScrape: suspend () -> String,
+    val countSuccessfulScrape: () -> Unit,
 )
 
 
@@ -87,6 +88,7 @@ class PrometheusServer() {
                     }
                     get("/metrics") {
                         call.respondText(config.performScrape())
+                        config.countSuccessfulScrape()
                     }
                 }
             }

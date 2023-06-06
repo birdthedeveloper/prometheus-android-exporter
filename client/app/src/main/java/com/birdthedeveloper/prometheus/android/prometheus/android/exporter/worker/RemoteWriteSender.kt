@@ -8,13 +8,48 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite
 import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.TimeSeries
 import remote.write.RemoteWrite.WriteRequest
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
+
+private class LastTimeMutex{
+    private val mutex = Mutex()
+    private var lastTime : Long = 0
+    suspend fun setLastTime(time : Long){
+        mutex.withLock {
+            lastTime = time
+        }
+    }
+    fun getLastTime() : Long { return lastTime }
+}
+
+private enum class RemoteWriteSenderState {
+    REMOTE_WRITE,
+    PUSHPROX_OR_PROMETHEUS_SERVER,
+}
+
+private class RemoteWriteSenderStateMutex {
+    private val mutex = Mutex()
+    private var remoteWriteSenderState = RemoteWriteSenderState.PUSHPROX_OR_PROMETHEUS_SERVER
+    suspend fun setRemoteWriteSenderState(state : RemoteWriteSenderState){
+        mutex.withLock {
+            remoteWriteSenderState = state
+        }
+    }
+
+    fun getRemoteWriteSenderState() : RemoteWriteSenderState {
+        return remoteWriteSenderState
+    }
+}
 
 data class RemoteWriteConfiguration(
     val scrape_interval: Int,
@@ -24,7 +59,7 @@ data class RemoteWriteConfiguration(
 
 //TODO implement this thing
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
-
+    private val lastTimeMutex = LastTimeMutex()
 
     private fun getRequestBody(): ByteArray {
         val label1: Label = Label.newBuilder()
@@ -67,6 +102,20 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             .build()
 
         return request.toByteArray()
+    }
+
+    suspend fun start(){
+        runBlocking {
+            //TODO from here
+        }
+
+    }
+
+    fun countSuccessfulScrape(){
+        Log.v(TAG, "countSuccesful scrape")
+        //TODO implement this "last time" and mutex
+
+        scheduleCheckScrapesHappened()
     }
 
     private fun encodeWithSnappy(data: ByteArray): ByteArray {
