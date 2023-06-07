@@ -31,4 +31,7 @@ remote_write:
   # where to post metrics
   # data type: string, no default value provided
   # example: http://localhost:9090/
-  remote_write_endpoint: 
+  remote_write_endpoint:
+
+  # default value is 5 scrapes 
+  max_samples_per_send: 5

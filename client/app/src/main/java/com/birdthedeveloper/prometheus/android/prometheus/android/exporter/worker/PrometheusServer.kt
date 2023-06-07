@@ -21,7 +21,7 @@ private const val TAG = "PROMETHEUS_SERVER"
 data class PrometheusServerConfig(
     val port: Int,
     val performScrape: suspend () -> String,
-    val countSuccessfulScrape: () -> Unit,
+    val countSuccessfulScrape: suspend () -> Unit,
 )
 
 

@@ -8,58 +8,54 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
+import io.prometheus.client.CollectorRegistry
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite
 import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.TimeSeries
 import remote.write.RemoteWrite.WriteRequest
-import java.util.Timer
-import kotlin.concurrent.schedule
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
-
-private class LastTimeMutex{
-    private val mutex = Mutex()
-    private var lastTime : Long = 0
-    suspend fun setLastTime(time : Long){
-        mutex.withLock {
-            lastTime = time
-        }
-    }
-    fun getLastTime() : Long { return lastTime }
-}
 
 private enum class RemoteWriteSenderState {
     REMOTE_WRITE,
     PUSHPROX_OR_PROMETHEUS_SERVER,
 }
 
-private class RemoteWriteSenderStateMutex {
-    private val mutex = Mutex()
-    private var remoteWriteSenderState = RemoteWriteSenderState.PUSHPROX_OR_PROMETHEUS_SERVER
-    suspend fun setRemoteWriteSenderState(state : RemoteWriteSenderState){
-        mutex.withLock {
-            remoteWriteSenderState = state
-        }
+private class LastTimeRingBuffer {
+    //TODO implement this with ring array
+
+    private fun checkScrapeDidNotHappenInTime() : Boolean {
+        return lastTimeMutex.getLastTime() < System.currentTimeMillis() - 3 * config.scrape_interval
     }
 
-    fun getRemoteWriteSenderState() : RemoteWriteSenderState {
-        return remoteWriteSenderState
+    private fun checkScrapeDidNotHappenHysteresis() : Boolean {
+        return false //TODO implement this with ring buffer in lastTimeMutex
     }
+
 }
 
 data class RemoteWriteConfiguration(
     val scrape_interval: Int,
     val remote_write_endpoint: String,
-    val performScrape: () -> String, //TODO this class needs it structured in objects
+    val collectorRegistry: CollectorRegistry,
 )
 
-//TODO implement this thing
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
-    private val lastTimeMutex = LastTimeMutex()
+    // TODO ring buffer for last time
+    // TODO last time into it's own object with boolean functions
+    // private val lastTimeMutex = LastTimeMutex()
+    private var alreadyStoredSampleLength : Int = 0
+    private val storage : RemoteWriteSenderStorage = RemoteWriteSenderMemoryStorage()
+    private val scrapesAreBeingSentMutex = Mutex()
 
     private fun getRequestBody(): ByteArray {
         val label1: Label = Label.newBuilder()
@@ -104,25 +100,112 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         return request.toByteArray()
     }
 
-    suspend fun start(){
+    private fun performScrape() : MetricsScrape {
+
+
+        for ( item in config.collectorRegistry.metricFamilySamples() ){
+            val name : String = item.name
+            for (sample in item.samples){
+                val timestamp : Long = sample.timestampMs
+
+                val labelValueIterator : Iterator<String> = sample.labelValues.iterator()
+                for(labelName in sample.labelNames){
+                    val protobufLabel : Label = Label.newBuilder()
+                        .setName(labelName)
+                        .setValue(labelValueIterator.next())
+                        .build()
+                }
+
+                val sampleValue : Double = sample.value
+
+
+            }
+        }
+    }
+
+    //TODO channel je k hovnu
+    //TODO v remotewriteseender storage musi byt mutex
+
+
+    private suspend fun scraper(channel : Channel<Unit>){
+        val checkDelay = 1000L
+        while (true){
+            if (checkScrapeDidNotHappenInTime()){
+                delay(config.scrape_interval * 1000L)
+                storage.writeScrapedSample(performScrape())
+
+                while(checkScrapeDidNotHappenHysteresis()){
+                    delay(config.scrape_interval * 1000L)
+                    storage.writeScrapedSample(performScrape())
+                }
+            }
+            delay(checkDelay)
+        }
+    }
+
+    // sending metric scrapes to remote write endpoint will not be parallel
+    private suspend fun sendAll(){
+        scrapesAreBeingSentMutex.withLock {
+            // Take all metric samples and send them in batches of (max_samples_per_send)
+            // one by one batch
+
+
+        }
+    }
+
+    private suspend fun senderManager(channel : Channel<Unit>){
+        val alreadyStoredMetricScrapes : Int = storage.getLength()
+
         runBlocking {
-            //TODO from here
+            if (alreadyStoredMetricScrapes > 0){
+                launch { // fire and forget
+                    sendAll()
+                }
+            }
+
+            channel.receive()
+
+
+            // suspended on channel.receive
+
+            // when there are enough to send:
+            // start a sender
+
+            // send with these conditions:
+            //
         }
 
     }
 
-    fun countSuccessfulScrape(){
-        Log.v(TAG, "countSuccesful scrape")
-        //TODO implement this "last time" and mutex
+    suspend fun start(){
+       val channel = Channel<Unit>()
+       try {
+           runBlocking {
+               launch {
+                   scraper(channel)
+               }
+               launch {
+                   senderManager(channel)
+               }
+           }
+       } finally {
+           withContext(NonCancellable){
+               channel.close()
+               Log.v(TAG, "Canceling Remote Write Sender")
+           }
+       }
+    }
 
-        scheduleCheckScrapesHappened()
+    suspend fun countSuccessfulScrape(){
+        Log.v(TAG, "Counting successful scrape")
+        lastTimeMutex.setLastTime(System.currentTimeMillis())
     }
 
     private fun encodeWithSnappy(data: ByteArray): ByteArray {
         return Snappy.compress(data)
     }
 
-    suspend fun sendTestRequest() {
+    private suspend fun sendTestRequest() {
         Log.v(TAG, "sending to prometheus now")
         val client = HttpClient()
         val response = client.post(config.remote_write_endpoint) {
@@ -141,4 +224,3 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         client.close()
     }
 }
-

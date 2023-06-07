@@ -21,7 +21,7 @@ data class PushProxConfig(
     val pushProxFqdn: String,
     val registry: CollectorRegistry,
     val performScrape: () -> String,
-    val countSuccessfulScrape: () -> Unit,
+    val countSuccessfulScrape: suspend () -> Unit,
 )
 
 /**

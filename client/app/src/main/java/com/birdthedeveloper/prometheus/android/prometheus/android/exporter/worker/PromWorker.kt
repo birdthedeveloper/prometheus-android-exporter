@@ -12,8 +12,11 @@ import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.R
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose.PromConfiguration
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 import java.io.StringWriter
 
 private const val TAG = "Worker"
@@ -45,55 +48,57 @@ class PromWorker(
         androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     }
 
-    private fun countSuccessfulScrape(){
+    private suspend fun countSuccessfulScrape(){
         remoteWriteSender?.countSuccessfulScrape()
     }
 
-    private suspend fun startServices(config: PromConfiguration) {
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun startServicesInOneThread(config: PromConfiguration){
+        val threadContext = newSingleThreadContext("PromWorkerThreadContext")
+
         var deferred = coroutineScope {
+            withContext(threadContext){
 
-            if (config.remoteWriteEnabled) {
-                remoteWriteSender = RemoteWriteSender(
-                    RemoteWriteConfiguration(
-                        config.remoteWriteScrapeInterval,
-                        config.remoteWriteEndpoint,
-                        ::performScrape,
+                if (config.remoteWriteEnabled) {
+                    remoteWriteSender = RemoteWriteSender(
+                        RemoteWriteConfiguration(
+                            config.remoteWriteScrapeInterval,
+                            config.remoteWriteEndpoint,
+                            collectorRegistry,
+                        )
                     )
-                )
-                launch {
-                    remoteWriteSender?.start()
+                    launch {
+                        remoteWriteSender?.start()
+                    }
+                }
+
+                if (config.prometheusServerEnabled) {
+                    launch {
+                        PrometheusServer.start(
+                            PrometheusServerConfig(
+                                config.prometheusServerPort,
+                                ::performScrape,
+                                ::countSuccessfulScrape,
+                            ),
+                        )
+                    }
+                }
+
+                if (config.pushproxEnabled) {
+                    pushProxClient = PushProxClient(
+                        PushProxConfig(
+                            pushProxUrl = config.pushproxProxyUrl,
+                            performScrape = ::performScrape,
+                            pushProxFqdn = config.pushproxFqdn,
+                            registry = collectorRegistry,
+                            countSuccessfulScrape = ::countSuccessfulScrape,
+                        )
+                    )
+                    launch {
+                        pushProxClient.start()
+                    }
                 }
             }
-
-            if (config.prometheusServerEnabled) {
-                launch {
-                    PrometheusServer.start(
-                        PrometheusServerConfig(
-                            config.prometheusServerPort,
-                            ::performScrape,
-                            ::countSuccessfulScrape,
-                        ),
-                    )
-                }
-            }
-
-            if (config.pushproxEnabled) {
-                pushProxClient = PushProxClient(
-                    PushProxConfig(
-                        pushProxUrl = config.pushproxProxyUrl,
-                        performScrape = ::performScrape,
-                        pushProxFqdn = config.pushproxFqdn,
-                        registry = collectorRegistry,
-                        countSuccessfulScrape = ::countSuccessfulScrape,
-                    )
-                )
-                launch {
-                    pushProxClient.start()
-                }
-            }
-
-
-
         }
     }
 
@@ -104,7 +109,7 @@ class PromWorker(
         //setForeground(createForegroundInfo())
 
         initializeWork(inputConfiguration)
-        startServices(inputConfiguration)
+        startServicesInOneThread(inputConfiguration)
 
         return Result.success()
     }
