@@ -33,6 +33,10 @@ private enum class RemoteWriteSenderState {
 private class LastTimeRingBuffer {
     //TODO implement this with ring array
 
+    fun setLastTime(timestamp : Long) {
+        //TODO implement this
+    }
+
     private fun checkScrapeDidNotHappenInTime() : Boolean {
         return lastTimeMutex.getLastTime() < System.currentTimeMillis() - 3 * config.scrape_interval
     }
@@ -100,30 +104,12 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         return request.toByteArray()
     }
 
-    private fun performScrape() : MetricsScrape {
-
-
-        for ( item in config.collectorRegistry.metricFamilySamples() ){
-            val name : String = item.name
-            for (sample in item.samples){
-                val timestamp : Long = sample.timestampMs
-
-                val labelValueIterator : Iterator<String> = sample.labelValues.iterator()
-                for(labelName in sample.labelNames){
-                    val protobufLabel : Label = Label.newBuilder()
-                        .setName(labelName)
-                        .setValue(labelValueIterator.next())
-                        .build()
-                }
-
-                val sampleValue : Double = sample.value
-
-
-            }
-        }
+    private fun performScrapeAndSaveIt() {
+        val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
+        storage.writeScrapedSample(scrapedMetrics)
     }
 
-    //TODO channel je k hovnu
+    //TODO channel je bad
     //TODO v remotewriteseender storage musi byt mutex
 
 
@@ -132,11 +118,11 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         while (true){
             if (checkScrapeDidNotHappenInTime()){
                 delay(config.scrape_interval * 1000L)
-                storage.writeScrapedSample(performScrape())
+
 
                 while(checkScrapeDidNotHappenHysteresis()){
                     delay(config.scrape_interval * 1000L)
-                    storage.writeScrapedSample(performScrape())
+                    performScrapeAndSaveIt
                 }
             }
             delay(checkDelay)
@@ -199,10 +185,6 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     suspend fun countSuccessfulScrape(){
         Log.v(TAG, "Counting successful scrape")
         lastTimeMutex.setLastTime(System.currentTimeMillis())
-    }
-
-    private fun encodeWithSnappy(data: ByteArray): ByteArray {
-        return Snappy.compress(data)
     }
 
     private suspend fun sendTestRequest() {
