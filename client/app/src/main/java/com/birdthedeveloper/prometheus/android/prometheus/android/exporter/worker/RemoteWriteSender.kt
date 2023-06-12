@@ -17,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite
 import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.TimeSeries
@@ -25,24 +24,45 @@ import remote.write.RemoteWrite.WriteRequest
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
 
-private enum class RemoteWriteSenderState {
-    REMOTE_WRITE,
-    PUSHPROX_OR_PROMETHEUS_SERVER,
-}
+//TODO this thing
 
-private class LastTimeRingBuffer {
-    //TODO implement this with ring array
+// This class stores information about scrapes to PROM_SERVER and PUSHPROX
+// for purposes of scraping metrics on device and back-filling them later using remote write
+//
+// Only timestamps of succesfull scrapes are stored
+private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
+    private val buffer : Array<Long> = Array(hysteresisThreshold) { _ -> 0 }
+    private var firstIndex : Int = 0
+    companion object{
+        private const val hysteresisThreshold : Int = 3
+    }
 
     fun setLastTime(timestamp : Long) {
-        //TODO implement this
+        firstIndex = firstIndex++ % hysteresisThreshold
+        buffer[firstIndex] = timestamp
+    }
+
+    private fun getTimeByIndex(index : Int) : Long {
+        if(index > hysteresisThreshold - 1){
+            throw IllegalArgumentException("index cannot be bigger than hysteresisThreshold")
+        }
+
+        val bufferIndex : Int = firstIndex + index % hysteresisThreshold
+        return buffer[bufferIndex]
     }
 
     private fun checkScrapeDidNotHappenInTime() : Boolean {
-        return lastTimeMutex.getLastTime() < System.currentTimeMillis() - 3 * config.scrape_interval
+        return getTimeByIndex(0) < System.currentTimeMillis() - 3 * scrapeIntervalMs
     }
 
     private fun checkScrapeDidNotHappenHysteresis() : Boolean {
-        return false //TODO implement this with ring buffer in lastTimeMutex
+        val scrapeOccuredAfterThis : Long = System.currentTimeMillis() - 5 * scrapeIntervalMs
+        for (i in 0 until hysteresisThreshold) {
+            if (getTimeByIndex(i) < scrapeOccuredAfterThis){
+                return true
+            }
+        }
+        return false
     }
 
 }
@@ -58,8 +78,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     // TODO last time into it's own object with boolean functions
     // private val lastTimeMutex = LastTimeMutex()
     private var alreadyStoredSampleLength : Int = 0
-    private val storage : RemoteWriteSenderStorage = RemoteWriteSenderMemoryStorage()
-    private val scrapesAreBeingSentMutex = Mutex()
+    private val storage : RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage()
 
     private fun getRequestBody(): ByteArray {
         val label1: Label = Label.newBuilder()
