@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -84,7 +86,7 @@ fun HomePage(
 
                 ConfigFileState.SUCCESS -> ConfigFileSuccessPage(promViewModel = promViewModel)
                 ConfigFileState.LOADING -> LoadingPage(Modifier)
-                ConfigFileState.MISSING -> TabPage(promViewModel, navController)
+                ConfigFileState.MISSING -> TabPage(promViewModel)
             }
         }
 
@@ -174,7 +176,6 @@ private fun StartStopButton(
 @Composable
 private fun TabPage(
     promViewModel: PromViewModel,
-    navController: NavHostController,
 ) {
     val tabs = mapOf(0 to "Prom Server", 1 to "PushProx", 2 to "Remote write")
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
@@ -188,7 +189,7 @@ private fun TabPage(
             }
         }
         when (uiState.tabIndex) {
-            0 -> PrometheusServerPage(promViewModel, Modifier)
+            0 -> PrometheusServerPage(promViewModel)
             1 -> PushProxPage(promViewModel)
             2 -> RemoteWritePage(promViewModel)
         }
@@ -198,7 +199,6 @@ private fun TabPage(
 @Composable
 private fun PrometheusServerPage(
     promViewModel: PromViewModel,
-    modifier: Modifier
 ) {
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
@@ -300,6 +300,7 @@ private fun PushProxPage(
     }
 }
 
+//TODO implement this
 @Composable
 private fun RemoteWritePage(
     promViewModel: PromViewModel,
@@ -307,10 +308,72 @@ private fun RemoteWritePage(
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column(
-        modifier = Modifier,
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        //TODO implement this
-        Text("Remote write configuration")
+        Text("Remote write configuration:")
+
+        TextField(
+            value = uiState.promConfig.remoteWriteEndpoint,
+            singleLine = true,
+            onValueChange = {
+                promViewModel.updatePromConfig(UpdatePromConfig.PushproxFqdn, it)
+            },
+            label = {
+                Text(text = "Remote write endpoint")
+            },
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        TextField(
+            value = uiState.promConfig.remoteWriteScrapeInterval.toString(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = {
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteScrapeInterval, it.toInt())
+            },
+            label = {
+                Text(text = "Scrape interval in seconds")
+            },
+        )
+
+        TextField(
+            value = uiState.promConfig.remoteWriteMaxSamplesPerExport.toString(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = {
+                promViewModel.updatePromConfig(
+                    UpdatePromConfig.RemoteWriteMaxSamplesPerExport,
+                    it.toInt(),
+                )
+            },
+            label = {
+                Text(text = "Max number of samples per export")
+            },
+        )
+
+        TextField(
+            value = uiState.promConfig.remoteWriteExportInterval.toString(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = {
+                promViewModel.updatePromConfig(UpdatePromConfig.PushproxProxyUrl, it.toInt())
+            },
+            label = {
+                Text(text = "Export interval in seconds")
+            },
+        )
+
+        Switch(
+            checked = uiState.promConfig.remoteWriteEnabled,
+            onCheckedChange = { value: Boolean? ->
+                if (value != null) {
+                    promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteEnabled, value)
+                }
+            }
+        )
+
     }
 }
 

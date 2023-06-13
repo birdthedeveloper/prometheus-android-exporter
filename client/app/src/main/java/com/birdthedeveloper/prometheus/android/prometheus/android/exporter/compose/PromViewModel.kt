@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.UUID
 
 private val TAG: String = "PROMVIEWMODEL"
 
@@ -40,6 +38,8 @@ enum class UpdatePromConfig {
     RemoteWriteEnabled,
     RemoteWriteScrapeInterval,
     RemoteWriteEndpoint,
+    RemoteWriteexportInterval,
+    RemoteWriteMaxSamplesPerExport,
 }
 
 enum class ExporterState {
@@ -56,7 +56,6 @@ data class PromUiState(
     val fileLoadException: String? = null,
     val configValidationException: String? = null,
 )
-
 
 class PromViewModel() : ViewModel() {
 
@@ -335,6 +334,22 @@ class PromViewModel() : ViewModel() {
                 current.copy(
                     promConfig = current.promConfig.copy(
                         remoteWriteEndpoint = value as String,
+                    )
+                )
+            }
+
+            UpdatePromConfig.RemoteWriteexportInterval -> _uiState.update {current ->
+                current.copy(
+                    promConfig = current.promConfig.copy(
+                        remoteWriteExportInterval = value as Int
+                    )
+                )
+            }
+
+            UpdatePromConfig.RemoteWriteMaxSamplesPerExport -> _uiState.update { current ->
+                current.copy(
+                    promConfig = current.promConfig.copy(
+                        remoteWriteMaxSamplesPerExport = value as Int
                     )
                 )
             }

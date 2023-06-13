@@ -14,8 +14,8 @@ private const val TAG: String = "CONFIGURATION"
 //TODO register within prometheus foundation
 private const val defaultPrometheusServerPort: Int = 10101
 private const val defaultRemoteWriteScrapeInterval: Int = 30 // seconds
-private const val defaultRemoteWriteMaxSamplesPerSend : Int = 60 // seconds
-private const val defaultRemoteWriteSendInterval : Int = 120 // seconds
+private const val defaultRemoteWriteMaxSamplesPerExport : Int = 60 // seconds
+private const val defaultRemoteWriteExportInterval : Int = 120 // seconds
 
 // serialization classes for parsing YAML configuration file
 @Serializable
@@ -35,8 +35,8 @@ data class PromConfigFile(
             remoteWriteEndpoint = this.remote_write?.remote_write_endpoint ?: "",
             prometheusServerEnabled = this.prometheus_server?.enabled ?: true,
             prometheusServerPort = this.prometheus_server?.port ?: defaultPrometheusServerPort,
-            remoteWriteMaxSamplesPerSend = this.remote_write?.max_samples_per_send ?: defaultRemoteWriteMaxSamplesPerSend,
-            remoteWriteSendInterval = this.remote_write?.send_interval ?: defaultRemoteWriteSendInterval,
+            remoteWriteMaxSamplesPerExport = this.remote_write?.max_samples_per_export ?: defaultRemoteWriteMaxSamplesPerExport,
+            remoteWriteExportInterval = this.remote_write?.export_interval ?: defaultRemoteWriteExportInterval,
         )
     }
 }
@@ -59,8 +59,8 @@ data class RemoteWriteConfigFile(
     val enabled: Boolean?,
     val scrape_interval: Int?,
     val remote_write_endpoint: String?,
-    val max_samples_per_send: Int?,
-    val send_interval: Int?,
+    val max_samples_per_export: Int?,
+    val export_interval: Int?,
 )
 
 // configuration of a work manager worker
@@ -75,8 +75,8 @@ data class PromConfiguration(
     val remoteWriteEnabled: Boolean = false,
     val remoteWriteScrapeInterval: Int = defaultRemoteWriteScrapeInterval,
     val remoteWriteEndpoint: String = "",
-    val remoteWriteSendInterval : Int = 60,
-    val remoteWriteMaxSamplesPerSend : Int = 500,
+    val remoteWriteExportInterval : Int = defaultRemoteWriteExportInterval,
+    val remoteWriteMaxSamplesPerExport : Int = defaultRemoteWriteMaxSamplesPerExport,
 ) {
 
     fun toStructuredText(): String {
@@ -91,8 +91,8 @@ data class PromConfiguration(
             remote_write:
                 enabled: $remoteWriteEnabled
                 scrape_interval: $remoteWriteScrapeInterval
-                send_interval: $remoteWriteSendInterval
-                max_samples_per_send: $remoteWriteMaxSamplesPerSend
+                export_interval: $remoteWriteExportInterval
+                max_samples_per_export: $remoteWriteMaxSamplesPerExport
                 remote_write_endpoint: "$remoteWriteEndpoint"
         """.trimIndent()
     }

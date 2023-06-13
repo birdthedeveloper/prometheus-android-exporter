@@ -2,7 +2,6 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.work
 
 import android.app.NotificationManager
 import android.content.Context
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -60,8 +59,8 @@ class PromWorker(
                             scrapeInterval = config.remoteWriteScrapeInterval,
                             remoteWriteEndpoint = config.remoteWriteEndpoint,
                             collectorRegistry = collectorRegistry,
-                            sendInterval = config.remoteWriteSendInterval,
-                            maxSamplesPerSend = config.remoteWriteMaxSamplesPerSend,
+                            exportInterval = config.remoteWriteExportInterval,
+                            maxSamplesPerExport = config.remoteWriteMaxSamplesPerExport,
                         ) { context }
                     )
                     launch {

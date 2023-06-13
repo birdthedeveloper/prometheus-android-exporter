@@ -68,8 +68,8 @@ data class RemoteWriteConfiguration(
     val scrapeInterval: Int,
     val remoteWriteEndpoint: String,
     val collectorRegistry: CollectorRegistry,
-    val maxSamplesPerSend: Int,
-    val sendInterval : Int,
+    val maxSamplesPerExport: Int,
+    val exportInterval : Int,
     val getContext : () -> Context,
 )
 
@@ -107,7 +107,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private suspend fun sendAll(){
         scrapesAreBeingSent = true
         while (!storage.isEmpty()){
-            val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerSend)
+            val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
             ExponentialBackoff.runWithBackoff( {sendRequestToRemoteWrite(body)}, {}, false)
         }
         lastTimeRemoteWriteSent = System.currentTimeMillis()
@@ -128,7 +128,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private fun timeHasPassed() : Boolean {
-        return lastTimeRemoteWriteSent < System.currentTimeMillis() - config.sendInterval * 1000
+        return lastTimeRemoteWriteSent < System.currentTimeMillis() - config.exportInterval * 1000
     }
 
     private fun conditionsForRemoteWrite() : Boolean {
@@ -136,7 +136,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private fun enoughSamplesScraped() : Boolean {
-        return storage.getLength() > config.maxSamplesPerSend
+        return storage.getLength() > config.maxSamplesPerExport
     }
 
     private suspend fun senderManager(channel : Channel<Unit>){

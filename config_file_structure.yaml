@@ -36,6 +36,6 @@ remote_write:
   remote_write_endpoint:
 
   # default value is 500 scrapes 
-  max_samples_per_send: 500
+  max_samples_per_export: 500
 
-  send_interval: 60 # default
+  export_interval: 60 # default
