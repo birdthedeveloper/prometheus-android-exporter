@@ -11,7 +11,7 @@ import java.util.Enumeration
 import java.util.LinkedList
 import java.util.Queue
 
-private const val TAG : String = "REMOTE_WRITE_SENDER_STORAGE"
+private const val TAG: String = "REMOTE_WRITE_SENDER_STORAGE"
 
 // This is a very primitive implementation, may require some optimization later
 //
@@ -24,21 +24,22 @@ typealias MetricsScrape = Enumeration<MetricFamilySamples>
 private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
 
 private data class TimeSeriesLabel(
-    val name : String,
-    val value : String,
-){
-    fun toProtobufLabel() : Label{
+    val name: String,
+    val value: String,
+) {
+    fun toProtobufLabel(): Label {
         return Label.newBuilder()
             .setName(this.name)
             .setValue(this.value)
             .build()
     }
 }
+
 private data class TimeSeriesSample(
-    val timeStampMs : Long,
-    val value : Double,
-){
-    fun toProtobufSample() : Sample{
+    val timeStampMs: Long,
+    val value: Double,
+) {
+    fun toProtobufSample(): Sample {
         return Sample.newBuilder()
             .setTimestamp(this.timeStampMs)
             .setValue(this.value)
@@ -47,26 +48,29 @@ private data class TimeSeriesSample(
 }
 
 abstract class RemoteWriteSenderStorage {
-    private val remoteWriteLabel : TimeSeriesLabel = TimeSeriesLabel(
+    private val remoteWriteLabel: TimeSeriesLabel = TimeSeriesLabel(
         name = "backfill",
         value = "true",
     )
+
     protected fun encodeWithSnappy(data: ByteArray): ByteArray {
         return Snappy.compress(data)
     }
 
-    private fun processLabels(sample : MetricFamilySamples.Sample,
-                              sampleName: String) : List<TimeSeriesLabel>{
+    private fun processLabels(
+        sample: MetricFamilySamples.Sample,
+        sampleName: String
+    ): List<TimeSeriesLabel> {
 
-        val result : MutableList<TimeSeriesLabel> = mutableListOf()
+        val result: MutableList<TimeSeriesLabel> = mutableListOf()
 
         // labels are stored in parallel lists -> iterate over two lists at a time
         val sampleLabelNamesIterator = sample.labelNames.iterator()
         val sampleLabelValuesIterator = sample.labelNames.iterator()
 
         while (sampleLabelNamesIterator.hasNext() && sampleLabelValuesIterator.hasNext()) {
-            val labelName : String = sampleLabelNamesIterator.next()
-            val labelValue : String = sampleLabelValuesIterator.next()
+            val labelName: String = sampleLabelNamesIterator.next()
+            val labelValue: String = sampleLabelValuesIterator.next()
 
             val label = TimeSeriesLabel(
                 name = labelName,
@@ -83,8 +87,8 @@ abstract class RemoteWriteSenderStorage {
         return result.toList()
     }
 
-    private fun getTimeSeriesSample(sample : MetricFamilySamples.Sample) : TimeSeriesSample{
-        val timestampMs : Long = sample.timestampMs ?: System.currentTimeMillis()
+    private fun getTimeSeriesSample(sample: MetricFamilySamples.Sample): TimeSeriesSample {
+        val timestampMs: Long = sample.timestampMs ?: System.currentTimeMillis()
 
         return TimeSeriesSample(
             value = sample.value,
@@ -93,18 +97,19 @@ abstract class RemoteWriteSenderStorage {
     }
 
     private fun processTimeSeries(
-        hashMap: ConverterHashMap, familySample : MetricFamilySamples){
+        hashMap: ConverterHashMap, familySample: MetricFamilySamples
+    ) {
 
-        for ( sample in familySample.samples ) {
-            val sampleName : String = sample.name
-            val labels : List<TimeSeriesLabel> = processLabels(sample, sampleName)
+        for (sample in familySample.samples) {
+            val sampleName: String = sample.name
+            val labels: List<TimeSeriesLabel> = processLabels(sample, sampleName)
 
-            val timeSeriesSample : TimeSeriesSample = getTimeSeriesSample(sample)
+            val timeSeriesSample: TimeSeriesSample = getTimeSeriesSample(sample)
 
-            if (hashMap[labels] == null){
+            if (hashMap[labels] == null) {
                 // this time series does not yet exist
                 hashMap[labels] = mutableListOf(timeSeriesSample)
-            }else{
+            } else {
                 // this time series already exists
                 hashMap[labels]!!.add(timeSeriesSample)
             }
@@ -112,25 +117,26 @@ abstract class RemoteWriteSenderStorage {
     }
 
     private fun hashMapEntryToProtobufTimeSeries(
-        labels : List<TimeSeriesLabel>, samples : MutableList<TimeSeriesSample>) : TimeSeries {
+        labels: List<TimeSeriesLabel>, samples: MutableList<TimeSeriesSample>
+    ): TimeSeries {
 
-        val timeSeriesBuilder : TimeSeries.Builder = TimeSeries.newBuilder()
+        val timeSeriesBuilder: TimeSeries.Builder = TimeSeries.newBuilder()
 
-        timeSeriesBuilder.addAllLabels(labels.map{
+        timeSeriesBuilder.addAllLabels(labels.map {
             it.toProtobufLabel()
         })
 
-        timeSeriesBuilder.addAllSamples(samples.map{
+        timeSeriesBuilder.addAllSamples(samples.map {
             it.toProtobufSample()
         })
 
         return timeSeriesBuilder.build()
     }
 
-    private fun hashmapToProtobufWriteRequest(hashMap: ConverterHashMap) : WriteRequest{
-        val writeRequestBuilder : WriteRequest.Builder = WriteRequest.newBuilder()
+    private fun hashmapToProtobufWriteRequest(hashMap: ConverterHashMap): WriteRequest {
+        val writeRequestBuilder: WriteRequest.Builder = WriteRequest.newBuilder()
 
-        for (entry in hashMap){
+        for (entry in hashMap) {
             val timeSeries = hashMapEntryToProtobufTimeSeries(entry.key, entry.value)
             writeRequestBuilder.addTimeseries(timeSeries)
         }
@@ -138,20 +144,20 @@ abstract class RemoteWriteSenderStorage {
         return writeRequestBuilder.build()
     }
 
-    protected fun metricsScrapeListToProtobuf(input: List<MetricsScrape>) : WriteRequest {
-        if(input.isEmpty()){
+    protected fun metricsScrapeListToProtobuf(input: List<MetricsScrape>): WriteRequest {
+        if (input.isEmpty()) {
             throw Exception("Input is empty!")
         }
 
-        val hashmap : ConverterHashMap = HashMap()
+        val hashmap: ConverterHashMap = HashMap()
 
-        for ( metricsScrape in input ){
-            for ( familySample in metricsScrape ) {
+        for (metricsScrape in input) {
+            for (familySample in metricsScrape) {
                 processTimeSeries(hashmap, familySample)
             }
         }
 
-        val result : WriteRequest = hashmapToProtobufWriteRequest(hashmap)
+        val result: WriteRequest = hashmapToProtobufWriteRequest(hashmap)
 
         Log.v(TAG, result.timeseriesList.toString() + "<- protobuf")
 
@@ -166,34 +172,34 @@ abstract class RemoteWriteSenderStorage {
 }
 
 class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
-    private val data : Queue<MetricsScrape> = LinkedList()
+    private val data: Queue<MetricsScrape> = LinkedList()
 
     override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
-        if (howMany < 1){
+        if (howMany < 1) {
             throw IllegalArgumentException("howMany must be bigger than zero")
         }
 
-        val scrapedMetrics : MutableList<MetricsScrape> = mutableListOf()
-        for (i in 1..howMany){
-            val oneMetric : MetricsScrape? = data.poll()
-            if(oneMetric == null){
+        val scrapedMetrics: MutableList<MetricsScrape> = mutableListOf()
+        for (i in 1..howMany) {
+            val oneMetric: MetricsScrape? = data.poll()
+            if (oneMetric == null) {
                 break
-            }else{
+            } else {
                 scrapedMetrics.add(oneMetric)
             }
         }
 
-        val writeRequest : WriteRequest = this.metricsScrapeListToProtobuf(scrapedMetrics.toList())
-        val bytes : ByteArray = writeRequest.toByteArray()
+        val writeRequest: WriteRequest = this.metricsScrapeListToProtobuf(scrapedMetrics.toList())
+        val bytes: ByteArray = writeRequest.toByteArray()
         return this.encodeWithSnappy(bytes)
     }
 
     override fun removeNumberOfScrapedSamples(number: Int) {
-        if (number > 0){
-            for (i in 1..number){
+        if (number > 0) {
+            for (i in 1..number) {
                 data.remove()
             }
-        }else{
+        } else {
             throw IllegalArgumentException("number must by higher than 0")
         }
     }

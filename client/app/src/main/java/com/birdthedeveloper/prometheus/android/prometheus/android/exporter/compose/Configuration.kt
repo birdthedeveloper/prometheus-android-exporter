@@ -14,8 +14,8 @@ private const val TAG: String = "CONFIGURATION"
 //TODO register within prometheus foundation
 private const val defaultPrometheusServerPort: Int = 10101
 private const val defaultRemoteWriteScrapeInterval: Int = 30 // seconds
-private const val defaultRemoteWriteMaxSamplesPerExport : Int = 60 // seconds
-private const val defaultRemoteWriteExportInterval : Int = 120 // seconds
+private const val defaultRemoteWriteMaxSamplesPerExport: Int = 60 // seconds
+private const val defaultRemoteWriteExportInterval: Int = 120 // seconds
 
 // serialization classes for parsing YAML configuration file
 @Serializable
@@ -27,15 +27,19 @@ data class PromConfigFile(
     fun toPromConfiguration(): PromConfiguration {
         return PromConfiguration(
             pushproxProxyUrl = this.pushprox?.proxy_url ?: "",
-            remoteWriteScrapeInterval = (this.remote_write?.scrape_interval ?: defaultRemoteWriteScrapeInterval).toString(),
+            remoteWriteScrapeInterval = (this.remote_write?.scrape_interval
+                ?: defaultRemoteWriteScrapeInterval).toString(),
             pushproxEnabled = this.pushprox?.enabled ?: false,
             pushproxFqdn = this.pushprox?.fqdn ?: "",
             remoteWriteEnabled = this.remote_write?.enabled ?: false,
             remoteWriteEndpoint = this.remote_write?.remote_write_endpoint ?: "",
             prometheusServerEnabled = this.prometheus_server?.enabled ?: true,
-            prometheusServerPort = (this.prometheus_server?.port ?: defaultPrometheusServerPort).toString(),
-            remoteWriteMaxSamplesPerExport = (this.remote_write?.max_samples_per_export ?: defaultRemoteWriteMaxSamplesPerExport).toString(),
-            remoteWriteExportInterval = (this.remote_write?.export_interval ?: defaultRemoteWriteExportInterval).toString(),
+            prometheusServerPort = (this.prometheus_server?.port
+                ?: defaultPrometheusServerPort).toString(),
+            remoteWriteMaxSamplesPerExport = (this.remote_write?.max_samples_per_export
+                ?: defaultRemoteWriteMaxSamplesPerExport).toString(),
+            remoteWriteExportInterval = (this.remote_write?.export_interval
+                ?: defaultRemoteWriteExportInterval).toString(),
         )
     }
 }
@@ -74,8 +78,8 @@ data class PromConfiguration(
     val remoteWriteEnabled: Boolean = false,
     val remoteWriteScrapeInterval: String = defaultRemoteWriteScrapeInterval.toString(),
     val remoteWriteEndpoint: String = "",
-    val remoteWriteExportInterval : String = defaultRemoteWriteExportInterval.toString(),
-    val remoteWriteMaxSamplesPerExport : String = defaultRemoteWriteMaxSamplesPerExport.toString(),
+    val remoteWriteExportInterval: String = defaultRemoteWriteExportInterval.toString(),
+    val remoteWriteMaxSamplesPerExport: String = defaultRemoteWriteMaxSamplesPerExport.toString(),
 ) {
 
     fun toStructuredText(): String {

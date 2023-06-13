@@ -28,34 +28,35 @@ private const val TAG: String = "REMOTE_WRITE_SENDER"
 //
 // Only timestamps of succesfull scrapes are stored
 private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
-    private val buffer : Array<Long> = Array(hysteresisThreshold) { 0 }
-    private var firstIndex : Int = 0
-    companion object{
-        private const val hysteresisThreshold : Int = 3
+    private val buffer: Array<Long> = Array(hysteresisThreshold) { 0 }
+    private var firstIndex: Int = 0
+
+    companion object {
+        private const val hysteresisThreshold: Int = 3
     }
 
-    fun setLastTime(timestamp : Long) {
+    fun setLastTime(timestamp: Long) {
         firstIndex = firstIndex++ % hysteresisThreshold
         buffer[firstIndex] = timestamp
     }
 
-    private fun getTimeByIndex(index : Int) : Long {
-        if(index > hysteresisThreshold - 1){
+    private fun getTimeByIndex(index: Int): Long {
+        if (index > hysteresisThreshold - 1) {
             throw IllegalArgumentException("index cannot be bigger than hysteresisThreshold")
         }
 
-        val bufferIndex : Int = firstIndex + index % hysteresisThreshold
+        val bufferIndex: Int = firstIndex + index % hysteresisThreshold
         return buffer[bufferIndex]
     }
 
-    fun checkScrapeDidNotHappenInTime() : Boolean {
+    fun checkScrapeDidNotHappenInTime(): Boolean {
         return getTimeByIndex(0) < System.currentTimeMillis() - 3 * scrapeIntervalMs
     }
 
-    fun checkScrapeDidNotHappenHysteresis() : Boolean {
-        val scrapeOccurredAfterThis : Long = System.currentTimeMillis() - 5 * scrapeIntervalMs
+    fun checkScrapeDidNotHappenHysteresis(): Boolean {
+        val scrapeOccurredAfterThis: Long = System.currentTimeMillis() - 5 * scrapeIntervalMs
         for (i in 0 until hysteresisThreshold) {
-            if (getTimeByIndex(i) < scrapeOccurredAfterThis){
+            if (getTimeByIndex(i) < scrapeOccurredAfterThis) {
                 return true
             }
         }
@@ -69,33 +70,33 @@ data class RemoteWriteConfiguration(
     val remoteWriteEndpoint: String,
     val collectorRegistry: CollectorRegistry,
     val maxSamplesPerExport: Int,
-    val exportInterval : Int,
-    val getContext : () -> Context,
+    val exportInterval: Int,
+    val getContext: () -> Context,
 )
 
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private val lastTimeRingBuffer = LastTimeRingBuffer(config.scrapeInterval * 1000)
-    private val storage : RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage()
-    private var scrapesAreBeingSent : Boolean = false
-    private lateinit var client : HttpClient
-    private var lastTimeRemoteWriteSent : Long = 0
-    private var remoteWriteOn : Boolean = false
+    private val storage: RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage()
+    private var scrapesAreBeingSent: Boolean = false
+    private lateinit var client: HttpClient
+    private var lastTimeRemoteWriteSent: Long = 0
+    private var remoteWriteOn: Boolean = false
 
-    private suspend fun performScrapeAndSaveIt(channel : Channel<Unit>) {
+    private suspend fun performScrapeAndSaveIt(channel: Channel<Unit>) {
         val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
         storage.writeScrapedSample(scrapedMetrics)
         channel.send(Unit)
     }
 
-    private suspend fun scraper(channel : Channel<Unit>){
+    private suspend fun scraper(channel: Channel<Unit>) {
         val checkDelay = 1000L
-        while (true){
-            if (lastTimeRingBuffer.checkScrapeDidNotHappenInTime()){
+        while (true) {
+            if (lastTimeRingBuffer.checkScrapeDidNotHappenInTime()) {
                 remoteWriteOn = true
                 performScrapeAndSaveIt(channel)
                 delay(config.scrapeInterval * 1000L)
 
-                while(lastTimeRingBuffer.checkScrapeDidNotHappenHysteresis()){
+                while (lastTimeRingBuffer.checkScrapeDidNotHappenHysteresis()) {
                     delay(config.scrapeInterval * 1000L)
                     performScrapeAndSaveIt(channel)
                 }
@@ -104,44 +105,44 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         }
     }
 
-    private suspend fun sendAll(){
+    private suspend fun sendAll() {
         scrapesAreBeingSent = true
-        while (!storage.isEmpty()){
+        while (!storage.isEmpty()) {
             val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
-            ExponentialBackoff.runWithBackoff( {sendRequestToRemoteWrite(body)}, {}, false)
+            ExponentialBackoff.runWithBackoff({ sendRequestToRemoteWrite(body) }, {}, false)
         }
         lastTimeRemoteWriteSent = System.currentTimeMillis()
     }
 
-    private fun deviceHasInternet() : Boolean {
+    private fun deviceHasInternet(): Boolean {
         val connectivityManager = config.getContext()
             .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 
-        if (connectivityManager != null){
+        if (connectivityManager != null) {
             val network = connectivityManager.getActiveNetworkCompat()
             val cap = connectivityManager.getNetworkCapabilities(network)
-            if (cap != null && cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
+            if (cap != null && cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
                 return true
             }
         }
         return false
     }
 
-    private fun timeHasPassed() : Boolean {
+    private fun timeHasPassed(): Boolean {
         return lastTimeRemoteWriteSent < System.currentTimeMillis() - config.exportInterval * 1000
     }
 
-    private fun conditionsForRemoteWrite() : Boolean {
-        return deviceHasInternet() && ( timeHasPassed() || enoughSamplesScraped() )
+    private fun conditionsForRemoteWrite(): Boolean {
+        return deviceHasInternet() && (timeHasPassed() || enoughSamplesScraped())
     }
 
-    private fun enoughSamplesScraped() : Boolean {
+    private fun enoughSamplesScraped(): Boolean {
         return storage.getLength() > config.maxSamplesPerExport
     }
 
-    private suspend fun senderManager(channel : Channel<Unit>){
+    private suspend fun senderManager(channel: Channel<Unit>) {
         while (true) {
-            if (storage.isEmpty()){
+            if (storage.isEmpty()) {
                 // channel is conflated, one receive is enough
                 // suspend here until sending remote write is needed
                 channel.receive()
@@ -157,37 +158,37 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     // entrypoint
-    suspend fun start(){
-       // conflated channel
-       val channel = Channel<Unit>(1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    suspend fun start() {
+        // conflated channel
+        val channel = Channel<Unit>(1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-       client = HttpClient()
-       try {
-           runBlocking {
-               launch {
-                   // check for outage in scrapes, save scrapes to storage
-                   scraper(channel)
-               }
-               launch {
-                   // send saved scrapes to remote write endpoint
-                   senderManager(channel)
-               }
-           }
-       } finally {
-           withContext(NonCancellable){
-               channel.close()
-               client.close()
-               Log.v(TAG, "Canceling Remote Write Sender")
-           }
-       }
+        client = HttpClient()
+        try {
+            runBlocking {
+                launch {
+                    // check for outage in scrapes, save scrapes to storage
+                    scraper(channel)
+                }
+                launch {
+                    // send saved scrapes to remote write endpoint
+                    senderManager(channel)
+                }
+            }
+        } finally {
+            withContext(NonCancellable) {
+                channel.close()
+                client.close()
+                Log.v(TAG, "Canceling Remote Write Sender")
+            }
+        }
     }
 
-    fun countSuccessfulScrape(){
+    fun countSuccessfulScrape() {
         Log.v(TAG, "Counting successful scrape")
         lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
     }
 
-    private suspend fun sendRequestToRemoteWrite(body : ByteArray){
+    private suspend fun sendRequestToRemoteWrite(body: ByteArray) {
         Log.v(TAG, "sending to prometheus remote write now")
         val response = client.post(config.remoteWriteEndpoint) {
             setBody(body)

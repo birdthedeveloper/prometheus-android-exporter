@@ -27,7 +27,8 @@ class PromWorker(
 
     private val collectorRegistry = CollectorRegistry()
     private val metricsEngine: MetricsEngine = MetricsEngine(context)
-    private val androidCustomExporter : AndroidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
+    private val androidCustomExporter: AndroidCustomExporter =
+        AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     private lateinit var pushProxClient: PushProxClient
     private var remoteWriteSender: RemoteWriteSender? = null
 
@@ -42,16 +43,16 @@ class PromWorker(
         return writer.toString()
     }
 
-    private suspend fun countSuccessfulScrape(){
+    private suspend fun countSuccessfulScrape() {
         remoteWriteSender?.countSuccessfulScrape()
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private suspend fun startServicesInOneThread(config: PromConfiguration){
+    private suspend fun startServicesInOneThread(config: PromConfiguration) {
         val threadContext = newSingleThreadContext("PromWorkerThreadContext")
 
         coroutineScope {
-            withContext(threadContext){
+            withContext(threadContext) {
 
                 if (config.remoteWriteEnabled) {
                     remoteWriteSender = RemoteWriteSender(

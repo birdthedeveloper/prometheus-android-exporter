@@ -65,7 +65,7 @@ class PromViewModel : ViewModel() {
     private lateinit var getContext: () -> Context
 
     private var workerLiveData: LiveData<List<WorkInfo>>? = null
-    private val workerLiveDataObserver : Observer<List<WorkInfo>> = Observer {
+    private val workerLiveDataObserver: Observer<List<WorkInfo>> = Observer {
         if (it.isEmpty()) {
             updateExporterStateWith(ExporterState.NotRunning)
         } else {
@@ -83,6 +83,7 @@ class PromViewModel : ViewModel() {
     companion object {
         private const val PROM_UNIQUE_WORK: String = "prom_unique_job"
     }
+
     private fun loadConfigurationFile() {
         Log.v(TAG, "Checking for configuration file")
 
@@ -139,18 +140,18 @@ class PromViewModel : ViewModel() {
         }
     }
 
-    override fun onCleared(){
+    override fun onCleared() {
         super.onCleared()
         workerLiveData?.removeObserver(workerLiveDataObserver)
     }
 
-    private fun updateExporterStateWith(exporterState: ExporterState){
+    private fun updateExporterStateWith(exporterState: ExporterState) {
         _uiState.update {
             it.copy(exporterState = exporterState)
         }
     }
 
-    private fun startMonitoringWorker(){
+    private fun startMonitoringWorker() {
         val workManagerInstance = WorkManager.getInstance(getContext())
         workerLiveData = workManagerInstance.getWorkInfosLiveData(
             WorkQuery.fromUniqueWorkNames(
@@ -185,15 +186,15 @@ class PromViewModel : ViewModel() {
         return false
     }
 
-    private fun somePushProxVariableUnset(config : PromConfiguration) : Boolean {
+    private fun somePushProxVariableUnset(config: PromConfiguration): Boolean {
         return config.pushproxFqdn.isBlank() || config.pushproxProxyUrl.isBlank()
     }
 
-    private fun somePrometheusServerVariableUnset(config : PromConfiguration) : Boolean {
+    private fun somePrometheusServerVariableUnset(config: PromConfiguration): Boolean {
         return config.prometheusServerPort.isBlank()
     }
 
-    private fun someRemoteWriteVariableUnset(config : PromConfiguration) : Boolean {
+    private fun someRemoteWriteVariableUnset(config: PromConfiguration): Boolean {
         return config.remoteWriteEndpoint.isBlank()
                 || config.remoteWriteScrapeInterval.isBlank()
                 || config.remoteWriteExportInterval.isBlank()
@@ -209,22 +210,22 @@ class PromViewModel : ViewModel() {
         }
 
         // check for empty configuration
-        if(config.pushproxEnabled && somePushProxVariableUnset(config)){
+        if (config.pushproxEnabled && somePushProxVariableUnset(config)) {
             return displayConfigValidationDialog("Please set all PushProx configuration settings!")
         }
-        if(config.prometheusServerEnabled && somePrometheusServerVariableUnset(config)){
+        if (config.prometheusServerEnabled && somePrometheusServerVariableUnset(config)) {
             return displayConfigValidationDialog("Set all Prometheus Server config settings!")
         }
-        if(config.remoteWriteEnabled && someRemoteWriteVariableUnset(config)){
+        if (config.remoteWriteEnabled && someRemoteWriteVariableUnset(config)) {
             return displayConfigValidationDialog("Set all Remote Write configuration settings!")
         }
 
         // validate settings for remote write
-        if(config.remoteWriteEnabled){
+        if (config.remoteWriteEnabled) {
             // check scrape interval boundaries
             val minScrapeInterval = 1
             val maxScrapeInterval = 3600 / 4
-            val scrapeInterval : Int = config.remoteWriteScrapeInterval.toIntOrNull()
+            val scrapeInterval: Int = config.remoteWriteScrapeInterval.toIntOrNull()
                 ?: return displayConfigValidationDialog("Scrape interval must be a number!")
 
             if (scrapeInterval > maxScrapeInterval || scrapeInterval < minScrapeInterval) {
@@ -236,9 +237,9 @@ class PromViewModel : ViewModel() {
                 ?: return displayConfigValidationDialog("Max Samples Per Export must be a number!")
 
             // check export interval
-            val exportInterval : Int = config.remoteWriteExportInterval.toIntOrNull()
+            val exportInterval: Int = config.remoteWriteExportInterval.toIntOrNull()
                 ?: return displayConfigValidationDialog("Export interval must be a number!")
-            if (scrapeInterval > exportInterval){
+            if (scrapeInterval > exportInterval) {
                 return displayConfigValidationDialog(
                     "Scrape interval must be smaller than Export interval!"
                 )
@@ -247,11 +248,11 @@ class PromViewModel : ViewModel() {
         }
 
         // validate settings for prometheus server
-        if(config.prometheusServerEnabled){
+        if (config.prometheusServerEnabled) {
             // check port boundaries
             val minPort = 1024
             val maxPort = 65535
-            val prometheusServerPort : Int = config.prometheusServerPort.toIntOrNull()
+            val prometheusServerPort: Int = config.prometheusServerPort.toIntOrNull()
                 ?: return displayConfigValidationDialog("Prometheus Server Port must be a number!")
             if (prometheusServerPort < minPort || prometheusServerPort > maxPort) {
                 return displayConfigValidationDialog("Prometheus exporter port out of bounds!")

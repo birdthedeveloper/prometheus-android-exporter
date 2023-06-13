@@ -11,8 +11,10 @@ class ExponentialBackoff {
         private const val initialDelay = 3.0 // seconds
         private const val maxDelay = 40.0 // seconds
 
-        suspend fun runWithBackoff(function: suspend () -> Unit,
-                                   onException: () -> Unit, infinite : Boolean = true) {
+        suspend fun runWithBackoff(
+            function: suspend () -> Unit,
+            onException: () -> Unit, infinite: Boolean = true
+        ) {
 
             var successfull: Boolean = false
 
@@ -41,7 +43,7 @@ class ExponentialBackoff {
                     currentDelay = min(currentDelay, maxDelay)
 
                     // finite vs infinite exponential backoff
-                    if(currentDelay == maxDelay && !infinite){
+                    if (currentDelay == maxDelay && !infinite) {
                         break
                     }
 
