@@ -56,11 +56,11 @@ class PromWorker(
                 if (config.remoteWriteEnabled) {
                     remoteWriteSender = RemoteWriteSender(
                         RemoteWriteConfiguration(
-                            scrapeInterval = config.remoteWriteScrapeInterval,
+                            scrapeInterval = config.remoteWriteScrapeInterval.toInt(),
                             remoteWriteEndpoint = config.remoteWriteEndpoint,
                             collectorRegistry = collectorRegistry,
-                            exportInterval = config.remoteWriteExportInterval,
-                            maxSamplesPerExport = config.remoteWriteMaxSamplesPerExport,
+                            exportInterval = config.remoteWriteExportInterval.toInt(),
+                            maxSamplesPerExport = config.remoteWriteMaxSamplesPerExport.toInt(),
                         ) { context }
                     )
                     launch {
@@ -72,7 +72,7 @@ class PromWorker(
                     launch {
                         PrometheusServer.start(
                             PrometheusServerConfig(
-                                config.prometheusServerPort,
+                                config.prometheusServerPort.toInt(),
                                 ::performScrape,
                                 ::countSuccessfulScrape,
                             ),

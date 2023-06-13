@@ -27,16 +27,15 @@ data class PromConfigFile(
     fun toPromConfiguration(): PromConfiguration {
         return PromConfiguration(
             pushproxProxyUrl = this.pushprox?.proxy_url ?: "",
-            remoteWriteScrapeInterval = this.remote_write?.scrape_interval
-                ?: defaultRemoteWriteScrapeInterval,
+            remoteWriteScrapeInterval = (this.remote_write?.scrape_interval ?: defaultRemoteWriteScrapeInterval).toString(),
             pushproxEnabled = this.pushprox?.enabled ?: false,
             pushproxFqdn = this.pushprox?.fqdn ?: "",
             remoteWriteEnabled = this.remote_write?.enabled ?: false,
             remoteWriteEndpoint = this.remote_write?.remote_write_endpoint ?: "",
             prometheusServerEnabled = this.prometheus_server?.enabled ?: true,
-            prometheusServerPort = this.prometheus_server?.port ?: defaultPrometheusServerPort,
-            remoteWriteMaxSamplesPerExport = this.remote_write?.max_samples_per_export ?: defaultRemoteWriteMaxSamplesPerExport,
-            remoteWriteExportInterval = this.remote_write?.export_interval ?: defaultRemoteWriteExportInterval,
+            prometheusServerPort = (this.prometheus_server?.port ?: defaultPrometheusServerPort).toString(),
+            remoteWriteMaxSamplesPerExport = (this.remote_write?.max_samples_per_export ?: defaultRemoteWriteMaxSamplesPerExport).toString(),
+            remoteWriteExportInterval = (this.remote_write?.export_interval ?: defaultRemoteWriteExportInterval).toString(),
         )
     }
 }
@@ -68,15 +67,15 @@ data class RemoteWriteConfigFile(
 data class PromConfiguration(
     // the following are default values for various configuration settings
     val prometheusServerEnabled: Boolean = true,
-    val prometheusServerPort: Int = defaultPrometheusServerPort,
+    val prometheusServerPort: String = defaultPrometheusServerPort.toString(),
     val pushproxEnabled: Boolean = false,
     val pushproxFqdn: String = "",
     val pushproxProxyUrl: String = "",
     val remoteWriteEnabled: Boolean = false,
-    val remoteWriteScrapeInterval: Int = defaultRemoteWriteScrapeInterval,
+    val remoteWriteScrapeInterval: String = defaultRemoteWriteScrapeInterval.toString(),
     val remoteWriteEndpoint: String = "",
-    val remoteWriteExportInterval : Int = defaultRemoteWriteExportInterval,
-    val remoteWriteMaxSamplesPerExport : Int = defaultRemoteWriteMaxSamplesPerExport,
+    val remoteWriteExportInterval : String = defaultRemoteWriteExportInterval.toString(),
+    val remoteWriteMaxSamplesPerExport : String = defaultRemoteWriteMaxSamplesPerExport.toString(),
 ) {
 
     fun toStructuredText(): String {

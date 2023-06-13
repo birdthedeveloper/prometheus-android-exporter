@@ -20,43 +20,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-private val TAG: String = "PROMVIEWMODEL"
+private const val TAG: String = "PROMVIEWMODEL"
 
 enum class ConfigFileState {
     LOADING, // parsing configuration file now
     ERROR, // file was not parsed successfully
     MISSING, // no configuration file has been found
     SUCCESS,
-}
-
-class PromUiConfiguration private constructor(
-    val prometheusServerEnabled: Boolean,
-    val prometheusServerPort: String,
-    val pushproxEnabled: Boolean,
-    val pushproxFqdn: String,
-    val pushproxProxyUrl: String,
-    val remoteWriteEnabled: Boolean,
-    val remoteWriteScrapeInterval: String,
-    val remoteWriteEndpoint: String,
-    val remoteWriteExportInterval : String,
-    val remoteWriteMaxSamplesPerExport : String,
-){
-    companion object {
-        fun default() : PromUiConfiguration{
-            val template = PromConfiguration()
-
-            return PromUiConfiguration(
-                remoteWriteEndpoint = template.remoteWriteEndpoint,
-                prometheusServerPort = template.prometheusServerPort.toString(),
-                prometheusServerEnabled = //TODO asap
-            )
-        }
-    }
-
-    // Throws exception when values are illegal
-    fun toPromConfiguration() : PromConfiguration {
-        //TODO
-    }
 }
 
 enum class UpdatePromConfig {
@@ -68,7 +38,7 @@ enum class UpdatePromConfig {
     RemoteWriteEnabled,
     RemoteWriteScrapeInterval,
     RemoteWriteEndpoint,
-    RemoteWriteexportInterval,
+    RemoteWriteExportInterval,
     RemoteWriteMaxSamplesPerExport,
 }
 
@@ -87,7 +57,7 @@ data class PromUiState(
     val configValidationException: String? = null,
 )
 
-class PromViewModel() : ViewModel() {
+class PromViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(PromUiState())
     val uiState: StateFlow<PromUiState> = _uiState.asStateFlow()
@@ -215,45 +185,80 @@ class PromViewModel() : ViewModel() {
         return false
     }
 
+    private fun somePushProxVariableUnset(config : PromConfiguration) : Boolean {
+        return config.pushproxFqdn.isBlank() || config.pushproxProxyUrl.isBlank()
+    }
+
+    private fun somePrometheusServerVariableUnset(config : PromConfiguration) : Boolean {
+        return config.prometheusServerPort.isBlank()
+    }
+
+    private fun someRemoteWriteVariableUnset(config : PromConfiguration) : Boolean {
+        return config.remoteWriteEndpoint.isBlank()
+                || config.remoteWriteScrapeInterval.isBlank()
+                || config.remoteWriteExportInterval.isBlank()
+                || config.remoteWriteMaxSamplesPerExport.isBlank()
+    }
+
     private fun validatePromConfiguration(): Boolean {
         val config: PromConfiguration = uiState.value.promConfig
 
-        // check eather pushprox or prometheus server is on
+        // check either pushprox or prometheus server is turned on
         if (!config.pushproxEnabled && !config.prometheusServerEnabled) {
             return displayConfigValidationDialog("Please enable PushProx or Prometheus server!")
         }
 
-        // check port boundaries
-        val minPort = 1024
-        val maxPort = 65535
-        if (config.prometheusServerPort < minPort || config.prometheusServerPort > maxPort) {
-            return displayConfigValidationDialog("Prometheus exporter port out of bounds!")
+        // check for empty configuration
+        if(config.pushproxEnabled && somePushProxVariableUnset(config)){
+            return displayConfigValidationDialog("Please set all PushProx configuration settings!")
+        }
+        if(config.prometheusServerEnabled && somePrometheusServerVariableUnset(config)){
+            return displayConfigValidationDialog("Set all Prometheus Server config settings!")
+        }
+        if(config.remoteWriteEnabled && someRemoteWriteVariableUnset(config)){
+            return displayConfigValidationDialog("Set all Remote Write configuration settings!")
         }
 
-        // check scrape interval boundaries
-        val minScrapeInterval = 1
-        val maxScrapeInterval = 3600 / 4
-        val scrapeInterval = config.remoteWriteScrapeInterval
-        if (scrapeInterval > maxScrapeInterval || scrapeInterval < minScrapeInterval) {
-            return displayConfigValidationDialog("Remote write scrape interval out of bounds!")
+        // validate settings for remote write
+        if(config.remoteWriteEnabled){
+            // check scrape interval boundaries
+            val minScrapeInterval = 1
+            val maxScrapeInterval = 3600 / 4
+            val scrapeInterval : Int = config.remoteWriteScrapeInterval.toIntOrNull()
+                ?: return displayConfigValidationDialog("Scrape interval must be a number!")
+
+            if (scrapeInterval > maxScrapeInterval || scrapeInterval < minScrapeInterval) {
+                return displayConfigValidationDialog("Remote write scrape interval out of bounds!")
+            }
+
+            // check max samples per export
+            config.remoteWriteMaxSamplesPerExport.toIntOrNull()
+                ?: return displayConfigValidationDialog("Max Samples Per Export must be a number!")
+
+            // check export interval
+            val exportInterval : Int = config.remoteWriteExportInterval.toIntOrNull()
+                ?: return displayConfigValidationDialog("Export interval must be a number!")
+            if (scrapeInterval > exportInterval){
+                return displayConfigValidationDialog(
+                    "Scrape interval must be smaller than Export interval!"
+                )
+            }
+
         }
 
-        // if remote write enabled, remote_write_endpoint is set
-        if (config.remoteWriteEnabled && config.remoteWriteEndpoint.isBlank()) {
-            return displayConfigValidationDialog("Please set remote write endpoint!")
+        // validate settings for prometheus server
+        if(config.prometheusServerEnabled){
+            // check port boundaries
+            val minPort = 1024
+            val maxPort = 65535
+            val prometheusServerPort : Int = config.prometheusServerPort.toIntOrNull()
+                ?: return displayConfigValidationDialog("Prometheus Server Port must be a number!")
+            if (prometheusServerPort < minPort || prometheusServerPort > maxPort) {
+                return displayConfigValidationDialog("Prometheus exporter port out of bounds!")
+            }
         }
 
-        // if pushprox is enabled, fqdn is set
-        if (config.pushproxEnabled && config.pushproxFqdn.isBlank()) {
-            return displayConfigValidationDialog(
-                "Please set proxy fqdn! For example: test.example.com"
-            )
-        }
-
-        // if pushprox is enabled, proxy_url is set
-        if (config.pushproxEnabled && config.pushproxProxyUrl.isBlank()) {
-            return displayConfigValidationDialog("Please set proxy_url!")
-        }
+        // no need to validate anything for pushprox
 
         return true
     }
@@ -315,7 +320,7 @@ class PromViewModel() : ViewModel() {
             UpdatePromConfig.PrometheusServerPort -> _uiState.update { current ->
                 current.copy(
                     promConfig = current.promConfig.copy(
-                        prometheusServerPort = value as Int,
+                        prometheusServerPort = value as String,
                     )
                 )
             }
@@ -355,7 +360,7 @@ class PromViewModel() : ViewModel() {
             UpdatePromConfig.RemoteWriteScrapeInterval -> _uiState.update { current ->
                 current.copy(
                     promConfig = current.promConfig.copy(
-                        remoteWriteScrapeInterval = value as Int,
+                        remoteWriteScrapeInterval = value as String,
                     )
                 )
             }
@@ -368,10 +373,10 @@ class PromViewModel() : ViewModel() {
                 )
             }
 
-            UpdatePromConfig.RemoteWriteexportInterval -> _uiState.update {current ->
+            UpdatePromConfig.RemoteWriteExportInterval -> _uiState.update { current ->
                 current.copy(
                     promConfig = current.promConfig.copy(
-                        remoteWriteExportInterval = value as Int
+                        remoteWriteExportInterval = value as String
                     )
                 )
             }
@@ -379,7 +384,7 @@ class PromViewModel() : ViewModel() {
             UpdatePromConfig.RemoteWriteMaxSamplesPerExport -> _uiState.update { current ->
                 current.copy(
                     promConfig = current.promConfig.copy(
-                        remoteWriteMaxSamplesPerExport = value as Int
+                        remoteWriteMaxSamplesPerExport = value as String
                     )
                 )
             }

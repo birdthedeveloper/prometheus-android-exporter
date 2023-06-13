@@ -212,7 +212,7 @@ private fun PrometheusServerPage(
             value = uiState.promConfig.prometheusServerPort.toString(),
             singleLine = true,
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerPort, it.toInt())
+                promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerPort, it)
             },
             label = { Text("Prometheus HTTP port") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -301,12 +301,14 @@ private fun RemoteWritePage(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text("Remote write configuration:")
+        
+        Spacer(modifier = Modifier.padding(bottom = 12.dp))
 
         TextField(
             value = uiState.promConfig.remoteWriteEndpoint,
             singleLine = true,
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.PushproxFqdn, it)
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteEndpoint, it)
             },
             label = {
                 Text(text = "Remote write endpoint")
@@ -315,14 +317,11 @@ private fun RemoteWritePage(
         )
 
         TextField(
-            value = scrapeIntervalState.value,
+            value = uiState.promConfig.remoteWriteScrapeInterval,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = {
-                val converted : Int? = it.toIntOrNull()
-                if (converted != null) {
-                    promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteScrapeInterval, converted)
-                }
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteScrapeInterval, it)
             },
             label = {
                 Text(text = "Scrape interval in seconds")
@@ -330,14 +329,11 @@ private fun RemoteWritePage(
         )
 
         TextField(
-            value = uiState.promConfig.remoteWriteMaxSamplesPerExport.toString(),
+            value = uiState.promConfig.remoteWriteMaxSamplesPerExport,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = {
-                promViewModel.updatePromConfig(
-                    UpdatePromConfig.RemoteWriteMaxSamplesPerExport,
-                    it.toInt(),
-                )
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteMaxSamplesPerExport, it)
             },
             label = {
                 Text(text = "Max number of samples per export")
@@ -345,11 +341,11 @@ private fun RemoteWritePage(
         )
 
         TextField(
-            value = uiState.promConfig.remoteWriteExportInterval.toString(),
+            value = uiState.promConfig.remoteWriteExportInterval,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.PushproxProxyUrl, it.toInt())
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteExportInterval, it)
             },
             label = {
                 Text(text = "Export interval in seconds")
