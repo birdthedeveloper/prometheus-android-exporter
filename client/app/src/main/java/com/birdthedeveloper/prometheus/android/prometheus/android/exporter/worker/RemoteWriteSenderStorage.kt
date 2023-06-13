@@ -1,8 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
 import android.util.Log
-import com.google.protobuf.value
-import io.prometheus.client.Collector
 import io.prometheus.client.Collector.MetricFamilySamples
 import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite.Label
@@ -20,7 +18,7 @@ private const val TAG : String = "REMOTE_WRITE_SENDER_STORAGE"
 // No need for locks as all operations are run on a single thread, defined in PromWorker
 // This class defines contract for RemoteWriteSender storage
 
-typealias MetricsScrape = Enumeration<Collector.MetricFamilySamples>
+typealias MetricsScrape = Enumeration<MetricFamilySamples>
 
 // HashMap<List of labels including name, List of TimeSeries samples to this TimeSeries>
 private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
@@ -57,8 +55,8 @@ abstract class RemoteWriteSenderStorage {
         return Snappy.compress(data)
     }
 
-    private fun processLabels(sample : Collector.MetricFamilySamples.Sample,
-                              familySampleName: String) : List<TimeSeriesLabel>{
+    private fun processLabels(sample : MetricFamilySamples.Sample,
+                              sampleName: String) : List<TimeSeriesLabel>{
 
         val result : MutableList<TimeSeriesLabel> = mutableListOf()
 
@@ -70,7 +68,7 @@ abstract class RemoteWriteSenderStorage {
             val labelName : String = sampleLabelNamesIterator.next()
             val labelValue : String = sampleLabelValuesIterator.next()
 
-            val label : TimeSeriesLabel = TimeSeriesLabel(
+            val label = TimeSeriesLabel(
                 name = labelName,
                 value = labelValue,
             )
@@ -78,7 +76,7 @@ abstract class RemoteWriteSenderStorage {
         }
 
         // add name and remoteWrite mark
-        val nameLabel = TimeSeriesLabel(name = "__name__", value = familySampleName)
+        val nameLabel = TimeSeriesLabel(name = "__name__", value = sampleName)
         result.add(nameLabel)
         result.add(remoteWriteLabel)
 
@@ -97,16 +95,9 @@ abstract class RemoteWriteSenderStorage {
     private fun processTimeSeries(
         hashMap: ConverterHashMap, familySample : MetricFamilySamples){
 
-        val familySampleName : String = familySample.name
-
-        Log.v(TAG, "FamilySampleName: $familySampleName")
-
         for ( sample in familySample.samples ) {
-            val labels : List<TimeSeriesLabel> = processLabels(sample, familySampleName)
-
-            // TODO this may be useful in the future
             val sampleName : String = sample.name
-            Log.v(TAG, "sampleName: $sampleName")
+            val labels : List<TimeSeriesLabel> = processLabels(sample, sampleName)
 
             val timeSeriesSample : TimeSeriesSample = getTimeSeriesSample(sample)
 
@@ -160,7 +151,11 @@ abstract class RemoteWriteSenderStorage {
             }
         }
 
-        return hashmapToProtobufWriteRequest(hashmap)
+        val result : WriteRequest = hashmapToProtobufWriteRequest(hashmap)
+
+        Log.v(TAG, result.timeseriesList.toString() + "<- protobuf")
+
+        return result
     }
 
     abstract fun writeScrapedSample(metricsScrape: MetricsScrape)

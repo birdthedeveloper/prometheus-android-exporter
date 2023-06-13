@@ -1,5 +1,7 @@
 # This is a configuration file example for prometheus android exporter.
 
+#TODO format this thing
+
 # Settings specific to exporting metrics using a HTTP server
 prometheus_server:
 
@@ -33,5 +35,7 @@ remote_write:
   # example: http://localhost:9090/
   remote_write_endpoint:
 
-  # default value is 5 scrapes 
-  max_samples_per_send: 5
+  # default value is 500 scrapes 
+  max_samples_per_send: 500
+
+  send_interval: 60 # default

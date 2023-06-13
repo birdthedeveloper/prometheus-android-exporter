@@ -2,19 +2,25 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.comp
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PromWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.UUID
 
 private val TAG: String = "PROMVIEWMODEL"
 
@@ -39,6 +45,7 @@ enum class UpdatePromConfig {
 enum class ExporterState {
     Running,
     NotRunning,
+    Enqueued,
 }
 
 data class PromUiState(
@@ -52,15 +59,31 @@ data class PromUiState(
 
 
 class PromViewModel() : ViewModel() {
-    companion object {
-        private const val PROM_UNIQUE_WORK: String = "prom_unique_job"
-    }
 
     private val _uiState = MutableStateFlow(PromUiState())
     val uiState: StateFlow<PromUiState> = _uiState.asStateFlow()
 
     private lateinit var getContext: () -> Context
 
+    private var workerLiveData: LiveData<List<WorkInfo>>? = null
+    private val workerLiveDataObserver : Observer<List<WorkInfo>> = Observer {
+        if (it.isEmpty()) {
+            updateExporterStateWith(ExporterState.NotRunning)
+        } else {
+            when (it[0].state) {
+                WorkInfo.State.ENQUEUED -> updateExporterStateWith(ExporterState.Enqueued)
+                WorkInfo.State.RUNNING -> updateExporterStateWith(ExporterState.Running)
+                WorkInfo.State.SUCCEEDED -> updateExporterStateWith(ExporterState.NotRunning)
+                WorkInfo.State.FAILED -> updateExporterStateWith(ExporterState.NotRunning)
+                WorkInfo.State.BLOCKED -> updateExporterStateWith(ExporterState.Enqueued)
+                WorkInfo.State.CANCELLED -> updateExporterStateWith(ExporterState.NotRunning)
+            }
+        }
+    }
+
+    companion object {
+        private const val PROM_UNIQUE_WORK: String = "prom_unique_job"
+    }
     private fun loadConfigurationFile() {
         Log.v(TAG, "Checking for configuration file")
 
@@ -102,6 +125,10 @@ class PromViewModel() : ViewModel() {
             ExporterState.NotRunning -> {
                 startWorker()
             }
+
+            ExporterState.Enqueued -> {
+                stopWorker()
+            }
         }
     }
 
@@ -113,9 +140,32 @@ class PromViewModel() : ViewModel() {
         }
     }
 
+    override fun onCleared(){
+        super.onCleared()
+        workerLiveData?.removeObserver(workerLiveDataObserver)
+    }
+
+    private fun updateExporterStateWith(exporterState: ExporterState){
+        _uiState.update {
+            it.copy(exporterState = exporterState)
+        }
+    }
+
+    private fun startMonitoringWorker(){
+        val workManagerInstance = WorkManager.getInstance(getContext())
+        workerLiveData = workManagerInstance.getWorkInfosLiveData(
+            WorkQuery.fromUniqueWorkNames(
+                PROM_UNIQUE_WORK,
+            ),
+        )
+        workerLiveData?.observeForever(workerLiveDataObserver)
+    }
+
+
     fun initializeWithApplicationContext(getContext: () -> Context) {
         this.getContext = getContext
         loadConfigurationFile()
+        startMonitoringWorker()
     }
 
     fun updateTabIndex(index: Int) {

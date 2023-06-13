@@ -28,7 +28,7 @@ class PromWorker(
 
     private val collectorRegistry = CollectorRegistry()
     private val metricsEngine: MetricsEngine = MetricsEngine(context)
-    private lateinit var androidCustomExporter: AndroidCustomExporter
+    private val androidCustomExporter : AndroidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
     private lateinit var pushProxClient: PushProxClient
     private var remoteWriteSender: RemoteWriteSender? = null
 
@@ -43,11 +43,6 @@ class PromWorker(
         return writer.toString()
     }
 
-    private fun initializeWork(config: PromConfiguration) {
-        // initialize metrics
-        androidCustomExporter = AndroidCustomExporter(metricsEngine).register(collectorRegistry)
-    }
-
     private suspend fun countSuccessfulScrape(){
         remoteWriteSender?.countSuccessfulScrape()
     }
@@ -56,17 +51,18 @@ class PromWorker(
     private suspend fun startServicesInOneThread(config: PromConfiguration){
         val threadContext = newSingleThreadContext("PromWorkerThreadContext")
 
-        var deferred = coroutineScope {
+        coroutineScope {
             withContext(threadContext){
 
                 if (config.remoteWriteEnabled) {
                     remoteWriteSender = RemoteWriteSender(
                         RemoteWriteConfiguration(
-                            config.remoteWriteScrapeInterval,
-                            config.remoteWriteEndpoint,
-                            collectorRegistry,
-                            {context},
-                        )
+                            scrapeInterval = config.remoteWriteScrapeInterval,
+                            remoteWriteEndpoint = config.remoteWriteEndpoint,
+                            collectorRegistry = collectorRegistry,
+                            sendInterval = config.remoteWriteSendInterval,
+                            maxSamplesPerSend = config.remoteWriteMaxSamplesPerSend,
+                        ) { context }
                     )
                     launch {
                         remoteWriteSender?.start()
@@ -109,7 +105,6 @@ class PromWorker(
         // set foreground - //TODO is this right for the use case?
         //setForeground(createForegroundInfo())
 
-        initializeWork(inputConfiguration)
         startServicesInOneThread(inputConfiguration)
 
         return Result.success()

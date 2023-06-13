@@ -130,8 +130,9 @@ private fun StartStopButton(
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
     val fileState: ConfigFileState = uiState.configFileState
 
-    val redColor: Color = Color(117, 8, 8, 255)
-    val greenColor: Color = Color(0, 105, 16, 255)
+    val redColor = Color(117, 8, 8, 255)
+    val greenColor = Color(0, 105, 16, 255)
+    val orangeColor = Color(186, 96, 6)
 
     if (fileState == ConfigFileState.SUCCESS || fileState == ConfigFileState.MISSING) {
         val buttonColor: Color
@@ -146,6 +147,11 @@ private fun StartStopButton(
             ExporterState.NotRunning -> {
                 buttonText = "START"
                 buttonColor = greenColor
+            }
+
+            ExporterState.Enqueued -> {
+                buttonText = "STOP (work is enqueued)"
+                buttonColor = orangeColor
             }
         }
 
@@ -334,7 +340,7 @@ private fun ConfigFileErrorPage(
         modifier = modifier,
     ) {
         //TODO implement this
-        Text("Config File error page")
+        Text("Config File error:", modifier = Modifier.padding(vertical = 20.dp))
         if (uiState.fileLoadException != null) {
             Text(uiState.fileLoadException!!)
         }
@@ -349,7 +355,7 @@ private fun ConfigFileSuccessPage(
 
     Column {
         //TODO implement this
-        Text("Config file success page")
+        Text("Config file success:", modifier = Modifier.padding(vertical = 20.dp))
         Text(uiState.promConfig.toStructuredText())
     }
 }

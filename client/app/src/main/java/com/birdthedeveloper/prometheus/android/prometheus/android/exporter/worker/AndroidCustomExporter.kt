@@ -19,7 +19,7 @@ class AndroidCustomExporter(metricEngine: MetricsEngine) : Collector() {
         return mfs
     }
 
-    fun collectBatteryStatus(mfs: MutableList<MetricFamilySamples>) {
+    private fun collectBatteryStatus(mfs: MutableList<MetricFamilySamples>) {
         //TODO
         val batteryPercentageGauge = GaugeMetricFamily(
             "battery_percentage", //TODO convert to ratio

@@ -11,9 +11,11 @@ import java.io.File
 
 private const val TAG: String = "CONFIGURATION"
 
-private const val defaultPrometheusServerPort: Int =
-    10101  //TODO register within prometheus foundation
-private const val defaultRemoteWriteScrapeInterval: Int = 30
+//TODO register within prometheus foundation
+private const val defaultPrometheusServerPort: Int = 10101
+private const val defaultRemoteWriteScrapeInterval: Int = 30 // seconds
+private const val defaultRemoteWriteMaxSamplesPerSend : Int = 60 // seconds
+private const val defaultRemoteWriteSendInterval : Int = 120 // seconds
 
 // serialization classes for parsing YAML configuration file
 @Serializable
@@ -33,6 +35,8 @@ data class PromConfigFile(
             remoteWriteEndpoint = this.remote_write?.remote_write_endpoint ?: "",
             prometheusServerEnabled = this.prometheus_server?.enabled ?: true,
             prometheusServerPort = this.prometheus_server?.port ?: defaultPrometheusServerPort,
+            remoteWriteMaxSamplesPerSend = this.remote_write?.max_samples_per_send ?: defaultRemoteWriteMaxSamplesPerSend,
+            remoteWriteSendInterval = this.remote_write?.send_interval ?: defaultRemoteWriteSendInterval,
         )
     }
 }
@@ -55,6 +59,8 @@ data class RemoteWriteConfigFile(
     val enabled: Boolean?,
     val scrape_interval: Int?,
     val remote_write_endpoint: String?,
+    val max_samples_per_send: Int?,
+    val send_interval: Int?,
 )
 
 // configuration of a work manager worker
@@ -69,6 +75,8 @@ data class PromConfiguration(
     val remoteWriteEnabled: Boolean = false,
     val remoteWriteScrapeInterval: Int = defaultRemoteWriteScrapeInterval,
     val remoteWriteEndpoint: String = "",
+    val remoteWriteSendInterval : Int = 60,
+    val remoteWriteMaxSamplesPerSend : Int = 500,
 ) {
 
     fun toStructuredText(): String {
@@ -83,6 +91,8 @@ data class PromConfiguration(
             remote_write:
                 enabled: $remoteWriteEnabled
                 scrape_interval: $remoteWriteScrapeInterval
+                send_interval: $remoteWriteSendInterval
+                max_samples_per_send: $remoteWriteMaxSamplesPerSend
                 remote_write_endpoint: "$remoteWriteEndpoint"
         """.trimIndent()
     }

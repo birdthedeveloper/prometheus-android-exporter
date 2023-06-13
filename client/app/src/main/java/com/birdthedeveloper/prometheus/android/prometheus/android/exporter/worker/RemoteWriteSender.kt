@@ -14,15 +14,12 @@ import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
 import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import remote.write.RemoteWrite
-import remote.write.RemoteWrite.Label
-import remote.write.RemoteWrite.TimeSeries
-import remote.write.RemoteWrite.WriteRequest
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
 
@@ -31,7 +28,7 @@ private const val TAG: String = "REMOTE_WRITE_SENDER"
 //
 // Only timestamps of succesfull scrapes are stored
 private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
-    private val buffer : Array<Long> = Array(hysteresisThreshold) { _ -> 0 }
+    private val buffer : Array<Long> = Array(hysteresisThreshold) { 0 }
     private var firstIndex : Int = 0
     companion object{
         private const val hysteresisThreshold : Int = 3
@@ -68,71 +65,26 @@ private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
 }
 
 data class RemoteWriteConfiguration(
-    val scrape_interval: Int,
-    val remote_write_endpoint: String,
+    val scrapeInterval: Int,
+    val remoteWriteEndpoint: String,
     val collectorRegistry: CollectorRegistry,
+    val maxSamplesPerSend: Int,
+    val sendInterval : Int,
     val getContext : () -> Context,
 )
 
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
-    private val lastTimeRingBuffer = LastTimeRingBuffer(config.scrape_interval * 1000)
+    private val lastTimeRingBuffer = LastTimeRingBuffer(config.scrapeInterval * 1000)
     private val storage : RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage()
     private var scrapesAreBeingSent : Boolean = false
     private lateinit var client : HttpClient
     private var lastTimeRemoteWriteSent : Long = 0
     private var remoteWriteOn : Boolean = false
 
-    companion object{
-        private const val maxScrapesSentAtATime : Int = 500
-        private const val delayBetweenSends : Int = 60 * 1000
-    }
-
-    private fun testGetRequestBody(): ByteArray {
-        val label1: Label = Label.newBuilder()
-            .setName("code")
-            .setValue("200").build()
-
-        val label2: Label = Label.newBuilder()
-            .setName("handler")
-            .setValue("/static/*filepath").build()
-
-        val label3: Label = Label.newBuilder()
-            .setName("instance")
-            .setValue("localhost:9090").build()
-
-        val label4: Label = Label.newBuilder()
-            .setName("job")
-            .setValue("prometheus").build()
-
-        val label5: Label = Label.newBuilder()
-            .setName("__name__")
-            .setValue("prometheus_http_requests_total")
-            .build()
-
-        val specialLabel: Label = Label.newBuilder()
-            .setName("prometheus_android_exporter")
-            .setValue("remote_written")
-            .build()
-
-        val sample: RemoteWrite.Sample = RemoteWrite.Sample.newBuilder()
-            .setValue(58.0)
-            .setTimestamp(System.currentTimeMillis()).build()
-
-        val timeSeries: TimeSeries = TimeSeries.newBuilder()
-            .addAllLabels(listOf(label1, label2, label3, label4, label5, specialLabel))
-            .addSamples(sample)
-            .build()
-
-        val request: WriteRequest = WriteRequest.newBuilder()
-            .addTimeseries(timeSeries)
-            .build()
-
-        return request.toByteArray()
-    }
-
-    private fun performScrapeAndSaveIt() {
+    private suspend fun performScrapeAndSaveIt(channel : Channel<Unit>) {
         val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
         storage.writeScrapedSample(scrapedMetrics)
+        channel.send(Unit)
     }
 
     private suspend fun scraper(channel : Channel<Unit>){
@@ -140,13 +92,12 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         while (true){
             if (lastTimeRingBuffer.checkScrapeDidNotHappenInTime()){
                 remoteWriteOn = true
-                performScrapeAndSaveIt()
-                delay(config.scrape_interval * 1000L)
-
+                performScrapeAndSaveIt(channel)
+                delay(config.scrapeInterval * 1000L)
 
                 while(lastTimeRingBuffer.checkScrapeDidNotHappenHysteresis()){
-                    delay(config.scrape_interval * 1000L)
-                    performScrapeAndSaveIt()
+                    delay(config.scrapeInterval * 1000L)
+                    performScrapeAndSaveIt(channel)
                 }
             }
             delay(checkDelay)
@@ -156,8 +107,8 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private suspend fun sendAll(){
         scrapesAreBeingSent = true
         while (!storage.isEmpty()){
-            val body = storage.getScrapedSamplesCompressedProtobuf(maxScrapesSentAtATime)
-            ExponentialBackoff.runWithBackoff( {sendRequestToRemoteWrite(body)}, {}, false,)
+            val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerSend)
+            ExponentialBackoff.runWithBackoff( {sendRequestToRemoteWrite(body)}, {}, false)
         }
         lastTimeRemoteWriteSent = System.currentTimeMillis()
     }
@@ -177,7 +128,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private fun timeHasPassed() : Boolean {
-        return lastTimeRemoteWriteSent < System.currentTimeMillis() - delayBetweenSends
+        return lastTimeRemoteWriteSent < System.currentTimeMillis() - config.sendInterval * 1000
     }
 
     private fun conditionsForRemoteWrite() : Boolean {
@@ -185,16 +136,15 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private fun enoughSamplesScraped() : Boolean {
-        return storage.getLength() > maxScrapesSentAtATime
+        return storage.getLength() > config.maxSamplesPerSend
     }
 
     private suspend fun senderManager(channel : Channel<Unit>){
-        if (!storage.isEmpty()){
-            sendAll()
-        }
         while (true) {
             if (storage.isEmpty()){
-                channel.receive() // if storage is empty suspend here
+                // channel is conflated, one receive is enough
+                // suspend here until sending remote write is needed
+                channel.receive()
             }
 
             while (remoteWriteOn || !storage.isEmpty()) {
@@ -208,7 +158,9 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
     // entrypoint
     suspend fun start(){
-       val channel = Channel<Unit>()
+       // conflated channel
+       val channel = Channel<Unit>(1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
        client = HttpClient()
        try {
            runBlocking {
@@ -237,7 +189,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
     private suspend fun sendRequestToRemoteWrite(body : ByteArray){
         Log.v(TAG, "sending to prometheus remote write now")
-        val response = client.post(config.remote_write_endpoint) {
+        val response = client.post(config.remoteWriteEndpoint) {
             setBody(body)
             headers {
                 append(HttpHeaders.ContentEncoding, "snappy")
@@ -247,7 +199,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             }
         }
 
-        Log.v(TAG, "Response status: ${response.status.toString()}")
+        Log.v(TAG, "Response status: ${response.status}")
         Log.v(TAG, "body: ${response.body<String>()}")
     }
 }
