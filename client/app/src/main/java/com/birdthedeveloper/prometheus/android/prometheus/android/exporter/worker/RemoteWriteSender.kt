@@ -152,7 +152,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             delay(checkDelay)
         }
     }
-    
+
     private suspend fun sendAll(){
         scrapesAreBeingSent = true
         while (!storage.isEmpty()){

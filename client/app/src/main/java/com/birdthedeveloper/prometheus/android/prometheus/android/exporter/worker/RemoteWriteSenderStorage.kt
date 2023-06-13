@@ -4,7 +4,7 @@ import android.util.Log
 import com.google.protobuf.value
 import io.prometheus.client.Collector
 import io.prometheus.client.Collector.MetricFamilySamples
-import org.xerial.snappy.Snappy
+import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.Sample
 import remote.write.RemoteWrite.TimeSeries
@@ -85,15 +85,17 @@ abstract class RemoteWriteSenderStorage {
         return result.toList()
     }
 
-    private fun getTimeSeriesSample(sample : Collector.MetricFamilySamples.Sample) : TimeSeriesSample{
+    private fun getTimeSeriesSample(sample : MetricFamilySamples.Sample) : TimeSeriesSample{
+        val timestampMs : Long = sample.timestampMs ?: System.currentTimeMillis()
+
         return TimeSeriesSample(
             value = sample.value,
-            timeStampMs = sample.timestampMs,
+            timeStampMs = timestampMs,
         )
     }
 
     private fun processTimeSeries(
-        hashMap: ConverterHashMap, familySample : Collector.MetricFamilySamples){
+        hashMap: ConverterHashMap, familySample : MetricFamilySamples){
 
         val familySampleName : String = familySample.name
 
