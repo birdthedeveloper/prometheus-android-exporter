@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
-private val TAG = "HOMEPAGE"
+private const val TAG : String = "HOMEPAGE"
 
 @Composable
 fun HomePage(
@@ -206,13 +206,14 @@ private fun PrometheusServerPage(
     ) {
 
         TextField(
-            value = uiState.promConfig.prometheusServerPort.toString(),
+            value = uiState.promConfig.prometheusServerPort,
             singleLine = true,
             onValueChange = {
                 promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerPort, it)
             },
             label = { Text("Prometheus HTTP port") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -226,7 +227,8 @@ private fun PrometheusServerPage(
                 if (value != null) {
                     promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerEnabled, value)
                 }
-            }
+            },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
     }
 }
@@ -260,7 +262,8 @@ private fun PushProxPage(
             label = {
                 Text(text = "Fully Qualified Domain Name")
             },
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 12.dp),
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         TextField(
@@ -272,6 +275,7 @@ private fun PushProxPage(
             label = {
                 Text(text = "PushProx proxy URL")
             },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         Switch(
@@ -280,7 +284,8 @@ private fun PushProxPage(
                 if (value != null) {
                     promViewModel.updatePromConfig(UpdatePromConfig.PushproxEnabled, value)
                 }
-            }
+            },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
     }
@@ -310,7 +315,8 @@ private fun RemoteWritePage(
             label = {
                 Text(text = "Remote write endpoint")
             },
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 12.dp),
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         TextField(
@@ -323,6 +329,7 @@ private fun RemoteWritePage(
             label = {
                 Text(text = "Scrape interval in seconds")
             },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         TextField(
@@ -335,6 +342,7 @@ private fun RemoteWritePage(
             label = {
                 Text(text = "Max number of samples per export")
             },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         TextField(
@@ -347,6 +355,7 @@ private fun RemoteWritePage(
             label = {
                 Text(text = "Export interval in seconds")
             },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
 
         Switch(
@@ -355,7 +364,8 @@ private fun RemoteWritePage(
                 if (value != null) {
                     promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteEnabled, value)
                 }
-            }
+            },
+            enabled = uiState.exporterState == ExporterState.NotRunning,
         )
     }
 }

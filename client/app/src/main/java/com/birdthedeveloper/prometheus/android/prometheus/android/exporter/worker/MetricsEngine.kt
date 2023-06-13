@@ -5,11 +5,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 
-class MetricsEngine(context: Context) {
-    private val contextRef = context
+class MetricsEngine(private val context: Context) {
     public fun getBatteryPercentage(): Float {
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
-            contextRef.registerReceiver(null, intFilter)
+            context.registerReceiver(null, intFilter)
         }
         //val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
 

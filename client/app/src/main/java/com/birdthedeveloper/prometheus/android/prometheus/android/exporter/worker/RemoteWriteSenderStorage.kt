@@ -175,6 +175,7 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     private val data: Queue<MetricsScrape> = LinkedList()
 
     override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
+        Log.d(TAG, "Getting scraped samples: $howMany samples")
         if (howMany < 1) {
             throw IllegalArgumentException("howMany must be bigger than zero")
         }
@@ -194,7 +195,9 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
         return this.encodeWithSnappy(bytes)
     }
 
+    //TODO use this thing
     override fun removeNumberOfScrapedSamples(number: Int) {
+        Log.d(TAG, "Removing number of scraped samples: $number samples")
         if (number > 0) {
             for (i in 1..number) {
                 data.remove()
@@ -205,6 +208,7 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     }
 
     override fun writeScrapedSample(metricsScrape: MetricsScrape) {
+        Log.d(TAG, "Writing scraped sample to storage")
         data.add(metricsScrape)
     }
 

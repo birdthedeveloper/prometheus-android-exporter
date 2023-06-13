@@ -66,6 +66,7 @@ class PromViewModel : ViewModel() {
 
     private var workerLiveData: LiveData<List<WorkInfo>>? = null
     private val workerLiveDataObserver: Observer<List<WorkInfo>> = Observer {
+        Log.d(TAG, "Observing change in worker state")
         if (it.isEmpty()) {
             updateExporterStateWith(ExporterState.NotRunning)
         } else {
@@ -85,9 +86,8 @@ class PromViewModel : ViewModel() {
     }
 
     private fun loadConfigurationFile() {
-        Log.v(TAG, "Checking for configuration file")
+        Log.d(TAG, "Checking for configuration file")
 
-        Log.v(TAG, getContext().filesDir.absolutePath)
         val fileExists = PromConfiguration.configFileExists(context = getContext())
         if (fileExists) {
             val tempPromConfiguration: PromConfiguration
@@ -101,7 +101,10 @@ class PromViewModel : ViewModel() {
                     )
                 }
 
+                Log.d(TAG, "Configuration file parsed successfully")
+
             } catch (e: Exception) {
+                Log.d(TAG, "Configuration file parsing failed")
                 _uiState.update { current ->
                     current.copy(
                         configFileState = ConfigFileState.ERROR,
@@ -202,6 +205,7 @@ class PromViewModel : ViewModel() {
     }
 
     private fun validatePromConfiguration(): Boolean {
+        Log.d(TAG, "Validating PromConfiguration now")
         val config: PromConfiguration = uiState.value.promConfig
 
         // check either pushprox or prometheus server is turned on
@@ -244,7 +248,6 @@ class PromViewModel : ViewModel() {
                     "Scrape interval must be smaller than Export interval!"
                 )
             }
-
         }
 
         // validate settings for prometheus server
@@ -261,10 +264,12 @@ class PromViewModel : ViewModel() {
 
         // no need to validate anything for pushprox
 
+        Log.d(TAG, "PromConfiguration validated")
         return true
     }
 
     private fun startWorker() {
+        Log.d(TAG, "Starting worker")
         if (validatePromConfiguration()) {
             Log.v(TAG, "Enqueuing work")
             val workManagerInstance = WorkManager.getInstance(getContext())
@@ -290,22 +295,13 @@ class PromViewModel : ViewModel() {
                 ExistingWorkPolicy.KEEP,
                 workerRequest,
             ).enqueue()
-
-            // set UI state
-            _uiState.update { current ->
-                current.copy(exporterState = ExporterState.Running)
-            }
         }
     }
 
     private fun stopWorker() {
+        Log.d(TAG, "Stopping worker")
         val workerManagerInstance = WorkManager.getInstance(getContext())
         workerManagerInstance.cancelUniqueWork(PROM_UNIQUE_WORK)
-
-        // update UI state
-        _uiState.update { current ->
-            current.copy(exporterState = ExporterState.NotRunning)
-        }
     }
 
     fun updatePromConfig(part: UpdatePromConfig, value: Any) {

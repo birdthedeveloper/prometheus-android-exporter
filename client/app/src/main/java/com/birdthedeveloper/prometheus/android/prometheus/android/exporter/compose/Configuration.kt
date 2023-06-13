@@ -11,7 +11,6 @@ import java.io.File
 
 private const val TAG: String = "CONFIGURATION"
 
-//TODO register within prometheus foundation
 private const val defaultPrometheusServerPort: Int = 10101
 private const val defaultRemoteWriteScrapeInterval: Int = 30 // seconds
 private const val defaultRemoteWriteMaxSamplesPerExport: Int = 60 // seconds
@@ -118,7 +117,7 @@ data class PromConfiguration(
         }
 
         fun loadFromConfigFile(context: Context): PromConfiguration {
-            Log.v(TAG, context.filesDir.absolutePath)
+            Log.d(TAG, "Loading configuration file now")
 
             val file = File(context.filesDir, filename)
             val alternativeFile = File(context.filesDir, alternativeFilename)
@@ -135,7 +134,7 @@ data class PromConfiguration(
                 fileContents
             )
 
-            Log.v(TAG, parsedConfig.prometheus_server?.port.toString())
+            Log.d(TAG, "Configuration file loaded")
 
             return parsedConfig.toPromConfiguration()
         }

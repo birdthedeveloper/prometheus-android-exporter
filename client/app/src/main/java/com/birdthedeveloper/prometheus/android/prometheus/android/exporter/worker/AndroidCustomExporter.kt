@@ -4,18 +4,19 @@ import android.util.Log
 import io.prometheus.client.Collector
 import io.prometheus.client.GaugeMetricFamily
 
-private val TAG = "ANDROID_EXPORTER"
+private const val TAG = "ANDROID_EXPORTER"
 
 class AndroidCustomExporter(metricEngine: MetricsEngine) : Collector() {
     private val metricsEngineRef = metricEngine
 
     override fun collect(): List<MetricFamilySamples> {
-        Log.v(TAG, "collecting")
+        Log.d(TAG, "Collecting metrics now")
         val mfs: MutableList<MetricFamilySamples> = ArrayList()
 
         // metrics definitions
         collectBatteryStatus(mfs)
 
+        Log.d(TAG, "Metrics collected")
         return mfs
     }
 

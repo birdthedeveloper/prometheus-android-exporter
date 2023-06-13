@@ -24,12 +24,11 @@ data class PrometheusServerConfig(
     val countSuccessfulScrape: suspend () -> Unit,
 )
 
-
 // Expose metrics on given port using Ktor http server
 class PrometheusServer() {
     companion object {
         suspend fun start(config: PrometheusServerConfig) {
-            Log.v(TAG, "Starting prometheus server")
+            Log.d(TAG, "Starting prometheus server")
 
             val server = configureServer(config)
 
@@ -38,7 +37,7 @@ class PrometheusServer() {
                 delay(Long.MAX_VALUE)
             } finally {
                 withContext(NonCancellable) {
-                    Log.v(TAG, "Canceling Prometheus server")
+                    Log.d(TAG, "Canceling Prometheus server")
                     server.stop()
                 }
             }
@@ -69,7 +68,6 @@ class PrometheusServer() {
         }
 
         private fun configureServer(config: PrometheusServerConfig): ApplicationEngine {
-            //TODO testing of different providers (CIO, netty, jetty ... for performance)
             return embeddedServer(CIO, port = config.port) {
                 install(StatusPages) {
                     status(HttpStatusCode.NotFound) { call, status ->
@@ -89,6 +87,7 @@ class PrometheusServer() {
                     get("/metrics") {
                         call.respondText(config.performScrape())
                         config.countSuccessfulScrape()
+                        Log.d(TAG, "Successful scrape")
                     }
                 }
             }

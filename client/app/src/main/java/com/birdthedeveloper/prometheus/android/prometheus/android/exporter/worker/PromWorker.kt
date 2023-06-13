@@ -2,6 +2,7 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.work
 
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -18,19 +19,23 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import java.io.StringWriter
 
-private const val TAG = "Worker"
+private const val TAG : String = "Worker"
 
 class PromWorker(
-    val context: Context,
+    private val context: Context,
     parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters) {
 
     private val collectorRegistry = CollectorRegistry()
     private val metricsEngine: MetricsEngine = MetricsEngine(context)
-    private val androidCustomExporter: AndroidCustomExporter =
-        AndroidCustomExporter(metricsEngine).register(collectorRegistry)
+
     private lateinit var pushProxClient: PushProxClient
     private var remoteWriteSender: RemoteWriteSender? = null
+
+    init {
+        val androidCustomExporter = AndroidCustomExporter(metricsEngine)
+        androidCustomExporter.register<AndroidCustomExporter>(collectorRegistry)
+    }
 
     //TODO foreground notification
     private val notificationManager =
@@ -44,6 +49,7 @@ class PromWorker(
     }
 
     private suspend fun countSuccessfulScrape() {
+        Log.d(TAG, "Counting successful scrape")
         remoteWriteSender?.countSuccessfulScrape()
     }
 
@@ -65,12 +71,14 @@ class PromWorker(
                         ) { context }
                     )
                     launch {
+                        Log.d(TAG, "Remote Write launched")
                         remoteWriteSender?.start()
                     }
                 }
 
                 if (config.prometheusServerEnabled) {
                     launch {
+                        Log.d(TAG, "Prometheus server launched")
                         PrometheusServer.start(
                             PrometheusServerConfig(
                                 config.prometheusServerPort.toInt(),
@@ -92,6 +100,7 @@ class PromWorker(
                         )
                     )
                     launch {
+                        Log.d(TAG, "PushProx launched")
                         pushProxClient.start()
                     }
                 }

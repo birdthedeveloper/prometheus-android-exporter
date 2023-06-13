@@ -83,9 +83,11 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private var remoteWriteOn: Boolean = false
 
     private suspend fun performScrapeAndSaveIt(channel: Channel<Unit>) {
+        Log.d(TAG, "performScrapeAndSaveIt start")
         val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
         storage.writeScrapedSample(scrapedMetrics)
         channel.send(Unit)
+        Log.d(TAG, "performScrapeAndSaveIt end")
     }
 
     private suspend fun scraper(channel: Channel<Unit>) {
@@ -106,6 +108,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private suspend fun sendAll() {
+        Log.d(TAG, "sendAll")
         scrapesAreBeingSent = true
         while (!storage.isEmpty()) {
             val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
@@ -145,7 +148,9 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             if (storage.isEmpty()) {
                 // channel is conflated, one receive is enough
                 // suspend here until sending remote write is needed
+                Log.d(TAG, "Sender manager: waiting on channel receive")
                 channel.receive()
+                Log.d(TAG, "Sender Manager: channel received")
             }
 
             while (remoteWriteOn || !storage.isEmpty()) {
@@ -176,20 +181,20 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             }
         } finally {
             withContext(NonCancellable) {
+                Log.d(TAG, "Canceling Remote Write Sender")
                 channel.close()
                 client.close()
-                Log.v(TAG, "Canceling Remote Write Sender")
             }
         }
     }
 
     fun countSuccessfulScrape() {
-        Log.v(TAG, "Counting successful scrape")
+        Log.d(TAG, "Counting successful scrape")
         lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
     }
 
     private suspend fun sendRequestToRemoteWrite(body: ByteArray) {
-        Log.v(TAG, "sending to prometheus remote write now")
+        Log.d(TAG, "Exporting remote write to prometheus now")
         val response = client.post(config.remoteWriteEndpoint) {
             setBody(body)
             headers {
@@ -200,7 +205,6 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             }
         }
 
-        Log.v(TAG, "Response status: ${response.status}")
-        Log.v(TAG, "body: ${response.body<String>()}")
+        Log.d(TAG, "Response status: ${response.status}")
     }
 }

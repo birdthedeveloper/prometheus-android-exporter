@@ -163,7 +163,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
             pushProxConfig.countSuccessfulScrape()
         } catch (e: Exception) {
             counters.pushError()
-            Log.v(TAG, "Push exception ${e.toString()}")
+            Log.v(TAG, "Push exception $e")
             return
         }
     }
