@@ -22,7 +22,7 @@ import java.io.StringWriter
 private const val TAG = "Worker"
 
 class PromWorker(
-    context: Context,
+    val context: Context,
     parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters) {
 
@@ -65,6 +65,7 @@ class PromWorker(
                             config.remoteWriteScrapeInterval,
                             config.remoteWriteEndpoint,
                             collectorRegistry,
+                            {context},
                         )
                     )
                     launch {

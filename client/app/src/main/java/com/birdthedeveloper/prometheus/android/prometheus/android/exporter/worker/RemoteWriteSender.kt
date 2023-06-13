@@ -1,6 +1,10 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.work.impl.utils.getActiveNetworkCompat
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.header
@@ -14,7 +18,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import remote.write.RemoteWrite
 import remote.write.RemoteWrite.Label
@@ -53,9 +56,9 @@ private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
     }
 
     fun checkScrapeDidNotHappenHysteresis() : Boolean {
-        val scrapeOccuredAfterThis : Long = System.currentTimeMillis() - 5 * scrapeIntervalMs
+        val scrapeOccurredAfterThis : Long = System.currentTimeMillis() - 5 * scrapeIntervalMs
         for (i in 0 until hysteresisThreshold) {
-            if (getTimeByIndex(i) < scrapeOccuredAfterThis){
+            if (getTimeByIndex(i) < scrapeOccurredAfterThis){
                 return true
             }
         }
@@ -68,14 +71,21 @@ data class RemoteWriteConfiguration(
     val scrape_interval: Int,
     val remote_write_endpoint: String,
     val collectorRegistry: CollectorRegistry,
+    val getContext : () -> Context,
 )
 
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private val lastTimeRingBuffer = LastTimeRingBuffer(config.scrape_interval * 1000)
-    private var alreadyStoredSampleLength : Int = 0
     private val storage : RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage()
     private var scrapesAreBeingSent : Boolean = false
     private lateinit var client : HttpClient
+    private var lastTimeRemoteWriteSent : Long = 0
+    private var remoteWriteOn : Boolean = false
+
+    companion object{
+        private const val maxScrapesSentAtATime : Int = 500
+        private const val delayBetweenSends : Int = 60 * 1000
+    }
 
     private fun testGetRequestBody(): ByteArray {
         val label1: Label = Label.newBuilder()
@@ -125,58 +135,75 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         storage.writeScrapedSample(scrapedMetrics)
     }
 
-    //TODO refactor this thing
     private suspend fun scraper(channel : Channel<Unit>){
         val checkDelay = 1000L
         while (true){
-            if (checkScrapeDidNotHappenInTime()){
+            if (lastTimeRingBuffer.checkScrapeDidNotHappenInTime()){
+                remoteWriteOn = true
+                performScrapeAndSaveIt()
                 delay(config.scrape_interval * 1000L)
 
 
-                while(checkScrapeDidNotHappenHysteresis()){
+                while(lastTimeRingBuffer.checkScrapeDidNotHappenHysteresis()){
                     delay(config.scrape_interval * 1000L)
-                    performScrapeAndSaveIt
+                    performScrapeAndSaveIt()
                 }
             }
             delay(checkDelay)
         }
     }
-
-    //TODO refactor this ting
-    // sending metric scrapes to remote write endpoint will not be parallel
-    private suspend fun sender(){
-        //TODO exponential backoff
-        scrapesAreBeingSentMutex.withLock {
-            // Take all metric samples and send them in batches of (max_samples_per_send)
-            // one by one batch
-
-
+    
+    private suspend fun sendAll(){
+        scrapesAreBeingSent = true
+        while (!storage.isEmpty()){
+            val body = storage.getScrapedSamplesCompressedProtobuf(maxScrapesSentAtATime)
+            ExponentialBackoff.runWithBackoff( {sendRequestToRemoteWrite(body)}, {}, false,)
         }
+        lastTimeRemoteWriteSent = System.currentTimeMillis()
     }
 
-    //TODO refactor this thing
-    private suspend fun senderManager(channel : Channel<Unit>){
-        val alreadyStoredMetricScrapes : Int = storage.getLength()
+    private fun deviceHasInternet() : Boolean {
+        val connectivityManager = config.getContext()
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 
-        runBlocking {
-            if (alreadyStoredMetricScrapes > 0){
-                launch { // fire and forget
-                    sendAll()
-                }
+        if (connectivityManager != null){
+            val network = connectivityManager.getActiveNetworkCompat()
+            val cap = connectivityManager.getNetworkCapabilities(network)
+            if (cap != null && cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun timeHasPassed() : Boolean {
+        return lastTimeRemoteWriteSent < System.currentTimeMillis() - delayBetweenSends
+    }
+
+    private fun conditionsForRemoteWrite() : Boolean {
+        return deviceHasInternet() && ( timeHasPassed() || enoughSamplesScraped() )
+    }
+
+    private fun enoughSamplesScraped() : Boolean {
+        return storage.getLength() > maxScrapesSentAtATime
+    }
+
+    private suspend fun senderManager(channel : Channel<Unit>){
+        if (!storage.isEmpty()){
+            sendAll()
+        }
+        while (true) {
+            if (storage.isEmpty()){
+                channel.receive() // if storage is empty suspend here
             }
 
-            channel.receive()
-
-
-            // suspended on channel.receive
-
-            // when there are enough to send:
-            // start a sender
-
-            // send with these conditions:
-            //
+            while (remoteWriteOn || !storage.isEmpty()) {
+                if (conditionsForRemoteWrite()) {
+                    sendAll()
+                }
+                delay(1000)
+            }
         }
-
     }
 
     // entrypoint

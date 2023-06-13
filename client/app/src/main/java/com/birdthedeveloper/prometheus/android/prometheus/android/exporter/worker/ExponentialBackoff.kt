@@ -9,9 +9,11 @@ class ExponentialBackoff {
     companion object {
         private const val multiplier: Double = 2.0
         private const val initialDelay = 3.0 // seconds
-        private const val maxDelay = 61.0 // seconds
+        private const val maxDelay = 40.0 // seconds
 
-        suspend fun runWithBackoff(function: suspend () -> Unit, onException: () -> Unit) {
+        suspend fun runWithBackoff(function: suspend () -> Unit,
+                                   onException: () -> Unit, infinite : Boolean = true) {
+
             var successfull: Boolean = false
 
             var currentDelay = initialDelay
@@ -22,12 +24,12 @@ class ExponentialBackoff {
                     function()
                     successfull = true
                 } catch (e: CancellationException) {
-                    successfull = true
+                    break
                 } catch (e: Exception) {
                     // check for suppressed exceptions
                     for (exception in e.suppressed) {
                         if (exception is CancellationException) {
-                            successfull = true
+                            break
                         }
                     }
 
@@ -37,9 +39,14 @@ class ExponentialBackoff {
                     currentExpIndex++
                     currentDelay = initialDelay + multiplier.pow(currentExpIndex)
                     currentDelay = min(currentDelay, maxDelay)
-                }
 
-                delay(currentDelay.toLong())
+                    // finite vs infinite exponential backoff
+                    if(currentDelay == maxDelay && !infinite){
+                        break
+                    }
+
+                    delay(currentDelay.toLong() * 1000)
+                }
             }
         }
     }
