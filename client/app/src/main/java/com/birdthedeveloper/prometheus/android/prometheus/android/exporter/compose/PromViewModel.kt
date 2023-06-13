@@ -29,6 +29,36 @@ enum class ConfigFileState {
     SUCCESS,
 }
 
+class PromUiConfiguration private constructor(
+    val prometheusServerEnabled: Boolean,
+    val prometheusServerPort: String,
+    val pushproxEnabled: Boolean,
+    val pushproxFqdn: String,
+    val pushproxProxyUrl: String,
+    val remoteWriteEnabled: Boolean,
+    val remoteWriteScrapeInterval: String,
+    val remoteWriteEndpoint: String,
+    val remoteWriteExportInterval : String,
+    val remoteWriteMaxSamplesPerExport : String,
+){
+    companion object {
+        fun default() : PromUiConfiguration{
+            val template = PromConfiguration()
+
+            return PromUiConfiguration(
+                remoteWriteEndpoint = template.remoteWriteEndpoint,
+                prometheusServerPort = template.prometheusServerPort.toString(),
+                prometheusServerEnabled = //TODO asap
+            )
+        }
+    }
+
+    // Throws exception when values are illegal
+    fun toPromConfiguration() : PromConfiguration {
+        //TODO
+    }
+}
+
 enum class UpdatePromConfig {
     PrometheusServerEnabled,
     PrometheusServerPort,

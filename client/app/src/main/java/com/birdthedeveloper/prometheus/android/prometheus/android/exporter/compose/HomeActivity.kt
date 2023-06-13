@@ -202,16 +202,26 @@ private fun PrometheusServerPage(
 ) {
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
-    // if showDialogText == "", do not display alert dialog
-    val showDialogText: MutableState<String> = remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+
+        TextField(
+            value = uiState.promConfig.prometheusServerPort.toString(),
+            singleLine = true,
+            onValueChange = {
+                promViewModel.updatePromConfig(UpdatePromConfig.PrometheusServerPort, it.toInt())
+            },
+            label = { Text("Prometheus HTTP port") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         Text(
-            text = "Turn on Android Exporter on port ${uiState.promConfig.prometheusServerPort}"
+            text = "Turn on Android Exporter"
         )
         Switch(
             checked = uiState.promConfig.prometheusServerEnabled,
@@ -221,19 +231,6 @@ private fun PrometheusServerPage(
                 }
             }
         )
-        if (showDialogText.value != "") {
-            AlertDialog(
-                onDismissRequest = { showDialogText.value = "" },
-                title = { Text("Error") },
-                text = { Text(showDialogText.value) },
-                dismissButton = {
-                    Button(
-                        onClick = { showDialogText.value = "" }
-                    ) { Text("OK") }
-                },
-                confirmButton = {}
-            )
-        }
     }
 }
 
@@ -243,11 +240,8 @@ private fun PushProxPage(
 ) {
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
-    // if showDialogText is empty string, do not display alert dialog
-    val showDialogText: MutableState<String> = remember { mutableStateOf("") }
-
     Column(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -283,24 +277,18 @@ private fun PushProxPage(
             },
         )
 
-        // conditional alert dialog
-        if (showDialogText.value != "") {
-            AlertDialog(
-                onDismissRequest = { showDialogText.value = "" },
-                title = { Text("Error") },
-                text = { Text(showDialogText.value) },
-                dismissButton = {
-                    Button(
-                        onClick = { showDialogText.value = "" }
-                    ) { Text("OK") }
-                },
-                confirmButton = {}
-            )
-        }
+        Switch(
+            checked = uiState.promConfig.pushproxEnabled,
+            onCheckedChange = { value: Boolean? ->
+                if (value != null) {
+                    promViewModel.updatePromConfig(UpdatePromConfig.PushproxEnabled, value)
+                }
+            }
+        )
+
     }
 }
 
-//TODO implement this
 @Composable
 private fun RemoteWritePage(
     promViewModel: PromViewModel,
@@ -327,11 +315,14 @@ private fun RemoteWritePage(
         )
 
         TextField(
-            value = uiState.promConfig.remoteWriteScrapeInterval.toString(),
+            value = scrapeIntervalState.value,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteScrapeInterval, it.toInt())
+                val converted : Int? = it.toIntOrNull()
+                if (converted != null) {
+                    promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteScrapeInterval, converted)
+                }
             },
             label = {
                 Text(text = "Scrape interval in seconds")
@@ -373,7 +364,6 @@ private fun RemoteWritePage(
                 }
             }
         )
-
     }
 }
 
@@ -402,7 +392,6 @@ private fun ConfigFileErrorPage(
     Column(
         modifier = modifier,
     ) {
-        //TODO implement this
         Text("Config File error:", modifier = Modifier.padding(vertical = 20.dp))
         if (uiState.fileLoadException != null) {
             Text(uiState.fileLoadException!!)
