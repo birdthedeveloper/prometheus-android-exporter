@@ -112,11 +112,13 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
     // Continuously poll from pushprox gateway
     private suspend fun doPoll(context: PushProxContext) {
+        Log.d(TAG, "Polling now")
         val response: HttpResponse = context.client.post(context.pollUrl) {
             setBody(context.fqdn)
         }
         val responseBody: String = response.body<String>()
         doPush(context, responseBody)
+        Log.d(TAG, "Polling finished")
     }
 
     // get value of HTTP header "Id" from response body

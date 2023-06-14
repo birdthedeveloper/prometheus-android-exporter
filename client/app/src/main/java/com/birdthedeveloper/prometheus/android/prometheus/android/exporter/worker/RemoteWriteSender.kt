@@ -6,12 +6,12 @@ import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.work.impl.utils.getActiveNetworkCompat
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.BufferOverflow
@@ -109,12 +109,19 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
     private suspend fun sendAll() {
         Log.d(TAG, "sendAll")
-        scrapesAreBeingSent = true
-        while (!storage.isEmpty()) {
-            val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
-            ExponentialBackoff.runWithBackoff({ sendRequestToRemoteWrite(body) }, {}, false)
+        if (!scrapesAreBeingSent) {
+            scrapesAreBeingSent = true
+
+            while (!storage.isEmpty()) {
+                val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
+                Log.d(TAG, "Exponential backoff to export remote write started")
+                ExponentialBackoff.runWithBackoff({
+                    sendRequestToRemoteWrite(body, config.maxSamplesPerExport)
+                }, {}, false)
+                Log.d(TAG, "Exponential backoff to export remote write finish")
+            }
+            lastTimeRemoteWriteSent = System.currentTimeMillis()
         }
-        lastTimeRemoteWriteSent = System.currentTimeMillis()
     }
 
     private fun deviceHasInternet(): Boolean {
@@ -193,7 +200,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
     }
 
-    private suspend fun sendRequestToRemoteWrite(body: ByteArray) {
+    private suspend fun sendRequestToRemoteWrite(body: ByteArray, numOfMetricScrapes : Int) {
         Log.d(TAG, "Exporting remote write to prometheus now")
         val response = client.post(config.remoteWriteEndpoint) {
             setBody(body)
@@ -206,5 +213,10 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         }
 
         Log.d(TAG, "Response status: ${response.status}")
+
+        if (response.status == HttpStatusCode.NoContent){
+            // this export was successful
+            storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+        }
     }
 }

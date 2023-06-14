@@ -48,7 +48,7 @@ class PromWorker(
         return writer.toString()
     }
 
-    private suspend fun countSuccessfulScrape() {
+    private fun countSuccessfulScrape() {
         Log.d(TAG, "Counting successful scrape")
         remoteWriteSender?.countSuccessfulScrape()
     }

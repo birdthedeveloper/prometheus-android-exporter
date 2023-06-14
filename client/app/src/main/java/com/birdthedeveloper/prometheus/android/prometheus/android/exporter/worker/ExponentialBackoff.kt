@@ -1,9 +1,12 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
+import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlin.math.min
 import kotlin.math.pow
+
+private const val TAG : String = "EXPONENTIAL_BACKOFF"
 
 class ExponentialBackoff {
     companion object {
@@ -26,12 +29,12 @@ class ExponentialBackoff {
                     function()
                     successfull = true
                 } catch (e: CancellationException) {
-                    break
+                    throw e
                 } catch (e: Exception) {
                     // check for suppressed exceptions
                     for (exception in e.suppressed) {
                         if (exception is CancellationException) {
-                            break
+                            throw exception
                         }
                     }
 
@@ -46,6 +49,8 @@ class ExponentialBackoff {
                     if (currentDelay == maxDelay && !infinite) {
                         break
                     }
+
+                    Log.d(TAG, "Backoff with delay: $currentDelay seconds")
 
                     delay(currentDelay.toLong() * 1000)
                 }
