@@ -159,8 +159,6 @@ abstract class RemoteWriteSenderStorage {
 
         val result: WriteRequest = hashmapToProtobufWriteRequest(hashmap)
 
-        Log.v(TAG, result.timeseriesList.toString() + "<- protobuf")
-
         return result
     }
 

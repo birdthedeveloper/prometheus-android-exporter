@@ -95,6 +95,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         while (true) {
             if (lastTimeRingBuffer.checkScrapeDidNotHappenInTime()) {
                 remoteWriteOn = true
+
                 performScrapeAndSaveIt(channel)
                 delay(config.scrapeInterval * 1000L)
 
@@ -102,25 +103,10 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                     delay(config.scrapeInterval * 1000L)
                     performScrapeAndSaveIt(channel)
                 }
+
+                remoteWriteOn = false
             }
             delay(checkDelay)
-        }
-    }
-
-    private suspend fun sendAll() {
-        Log.d(TAG, "sendAll")
-        if (!scrapesAreBeingSent) {
-            scrapesAreBeingSent = true
-
-            while (!storage.isEmpty()) {
-                val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
-                Log.d(TAG, "Exponential backoff to export remote write started")
-                ExponentialBackoff.runWithBackoff({
-                    sendRequestToRemoteWrite(body, config.maxSamplesPerExport)
-                }, {}, false)
-                Log.d(TAG, "Exponential backoff to export remote write finish")
-            }
-            lastTimeRemoteWriteSent = System.currentTimeMillis()
         }
     }
 
@@ -132,9 +118,11 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             val network = connectivityManager.getActiveNetworkCompat()
             val cap = connectivityManager.getNetworkCapabilities(network)
             if (cap != null && cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                Log.d(TAG, "Device has internet: true")
                 return true
             }
         }
+        Log.d(TAG, "Device has internet: false")
         return false
     }
 
@@ -150,8 +138,28 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         return storage.getLength() > config.maxSamplesPerExport
     }
 
+    private suspend fun exportToRemoteWriteEndpoint() {
+        Log.d(TAG, "sendAll")
+        if (!scrapesAreBeingSent) {
+            scrapesAreBeingSent = true
+
+            while (!storage.isEmpty()) {
+                val body = storage.getScrapedSamplesCompressedProtobuf(config.maxSamplesPerExport)
+                Log.d(TAG, "Exponential backoff to export remote write started")
+                ExponentialBackoff.runWithBackoff({
+                    sendRequestToRemoteWrite(body, config.maxSamplesPerExport)
+                }, {}, false)
+                Log.d(TAG, "Exponential backoff to export remote write finish")
+            }
+            lastTimeRemoteWriteSent = System.currentTimeMillis()
+
+            scrapesAreBeingSent = false
+        }
+    }
+
     private suspend fun senderManager(channel: Channel<Unit>) {
         while (true) {
+            Log.d(TAG, "Sender manager loop start")
             if (storage.isEmpty()) {
                 // channel is conflated, one receive is enough
                 // suspend here until sending remote write is needed
@@ -162,10 +170,11 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
             while (remoteWriteOn || !storage.isEmpty()) {
                 if (conditionsForRemoteWrite()) {
-                    sendAll()
+                    exportToRemoteWriteEndpoint()
                 }
                 delay(1000)
             }
+            Log.d(TAG, "Sender manager loop end")
         }
     }
 

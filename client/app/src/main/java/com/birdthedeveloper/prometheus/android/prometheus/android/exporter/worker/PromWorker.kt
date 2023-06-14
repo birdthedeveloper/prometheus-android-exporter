@@ -44,7 +44,7 @@ class PromWorker(
 
     private fun performScrape(): String {
         val writer = StringWriter()
-        TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples())
+        TextFormat.write004(writer, collectorRegistry.metricFamilySamples())
         return writer.toString()
     }
 

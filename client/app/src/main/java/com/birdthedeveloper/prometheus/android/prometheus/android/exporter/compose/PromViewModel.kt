@@ -255,6 +255,7 @@ class PromViewModel : ViewModel() {
             // check port boundaries
             val minPort = 1024
             val maxPort = 65535
+            Log.d(TAG, "Prometheus server port, ${config.prometheusServerPort}")
             val prometheusServerPort: Int = config.prometheusServerPort.toIntOrNull()
                 ?: return displayConfigValidationDialog("Prometheus Server Port must be a number!")
             if (prometheusServerPort < minPort || prometheusServerPort > maxPort) {
