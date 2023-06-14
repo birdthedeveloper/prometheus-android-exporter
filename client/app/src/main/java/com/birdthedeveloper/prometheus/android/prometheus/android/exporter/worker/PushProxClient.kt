@@ -10,6 +10,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMethod
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 
@@ -164,6 +165,9 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
             pushProxConfig.countSuccessfulScrape()
         } catch (e: Exception) {
+            if (e is CancellationException){
+                throw e
+            }
             counters.pushError()
             Log.v(TAG, "Push exception $e")
             return
@@ -172,14 +176,14 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
     private suspend fun loop(context: PushProxContext) {
         while (true) {
-            Log.v(TAG, "PushProxClient main loop start")
+            Log.d(TAG, "PushProxClient main loop start")
 
             ExponentialBackoff.runWithBackoff(
                 function = { doPoll(context) },
                 onException = { counters.pollError() }
             )
 
-            Log.v(TAG, "PushProxClient main loop end")
+            Log.d(TAG, "PushProxClient main loop end")
         }
     }
 }

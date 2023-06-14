@@ -16,6 +16,7 @@ import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -185,7 +186,8 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
         client = HttpClient()
         try {
-            runBlocking {
+            //TODO test this being coroutine scope
+            coroutineScope { //TODO this could be a problem
                 launch {
                     // check for outage in scrapes, save scrapes to storage
                     scraper(channel)

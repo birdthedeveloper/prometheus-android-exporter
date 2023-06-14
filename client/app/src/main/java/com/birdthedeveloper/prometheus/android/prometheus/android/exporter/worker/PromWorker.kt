@@ -13,13 +13,16 @@ import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compo
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import java.io.StringWriter
 
-private const val TAG : String = "Worker"
+private const val TAG : String = "PROM_WORKER"
 
 class PromWorker(
     private val context: Context,
@@ -53,11 +56,12 @@ class PromWorker(
         remoteWriteSender?.countSuccessfulScrape()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private suspend fun startServicesInOneThread(config: PromConfiguration) {
-        val threadContext = newSingleThreadContext("PromWorkerThreadContext")
+        val backgroundDispatcher = newFixedThreadPoolContext(2, "Prom worker")
+        val threadContext =  backgroundDispatcher.limitedParallelism(2)
 
-        coroutineScope {
+        try{
             withContext(threadContext) {
 
                 if (config.remoteWriteEnabled) {
@@ -99,17 +103,24 @@ class PromWorker(
                             countSuccessfulScrape = ::countSuccessfulScrape,
                         )
                     )
+                    Log.d(TAG, "PushProx launching now") //TODO is singleThreadContext a problem??
                     launch {
                         Log.d(TAG, "PushProx launched")
                         pushProxClient.start()
                     }
                 }
             }
+        }finally {
+            withContext(NonCancellable) {
+                Log.v(TAG, "Canceling prom worker")
+                backgroundDispatcher.close()
+            }
         }
     }
 
     override suspend fun doWork(): Result {
         val inputConfiguration: PromConfiguration = PromConfiguration.fromWorkData(inputData)
+        Log.d(TAG, "Launching PromWorker with the following config: $inputConfiguration")
 
         // set foreground - //TODO is this right for the use case?
         //setForeground(createForegroundInfo())

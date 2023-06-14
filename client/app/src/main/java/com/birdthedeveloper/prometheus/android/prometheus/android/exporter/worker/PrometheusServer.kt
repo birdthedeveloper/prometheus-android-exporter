@@ -86,7 +86,6 @@ class PrometheusServer() {
                     }
                     get("/metrics") {
                         val response : String = config.performScrape()
-                        Log.d(TAG, "Response: $response")
                         call.respondText(response)
                         config.countSuccessfulScrape()
                         Log.d(TAG, "Successful scrape")
