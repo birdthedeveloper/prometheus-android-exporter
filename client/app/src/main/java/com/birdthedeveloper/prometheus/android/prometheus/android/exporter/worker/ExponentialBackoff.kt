@@ -38,6 +38,8 @@ class ExponentialBackoff {
                         }
                     }
 
+                    Log.d(TAG, "Exception caught")
+
                     onException()
 
                     // calculate new delay

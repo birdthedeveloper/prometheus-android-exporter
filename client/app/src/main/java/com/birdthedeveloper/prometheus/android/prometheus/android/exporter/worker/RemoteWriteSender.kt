@@ -12,6 +12,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.prometheus.client.Collector.MetricFamilySamples
 import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.BufferOverflow
@@ -86,16 +87,26 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private suspend fun performScrapeAndSaveIt(channel: Channel<Unit>) {
         Log.d(TAG, "performScrapeAndSaveIt start")
         val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
-        storage.writeScrapedSample(scrapedMetrics)
+        val metricsScrape : MetricsScrape = MetricsScrape.fromMfs(scrapedMetrics)
+
+        storage.writeScrapedSample(metricsScrape)
         channel.send(Unit)
         Log.d(TAG, "performScrapeAndSaveIt end")
     }
 
+    private fun insertInitialDummyScrape(){
+        lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
+    }
+
     private suspend fun scraper(channel: Channel<Unit>) {
-        val checkDelay = 1000L
+        val checkDelay : Long = 1000L
+
+        insertInitialDummyScrape()
+
         while (true) {
             if (lastTimeRingBuffer.checkScrapeDidNotHappenInTime()) {
                 remoteWriteOn = true
+                Log.d(TAG, "Turning remote write on")
 
                 performScrapeAndSaveIt(channel)
                 delay(config.scrapeInterval * 1000L)
@@ -105,8 +116,10 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                     performScrapeAndSaveIt(channel)
                 }
 
+                Log.d(TAG, "Turning remote write off")
                 remoteWriteOn = false
             }
+
             delay(checkDelay)
         }
     }
@@ -140,7 +153,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private suspend fun exportToRemoteWriteEndpoint() {
-        Log.d(TAG, "sendAll")
+        Log.d(TAG, "export To Remote Write Endpoint")
         if (!scrapesAreBeingSent) {
             scrapesAreBeingSent = true
 
@@ -190,10 +203,12 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             coroutineScope { //TODO this could be a problem
                 launch {
                     // check for outage in scrapes, save scrapes to storage
+                    Log.d(TAG, "Launching scraper")
                     scraper(channel)
                 }
                 launch {
                     // send saved scrapes to remote write endpoint
+                    Log.d(TAG, "Launching senderManager")
                     senderManager(channel)
                 }
             }
@@ -207,7 +222,6 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     fun countSuccessfulScrape() {
-        Log.d(TAG, "Counting successful scrape")
         lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
     }
 

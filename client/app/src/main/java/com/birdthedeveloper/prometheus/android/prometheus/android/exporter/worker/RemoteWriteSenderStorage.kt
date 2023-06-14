@@ -18,12 +18,27 @@ private const val TAG: String = "REMOTE_WRITE_SENDER_STORAGE"
 // No need for locks as all operations are run on a single thread, defined in PromWorker
 // This class defines contract for RemoteWriteSender storage
 
-typealias MetricsScrape = Enumeration<MetricFamilySamples>
+// the same structure as MetricFamilySamples
+data class MetricsScrape(
+    val timeSeriesList : List<TimeSeries>
+){
+    companion object {
+        fun fromMfs(input : Enumeration<MetricFamilySamples>) : MetricsScrape{
+            for (family in input){
+                for (sample in family.samples){
+                    
+                }
+            }
+        }
+    }
+}
 
-// HashMap<List of labels including name, List of TimeSeries samples to this TimeSeries>
-private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
+data class TimeSeries(
+    val sample : TimeSeriesSample,
+    val labels : List<TimeSeriesLabel>,
+)
 
-private data class TimeSeriesLabel(
+data class TimeSeriesLabel(
     val name: String,
     val value: String,
 ) {
@@ -35,7 +50,7 @@ private data class TimeSeriesLabel(
     }
 }
 
-private data class TimeSeriesSample(
+data class TimeSeriesSample(
     val timeStampMs: Long,
     val value: Double,
 ) {
@@ -46,6 +61,10 @@ private data class TimeSeriesSample(
             .build()
     }
 }
+
+// HashMap<List of labels including name, List of TimeSeries samples to this TimeSeries>
+private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
+
 
 abstract class RemoteWriteSenderStorage {
     private val remoteWriteLabel: TimeSeriesLabel = TimeSeriesLabel(

@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.R
 import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose.PromConfiguration
 import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.exemplars.ExemplarConfig
 import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,6 +39,7 @@ class PromWorker(
     init {
         val androidCustomExporter = AndroidCustomExporter(metricsEngine)
         androidCustomExporter.register<AndroidCustomExporter>(collectorRegistry)
+        ExemplarConfig.disableExemplars() // prometheus client library configuration
     }
 
     //TODO foreground notification
