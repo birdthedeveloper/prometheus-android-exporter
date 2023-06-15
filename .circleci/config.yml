@@ -11,29 +11,26 @@ jobs:
       name: android/android-machine
       tag: '2023.04.1'
       resource-class: large 
-    working_directory: /home/circleci/project/client
     steps:
       - checkout
-
-      - run: pwd && ls
 
       # lint
       - android/restore-gradle-cache
       - run: 
           name: Run linter
-          command: ./gradlew lintDebug
+          command: cd client && ./gradlew lintDebug
       - android/save-gradle-cache
 
       # unit tests
       - run:
           name: Unit tests
-          command: ./gradlew testDebugUnitTest
+          command: cd client && ./gradlew testDebugUnitTest
       
       # build it
       - android/restore-build-cache
       - run:
           name: Build
-          command: ./gradlew build
+          command: cd client && ./gradlew build
       - android/save-build-cache
 
 
