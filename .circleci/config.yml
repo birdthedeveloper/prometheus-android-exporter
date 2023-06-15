@@ -8,10 +8,10 @@ orbs:
 jobs:
   lint-and-test-and-build:
     executor:
-      name: android/android-docker
-      resource-class: large
-      tag: 2023.05.1
-    working_directory: ~/project/client
+      name: android/android-machine
+      tag: '2023.04.1'
+      resource-class: large 
+    working_directory: /home/circleci/project/client
     steps:
       - checkout
 
