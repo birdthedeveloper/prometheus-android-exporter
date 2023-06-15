@@ -86,11 +86,13 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
     private suspend fun performScrapeAndSaveIt(channel: Channel<Unit>) {
         Log.d(TAG, "performScrapeAndSaveIt start")
+
         val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
         val metricsScrape : MetricsScrape = MetricsScrape.fromMfs(scrapedMetrics)
 
         storage.writeScrapedSample(metricsScrape)
         channel.send(Unit)
+
         Log.d(TAG, "performScrapeAndSaveIt end")
     }
 

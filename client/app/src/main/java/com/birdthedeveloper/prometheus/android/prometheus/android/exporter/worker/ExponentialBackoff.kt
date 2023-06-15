@@ -19,9 +19,9 @@ class ExponentialBackoff {
             onException: () -> Unit, infinite: Boolean = true
         ) {
 
-            var successfull: Boolean = false
+            var successfull = false
 
-            var currentDelay = initialDelay
+            var currentDelay: Double
             var currentExpIndex = -1
 
             while (!successfull) {
