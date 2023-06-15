@@ -1,0 +1,41 @@
+# CI/CD configuration file
+
+version: 2.1
+
+orbs:
+  android: circleci/android@2.3.0
+
+jobs:
+  lint-and-test-and-build:
+    executor:
+      name: android/android-docker
+      resource-class: large
+      tag: 2023.05.1
+    working_directory: ~/project/client
+    steps:
+      - checkout
+
+      # lint
+      - android/restore-gradle-cache
+      - run: 
+          name: Run linter
+          command: ./gradlew lintDebug
+      - android/save-gradle-cache
+
+      # unit tests
+      - run:
+          name: Unit tests
+          command: ./gradlew testDebugUnitTest
+      
+      # build it
+      - android/restore-build-cache
+      - run:
+          name: Build
+          command: ./gradlew build
+      - android/save-build-cache
+
+
+workflows:
+  build_and_test:
+    jobs:
+      - lint-and-test-and-build
