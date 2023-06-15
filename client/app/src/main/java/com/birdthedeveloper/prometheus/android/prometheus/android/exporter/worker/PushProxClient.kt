@@ -180,7 +180,8 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
             ExponentialBackoff.runWithBackoff(
                 function = { doPoll(context) },
-                onException = { counters.pollError() }
+                onException = { counters.pollError() },
+                "pushprox"
             )
 
             Log.d(TAG, "PushProxClient main loop end")

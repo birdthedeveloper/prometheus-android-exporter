@@ -16,7 +16,9 @@ class ExponentialBackoff {
 
         suspend fun runWithBackoff(
             function: suspend () -> Unit,
-            onException: () -> Unit, infinite: Boolean = true
+            onException: () -> Unit,
+            debugLabel: String,
+            infinite: Boolean = true,
         ) {
 
             var successfull = false
@@ -38,7 +40,8 @@ class ExponentialBackoff {
                         }
                     }
 
-                    Log.d(TAG, "Exception caught")
+                    Log.d(TAG, "Debug label: $debugLabel Exception caught")
+                    Log.d(TAG, "Exception: $e")
 
                     onException()
 
@@ -52,7 +55,7 @@ class ExponentialBackoff {
                         break
                     }
 
-                    Log.d(TAG, "Backoff with delay: $currentDelay seconds")
+                    Log.d(TAG, "Label :$debugLabel, Backoff with delay: $currentDelay seconds")
 
                     delay(currentDelay.toLong() * 1000)
                 }

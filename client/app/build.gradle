@@ -47,6 +47,9 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
 }
 
 protobuf {
@@ -61,7 +64,13 @@ protobuf {
 }
 
 dependencies {
+    // custom -tests
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestUtil 'androidx.test:orchestrator:1.4.2'
+
+    // custom - work manager
     implementation 'androidx.work:work-multiprocess:2.8.1'
+
     def core_version = "1.10.1"
 
     // custom - prometheus client java library

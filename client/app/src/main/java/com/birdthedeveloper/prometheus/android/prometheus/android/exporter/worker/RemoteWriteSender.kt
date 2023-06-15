@@ -29,7 +29,7 @@ private const val TAG: String = "REMOTE_WRITE_SENDER"
 // for purposes of scraping metrics on device and back-filling them later using remote write
 //
 // Only timestamps of succesfull scrapes are stored
-private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
+internal class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
     private val buffer: Array<Long> = Array(hysteresisThreshold) { 0 }
     private var firstIndex: Int = 0
 
@@ -42,7 +42,7 @@ private class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
         buffer[firstIndex] = timestamp
     }
 
-    private fun getTimeByIndex(index: Int): Long {
+    fun getTimeByIndex(index: Int): Long {
         if (index > hysteresisThreshold - 1) {
             throw IllegalArgumentException("index cannot be bigger than hysteresisThreshold")
         }
@@ -111,7 +111,6 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                 Log.d(TAG, "Turning remote write on")
 
                 performScrapeAndSaveIt(channel)
-                delay(config.scrapeInterval * 1000L)
 
                 while (lastTimeRingBuffer.checkScrapeDidNotHappenHysteresis()) {
                     delay(config.scrapeInterval * 1000L)
@@ -164,7 +163,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                 Log.d(TAG, "Exponential backoff to export remote write started")
                 ExponentialBackoff.runWithBackoff({
                     sendRequestToRemoteWrite(body, config.maxSamplesPerExport)
-                }, {}, false)
+                }, {}, "Remote Write", false)
                 Log.d(TAG, "Exponential backoff to export remote write finish")
             }
             lastTimeRemoteWriteSent = System.currentTimeMillis()
