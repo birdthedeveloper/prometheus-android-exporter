@@ -22,33 +22,41 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.lang.IndexOutOfBoundsException
+import kotlin.math.abs
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
 
 // This class stores information about scrapes to PROM_SERVER and PUSHPROX
 // for purposes of scraping metrics on device and back-filling them later using remote write
 //
-// Only timestamps of succesfull scrapes are stored
+// Only timestamps of successful scrapes are stored
 internal class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
     private val buffer: Array<Long> = Array(hysteresisThreshold) { 0 }
-    private var firstIndex: Int = 0
+    private var firstIndex: Int = -1
 
     companion object {
         private const val hysteresisThreshold: Int = 3
     }
 
     fun setLastTime(timestamp: Long) {
-        firstIndex = firstIndex++ % hysteresisThreshold
+        firstIndex = (++firstIndex) % hysteresisThreshold
         buffer[firstIndex] = timestamp
+        System.out.println("${buffer[0]} ${buffer[1]} ${buffer[2]}")
+        System.out.flush()
     }
 
     fun getTimeByIndex(index: Int): Long {
         if (index > hysteresisThreshold - 1) {
-            throw IllegalArgumentException("index cannot be bigger than hysteresisThreshold")
+            throw IndexOutOfBoundsException("index cannot be bigger than hysteresisThreshold")
         }
 
-        val bufferIndex: Int = firstIndex + index % hysteresisThreshold
-        return buffer[bufferIndex]
+        val bufferIndex: Int = (firstIndex - index)
+        return if (bufferIndex < 0){
+            buffer[hysteresisThreshold + bufferIndex]
+        }else{
+            buffer[bufferIndex]
+        }
     }
 
     fun checkScrapeDidNotHappenInTime(): Boolean {
@@ -64,7 +72,6 @@ internal class LastTimeRingBuffer(private val scrapeIntervalMs: Int) {
         }
         return false
     }
-
 }
 
 data class RemoteWriteConfiguration(
