@@ -28,39 +28,41 @@ data class MetricsScrape(
 
             for (family in input){
                 for (sample in family.samples){
-                    val labels : MutableList<TimeSeriesLabel> = mutableListOf()
+                    if (sample != null){
+                        val labels : MutableList<TimeSeriesLabel> = mutableListOf()
 
-                    // name label
-                    val sampleName : String = sample.name
-                    val sampleNameLabel = TimeSeriesLabel(
-                        name = "__name__",
-                        value = sampleName
-                    )
-                    labels.add(sampleNameLabel)
-
-                    // labels are stored in parallel lists -> iterate over two lists at a time
-                    val labelNamesIterator = sample.labelNames.iterator()
-                    val labelValuesIterator = sample.labelValues.iterator()
-
-                    while (labelNamesIterator.hasNext() && labelValuesIterator.hasNext()) {
-                        val labelName: String = labelNamesIterator.next()
-                        val labelValue: String = labelValuesIterator.next()
-
-                        val label = TimeSeriesLabel(
-                            name = labelName,
-                            value = labelValue,
+                        // name label
+                        val sampleName : String = sample.name
+                        val sampleNameLabel = TimeSeriesLabel(
+                            name = "__name__",
+                            value = sampleName
                         )
-                        labels.add(label)
+                        labels.add(sampleNameLabel)
+
+                        // labels are stored in parallel lists -> iterate over two lists at a time
+                        val labelNamesIterator = sample.labelNames.iterator()
+                        val labelValuesIterator = sample.labelValues.iterator()
+
+                        while (labelNamesIterator.hasNext() && labelValuesIterator.hasNext()) {
+                            val labelName: String = labelNamesIterator.next()
+                            val labelValue: String = labelValuesIterator.next()
+
+                            val label = TimeSeriesLabel(
+                                name = labelName,
+                                value = labelValue,
+                            )
+                            labels.add(label)
+                        }
+
+                        val timeSeries = StorageTimeSeries(
+                            labels = labels.toList(),
+                            sample = TimeSeriesSample(
+                                value = sample.value,
+                                timeStampMs = System.currentTimeMillis(),
+                            )
+                        )
+                        timeSeriesList.add(timeSeries)
                     }
-
-                    val timeSeries = StorageTimeSeries(
-                        labels = labels.toList(),
-                        sample = TimeSeriesSample(
-                            value = sample.value,
-                            timeStampMs = sample.timestampMs ?: System.currentTimeMillis(),
-                        )
-                    )
-                    timeSeriesList.add(timeSeries)
                 }
             }
 
@@ -103,7 +105,6 @@ data class TimeSeriesSample(
 // HashMap<List of labels including name, List of TimeSeries samples to this TimeSeries>
 private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
 
-//TODO rewrite these classes
 abstract class RemoteWriteSenderStorage {
     private val remoteWriteLabel: TimeSeriesLabel = TimeSeriesLabel(
         name = "backfill",
@@ -189,7 +190,6 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     private val data: Queue<MetricsScrape> = LinkedList()
 
     override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
-        Log.d(TAG, "Getting scraped samples: $howMany samples")
         if (howMany < 1) {
             throw IllegalArgumentException("howMany must be bigger than zero")
         }
@@ -203,6 +203,7 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
                 scrapedMetrics.add(oneMetric)
             }
         }
+        Log.d(TAG, "Getting scraped samples: ${scrapedMetrics.size} samples")
 
         val writeRequest: WriteRequest = this.metricsScrapeListToProtobuf(scrapedMetrics.toList())
         val bytes: ByteArray = writeRequest.toByteArray()
@@ -211,10 +212,13 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
 
     //TODO use this thing
     override fun removeNumberOfScrapedSamples(number: Int) {
-        Log.d(TAG, "Removing number of scraped samples: $number samples")
         if (number > 0) {
             for (i in 1..number) {
-                data.remove()
+                if(data.isEmpty()){
+                    break;
+                }else{
+                    data.remove()
+                }
             }
         } else {
             throw IllegalArgumentException("number must by higher than 0")
