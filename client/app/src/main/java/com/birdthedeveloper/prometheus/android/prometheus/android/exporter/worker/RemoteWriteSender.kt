@@ -130,7 +130,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
             .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 
         if (connectivityManager != null) {
-            val network = connectivityManager.getActiveNetworkCompat()
+            val network = connectivityManager.activeNetwork
             val cap = connectivityManager.getNetworkCapabilities(network)
             if (cap != null && cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
                 Log.d(TAG, "Device has internet: true")
