@@ -15,3 +15,9 @@ remote_write:
     remote_timeout: "30s"
     send_exemplars: false
     follow_redirects: true
+
+    write_relabel_configs:
+      - source_labels: [instance]
+        regex: '(.+)'
+        target_label: instance
+        replacement: mylabel

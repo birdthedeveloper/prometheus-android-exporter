@@ -7,6 +7,9 @@ scrape_configs:
 
     static_configs:
       - targets: ["localhost:9090"] # scrape prometheus itself
+        labels:
+          backfill: 'false'
+
   
   - job_name: "android phones"
     proxy_url: "http://pushprox:8080" #TODO add mobile phones here
@@ -16,3 +19,5 @@ scrape_configs:
       - targets: [
           "test.example.com"
         ]
+        labels:
+          backfill: 'false'
