@@ -1,5 +1,6 @@
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
 
+import android.content.Context
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -23,6 +24,7 @@ data class PushProxConfig(
     val registry: CollectorRegistry,
     val performScrape: () -> String,
     val countSuccessfulScrape: suspend () -> Unit,
+    val getContext : () -> Context,
 )
 
 /**
@@ -66,6 +68,7 @@ data class PushProxContext(
     val pollUrl: String,
     val pushUrl: String,
     val fqdn: String,
+    val getContext : () -> Context,
 )
 
 // This is a stripped down kotlin implementation of github.com/prometheus-community/PushProx client
@@ -108,18 +111,23 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
             pollURL,
             pushURL,
             pushProxConfig.pushProxFqdn,
+            pushProxConfig.getContext,
         )
     }
 
     // Continuously poll from pushprox gateway
     private suspend fun doPoll(context: PushProxContext) {
-        Log.d(TAG, "Polling now")
-        val response: HttpResponse = context.client.post(context.pollUrl) {
-            setBody(context.fqdn)
+        if(Util.deviceIsConnectedToInternet(context.getContext())){
+            Log.d(TAG, "Polling now")
+            val response: HttpResponse = context.client.post(context.pollUrl) {
+                setBody(context.fqdn)
+            }
+            val responseBody: String = response.body()
+            doPush(context, responseBody)
+            Log.d(TAG, "Polling finished")
+        }else{
+            Log.d(TAG, "Skipping poll because network not available")
         }
-        val responseBody: String = response.body<String>()
-        doPush(context, responseBody)
-        Log.d(TAG, "Polling finished")
     }
 
     // get value of HTTP header "Id" from response body

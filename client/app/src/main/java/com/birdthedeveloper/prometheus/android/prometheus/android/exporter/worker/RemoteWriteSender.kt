@@ -135,28 +135,13 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         }
     }
 
-    private fun deviceHasInternet(): Boolean {
-        val connectivityManager = config.getContext()
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-
-        if (connectivityManager != null) {
-            val network = connectivityManager.activeNetwork
-            val cap = connectivityManager.getNetworkCapabilities(network)
-            if (cap != null && cap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                Log.d(TAG, "Device has internet: true")
-                return true
-            }
-        }
-        Log.d(TAG, "Device has internet: false")
-        return false
-    }
-
     private fun timeHasPassed(): Boolean {
         return lastTimeRemoteWriteSent < System.currentTimeMillis() - config.exportInterval * 1000
     }
 
     private fun conditionsForRemoteWrite(): Boolean {
-        return deviceHasInternet() && (timeHasPassed() || enoughSamplesScraped())
+        val ctx : Context = config.getContext()
+        return Util.deviceIsConnectedToInternet(ctx) && (timeHasPassed() || enoughSamplesScraped())
     }
 
     private fun enoughSamplesScraped(): Boolean {
