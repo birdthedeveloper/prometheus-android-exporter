@@ -103,6 +103,7 @@ class PromWorker(
                             pushProxFqdn = config.pushproxFqdn,
                             registry = collectorRegistry,
                             countSuccessfulScrape = ::countSuccessfulScrape,
+                            getContext = {context}
                         )
                     )
                     Log.d(TAG, "PushProx launching now") //TODO is singleThreadContext a problem??
