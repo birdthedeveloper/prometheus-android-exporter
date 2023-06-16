@@ -28,7 +28,7 @@ class RemoteWriteSenderStorageTest{
         return MetricsScrape(
             timeSeriesList = listOf(
                 StorageTimeSeries(
-                    labels = listOf<TimeSeriesLabel>(),
+                    labels = listOf(),
                     sample = TimeSeriesSample(
                         // too old
                         timeStampMs = System.currentTimeMillis() - ageInMinutes * 60 * 1000L,
