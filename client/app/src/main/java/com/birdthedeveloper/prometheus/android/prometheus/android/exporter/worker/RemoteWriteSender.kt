@@ -74,6 +74,8 @@ internal class LastTimeRingBuffer(private val scrapeInterval: Int) {
     }
 }
 
+class TryExportMetricsAgainException(message : String) : Exception(message)
+
 data class RemoteWriteConfiguration(
     val scrapeInterval: Int,
     val remoteWriteEndpoint: String,
@@ -237,9 +239,19 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
         Log.d(TAG, "Response status: ${response.status}")
 
-        if (response.status == HttpStatusCode.NoContent){
-            // this export was successful
-            storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+        when (response.status) {
+            HttpStatusCode.NoContent -> {
+                // this export was successful
+                storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+            }
+            HttpStatusCode.BadRequest -> {
+                // probably some error or race condition has occured
+                // give up trying to send this data
+                storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+            }
+            else -> {
+                throw TryExportMetricsAgainException("Status code: ${response.status.description}")
+            }
         }
     }
 }
