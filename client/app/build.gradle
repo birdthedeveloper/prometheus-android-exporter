@@ -2,9 +2,13 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlinx-serialization'
+
+    // ksp for room database
+    id 'com.google.devtools.ksp'
 }
 
 apply plugin: 'com.google.protobuf'
+apply plugin: 'kotlin-android'
 
 android {
     namespace 'com.birdthedeveloper.prometheus.android.prometheus.android.exporter'
@@ -30,8 +34,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -52,6 +56,12 @@ android {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
 protobuf {
     protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
     generateProtoTasks {
@@ -64,7 +74,36 @@ protobuf {
 }
 
 dependencies {
-    // custom -tests
+    implementation 'androidx.core:core-ktx:1.10.1'
+
+
+    // custom - room database ----------------------------------------------------------------------
+    def room_version = "2.5.1"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    // ksp room database annotations
+    ksp "androidx.room:room-compiler:$room_version"
+
+    // optional - RxJava2 support for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
+
+    // optional - RxJava3 support for Room
+    implementation "androidx.room:room-rxjava3:$room_version"
+
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation "androidx.room:room-guava:$room_version"
+
+    // optional - Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
+
+    // optional - Paging 3 Integration
+    implementation "androidx.room:room-paging:$room_version"
+
+    // room database end ---------------------------------------------------------------------------
+
+    // custom - tests
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestUtil 'androidx.test:orchestrator:1.4.2'
 
