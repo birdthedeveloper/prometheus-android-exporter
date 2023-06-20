@@ -104,13 +104,13 @@ data class TimeSeriesSample(
 
 abstract class RemoteWriteSenderStorage {
     companion object{
-        protected const val maxMetricsAge : Int = 58 * 60 // 58 minutes
+        const val maxMetricsAge : Int = 58 * 60 // 58 minutes
 
-        protected val remoteWriteLabel: TimeSeriesLabel = TimeSeriesLabel(
+        val remoteWriteLabel: TimeSeriesLabel = TimeSeriesLabel(
             name = "backfill",
             value = "true",
         )
-        protected fun encodeWithSnappy(data: ByteArray): ByteArray {
+        fun encodeWithSnappy(data: ByteArray): ByteArray {
             return Snappy.compress(data)
         }
     }
@@ -122,97 +122,3 @@ abstract class RemoteWriteSenderStorage {
     abstract fun getLength(): Int
 }
 
-class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
-    private val data: Queue<MetricsScrape> = LinkedList()
-
-    override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
-        if (howMany < 1) {
-            throw IllegalArgumentException("howMany must be bigger than zero")
-        }
-
-        val scrapedMetrics: MutableList<MetricsScrape> = mutableListOf()
-        for (i in 1..howMany) {
-            val oneMetric: MetricsScrape? = data.poll()
-            if (oneMetric == null) {
-                break
-            } else {
-                scrapedMetrics.add(oneMetric)
-            }
-        }
-        Log.d(TAG, "Getting scraped samples: ${scrapedMetrics.size} samples")
-
-        filterExpiredMetrics(scrapedMetrics)
-
-        val writeRequest: WriteRequest = this.metricsScrapeListToProtobuf(scrapedMetrics.toList())
-        val bytes: ByteArray = writeRequest.toByteArray()
-        return this.encodeWithSnappy(bytes)
-    }
-
-    //TODO use this thing
-    override fun removeNumberOfScrapedSamples(number: Int) {
-        if (number > 0) {
-            for (i in 1..number) {
-                if(data.isEmpty()){
-                    break;
-                }else{
-                    data.remove()
-                }
-            }
-        } else {
-            throw IllegalArgumentException("number must by higher than 0")
-        }
-    }
-
-    override fun writeScrapedSample(metricsScrape: MetricsScrape) {
-        Log.d(TAG, "Writing scraped sample to storage")
-        data.add(metricsScrape)
-    }
-
-    override fun isEmpty(): Boolean {
-        return data.isEmpty()
-    }
-
-    override fun getLength(): Int {
-        return data.count()
-    }
-}
-
-@Entity
-data class RoomLabel {
-    @PrimaryKey
-}
-
-@Entity
-data class RoomTimeSeries {
-
-}
-
-interface RoomDao {
-    @Query
-    fun insertOneTimeSeriesSample(){
-
-    }
-
-}
-
-class RemoteWriteSenderDatabaseStorage : RemoteWriteSenderStorage() {
-    override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
-        TODO("Not yet implemented")
-    }
-
-    override fun removeNumberOfScrapedSamples(number: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun writeScrapedSample(metricsScrape: MetricsScrape) {
-        TODO("Not yet implemented")
-    }
-
-    override fun isEmpty(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun getLength(): Int {
-        TODO("Not yet implemented")
-    }
-}
