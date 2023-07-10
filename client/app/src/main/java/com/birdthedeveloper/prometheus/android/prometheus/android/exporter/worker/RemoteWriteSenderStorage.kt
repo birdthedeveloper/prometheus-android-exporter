@@ -2,6 +2,7 @@ package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.work
 
 import android.util.Log
 import io.prometheus.client.Collector.MetricFamilySamples
+import kotlinx.serialization.Serializable
 import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.Sample
@@ -78,6 +79,7 @@ data class StorageTimeSeries(
     val labels : List<TimeSeriesLabel>,
 )
 
+@Serializable
 data class TimeSeriesLabel(
     val name: String,
     val value: String,

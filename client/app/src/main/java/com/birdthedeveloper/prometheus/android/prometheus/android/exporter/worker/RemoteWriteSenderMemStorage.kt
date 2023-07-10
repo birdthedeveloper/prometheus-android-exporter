@@ -8,11 +8,17 @@ import java.util.Queue
 // HashMap<List of labels including name, List of TimeSeries samples to this TimeSeries>
 private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
 
-class RemoteWriteSenderMemStorage : RemoteWriteSenderStorage() {
+private const val TAG : String = "REMOTE_WRITE_SENDER_MEMORY_SIMPLE_STORAGE";
+
+
+//TODO sort this out
+
+class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
+    private val data: Queue<MetricsScrape> = LinkedList()
 
     private fun filterExpiredMetrics(metrics : MutableList<MetricsScrape>){
         val now : Long = System.currentTimeMillis()
-        val oldestMetricTimeMs : Long = now() - maxMetricsAge * 1000
+        val oldestMetricTimeMs : Long = now - maxMetricsAge * 1000
         var howManyMetricsRemove : Int = 0
 
         // count how many metrics to remove
@@ -33,10 +39,9 @@ class RemoteWriteSenderMemStorage : RemoteWriteSenderStorage() {
         }
     }
 
-
     private fun hashMapEntryToProtobufTimeSeries(
         labels: List<TimeSeriesLabel>, samples: MutableList<TimeSeriesSample>
-    ): TimeSeries {
+    ): RemoteWrite.TimeSeries {
 
         val timeSeriesBuilder: RemoteWrite.TimeSeries.Builder = RemoteWrite.TimeSeries.newBuilder()
 
@@ -51,8 +56,8 @@ class RemoteWriteSenderMemStorage : RemoteWriteSenderStorage() {
         return timeSeriesBuilder.build()
     }
 
-    private fun hashmapToProtobufWriteRequest(hashMap: ConverterHashMap): WriteRequest {
-        val writeRequestBuilder: WriteRequest.Builder = WriteRequest.newBuilder()
+    private fun hashmapToProtobufWriteRequest(hashMap: ConverterHashMap): RemoteWrite.WriteRequest {
+        val writeRequestBuilder: RemoteWrite.WriteRequest.Builder = RemoteWrite.WriteRequest.newBuilder()
 
         for (entry in hashMap) {
             val timeSeries = hashMapEntryToProtobufTimeSeries(entry.key, entry.value)
@@ -60,6 +65,47 @@ class RemoteWriteSenderMemStorage : RemoteWriteSenderStorage() {
         }
 
         return writeRequestBuilder.build()
+    }
+
+    override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
+        if (howMany < 1) {
+            throw IllegalArgumentException("howMany must be bigger than zero")
+        }
+
+        val scrapedMetrics: MutableList<MetricsScrape> = mutableListOf()
+        for (i in 1..howMany) {
+            val oneMetric: MetricsScrape? = data.poll()
+            if (oneMetric == null) {
+                break
+            } else {
+                scrapedMetrics.add(oneMetric)
+            }
+        }
+        Log.d(TAG, "Getting scraped samples: ${scrapedMetrics.size} samples")
+
+        filterExpiredMetrics(scrapedMetrics)
+
+        val writeRequest: RemoteWrite.WriteRequest = metricsScrapeListToProtobuf(scrapedMetrics.toList())
+        val bytes: ByteArray = writeRequest.toByteArray()
+        return RemoteWriteSenderStorage.encodeWithSnappy(bytes)
+    }
+
+    private fun metricsScrapeListToProtobuf(input: List<MetricsScrape>): RemoteWrite.WriteRequest {
+        if (input.isEmpty()) {
+            throw Exception("Input is empty!")
+        }
+
+        val hashmap: ConverterHashMap = HashMap()
+
+        for (metricsScrape in input) {
+            for (timeSeries in metricsScrape.timeSeriesList){
+                processStorageTimeSeries(hashmap, timeSeries)
+            }
+        }
+
+        val result: RemoteWrite.WriteRequest = hashmapToProtobufWriteRequest(hashmap)
+
+        return result
     }
 
     private fun processStorageTimeSeries(hashMap: ConverterHashMap, timeSeries: StorageTimeSeries){
@@ -78,107 +124,6 @@ class RemoteWriteSenderMemStorage : RemoteWriteSenderStorage() {
             // this time series already exists
             hashMap[immutableLabels]!!.add(timeSeries.sample)
         }
-    }
-
-    private fun metricsScrapeListToProtobuf(input: List<MetricsScrape>): WriteRequest {
-        if (input.isEmpty()) {
-            throw Exception("Input is empty!")
-        }
-
-        val hashmap: ConverterHashMap = HashMap()
-
-        for (metricsScrape in input) {
-            for (timeSeries in metricsScrape.timeSeriesList){
-                processStorageTimeSeries(hashmap, timeSeries)
-            }
-        }
-
-        val result: WriteRequest = hashmapToProtobufWriteRequest(hashmap)
-
-        return result
-    }
-
-
-    private val data: Queue<MetricsScrape> = LinkedList()
-
-    override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
-        if (howMany < 1) {
-            throw IllegalArgumentException("howMany must be bigger than zero")
-        }
-
-        val scrapedMetrics: MutableList<MetricsScrape> = mutableListOf()
-        for (i in 1..howMany) {
-            val oneMetric: MetricsScrape? = data.poll()
-            if (oneMetric == null) {
-                break
-            } else {
-                scrapedMetrics.add(oneMetric)
-            }
-        }
-        Log.d(TAG, "Getting scraped samples: ${scrapedMetrics.size} samples")
-
-        filterExpiredMetrics(scrapedMetrics)
-
-        val writeRequest: WriteRequest = this.metricsScrapeListToProtobuf(scrapedMetrics.toList())
-        val bytes: ByteArray = writeRequest.toByteArray()
-        return this.encodeWithSnappy(bytes)
-    }
-
-    override fun removeNumberOfScrapedSamples(number: Int) {
-        if (number > 0) {
-            for (i in 1..number) {
-                if(data.isEmpty()){
-                    break;
-                }else{
-                    data.remove()
-                }
-            }
-        } else {
-            throw IllegalArgumentException("number must by higher than 0")
-        }
-    }
-
-    override fun writeScrapedSample(metricsScrape: MetricsScrape) {
-        Log.d(TAG, "Writing scraped sample to storage")
-        data.add(metricsScrape)
-    }
-
-    override fun isEmpty(): Boolean {
-        return data.isEmpty()
-    }
-
-    override fun getLength(): Int {
-        return data.count()
-    }
-}
-
-
-//TODO sort this out
-
-class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
-    private val data: Queue<MetricsScrape> = LinkedList()
-
-    override fun getScrapedSamplesCompressedProtobuf(howMany: Int): ByteArray {
-        if (howMany < 1) {
-            throw IllegalArgumentException("howMany must be bigger than zero")
-        }
-
-        val scrapedMetrics: MutableList<MetricsScrape> = mutableListOf()
-        for (i in 1..howMany) {
-            val oneMetric: MetricsScrape? = data.poll()
-            if (oneMetric == null) {
-                break
-            } else {
-                scrapedMetrics.add(oneMetric)
-            }
-        }
-        Log.d(TAG, "Getting scraped samples: ${scrapedMetrics.size} samples")
-
-        filterExpiredMetrics(scrapedMetrics)
-
-        val writeRequest: RemoteWrite.WriteRequest = this.metricsScrapeListToProtobuf(scrapedMetrics.toList())
-        val bytes: ByteArray = writeRequest.toByteArray()
-        return this.encodeWithSnappy(bytes)
     }
 
     //TODO use this thing

@@ -8,13 +8,25 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import remote.write.RemoteWrite.TimeSeries
 
-//TODO
+/// Room is a relational database
+///     Contains the following tables:
+///     - Timeseries table:
+///         + labels : List<TimeSeriesLabel> sorted alphabetically and encoded in json
+///     - Sample table:
+///         + id
+///         + timestamp
+///         + value
+///         + Timeseries foreign key
 
 @Entity
-data class RoomTimeSeries {
-
-}
+data class RoomTimeSeries (
+    @PrimaryKey(autoGenerate = false)
+    val labels : String
+)
 
 @Entity
 data class RoomSample(
@@ -24,12 +36,16 @@ data class RoomSample(
     val value : Double,
 )
 
+@Serializable
+data class TimeSeriesLabelList(
+    val labels: List<TimeSeriesLabel>
+)
+
 @Database(
     entities = [RoomTimeSeries::class, RoomSample::class],
     version = 1
 )
 abstract class RemoteWriteDatabase: RoomDatabase() {
-
     abstract val dao: RoomDao
 }
 
@@ -41,7 +57,7 @@ interface RoomDao {
     }
 
     @Query("") //TODO
-    fun getNumberOfTimeSeriesSamples(){
+    fun getNumberOfTimeSeriesSamples(number : Int){
 
     }
 
@@ -53,31 +69,27 @@ interface RoomDao {
 }
 
 class RemoteWriteSenderDbStorage(getContext: () -> Context) : RemoteWriteSenderStorage(){
+    companion object{
+        const val dbName = "prometheus.db"
+    }
 
     private val roomDb by lazy {
         Room.databaseBuilder(
             getContext(),
             RemoteWriteDatabase::class.java,
-            "contacts.db"
+            dbName,
         ).build()
     }
 
     private fun encodeLabels(labelsList: List<TimeSeriesLabel>) : String{
-        //TODO
-        var result : String = ""
-        for (label in labelsList){
-            // check if label contains escape character
-            if (label.name.contains("-") || label.value.contains("-")){
-                throw IllegalArgumentException("Time series labels should not contain \'-\'")
-            }else{
-                //TODO
-            }
-        }
-        return result
+        /// preserve the same order
+        val sorted : List<TimeSeriesLabel> = labelsList.sortedBy { it.name }
+        val timeSeriesLabelList = TimeSeriesLabelList(labels = sorted)
+        return Json.encodeToString(TimeSeriesLabelList.serializer(), timeSeriesLabelList)
     }
 
     private fun decodeLabels(labels : String) : List<TimeSeriesLabel> {
-        //TODO
+        return Json.decodeFromString<TimeSeriesLabelList>(labels).labels
     }
     override fun writeScrapedSample(metricsScrape: MetricsScrape) {
         TODO("Not yet implemented")
@@ -98,5 +110,4 @@ class RemoteWriteSenderDbStorage(getContext: () -> Context) : RemoteWriteSenderS
     override fun getLength(): Int {
         TODO("Not yet implemented")
     }
-
 }
