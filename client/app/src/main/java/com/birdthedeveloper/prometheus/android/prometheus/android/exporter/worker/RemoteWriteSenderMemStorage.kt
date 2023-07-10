@@ -10,9 +10,6 @@ private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<
 
 private const val TAG : String = "REMOTE_WRITE_SENDER_MEMORY_SIMPLE_STORAGE";
 
-
-//TODO sort this out
-
 class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     private val data: Queue<MetricsScrape> = LinkedList()
 

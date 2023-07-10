@@ -27,7 +27,7 @@ class AndroidCustomExporter(metricEngine: MetricsEngine) : Collector() {
             "Current battery percentage", listOf(),
         )
 
-        val batteryPercentage: Double = metricsEngineRef.getBatteryPercentage().toDouble()
+        val batteryPercentage: Double = metricsEngineRef.batteryChargeRatio().toDouble()
         batteryPercentageGauge.addMetric(listOf(), batteryPercentage)
         mfs.add(batteryPercentageGauge)
     }

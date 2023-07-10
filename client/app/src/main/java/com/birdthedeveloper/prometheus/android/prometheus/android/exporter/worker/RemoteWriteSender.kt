@@ -23,10 +23,10 @@ import java.lang.IndexOutOfBoundsException
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
 
-// This class stores information about scrapes to PROM_SERVER and PUSHPROX
-// for purposes of scraping metrics on device and back-filling them later using remote write
-//
-// Only timestamps of successful scrapes are stored
+/// This class stores information about scrapes to PROM_SERVER and PUSHPROX
+/// for purposes of scraping metrics on device and back-filling them later using remote write
+///
+/// Only timestamps of successful scrapes are stored
 internal class LastTimeRingBuffer(private val scrapeInterval: Int) {
     private val buffer: Array<Long> = Array(hysteresisMemory) { 0 }
     private var firstIndex: Int = -1
@@ -199,8 +199,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
         client = HttpClient()
         try {
-            //TODO test this being coroutine scope
-            coroutineScope { //TODO this could be a problem
+            coroutineScope {
                 launch {
                     // check for outage in scrapes, save scrapes to storage
                     Log.d(TAG, "Launching scraper")
