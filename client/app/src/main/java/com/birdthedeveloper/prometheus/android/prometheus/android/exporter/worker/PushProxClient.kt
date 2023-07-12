@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.android.Android
 import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -13,6 +14,7 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private const val TAG = "PUSHPROX_CLIENT"
@@ -81,14 +83,25 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
         var client: HttpClient? = null
         try {
-            client = HttpClient()
+            client = createClient()
             val context: PushProxContext = getPushProxContext(client)
+
             loop(context)
         } finally {
             withContext(NonCancellable) {
                 Log.v(TAG, "Canceling pushprox client")
                 client?.close()
                 Log.v(TAG, "PushProx http client canceled")
+            }
+        }
+    }
+
+    private fun createClient() : HttpClient {
+        Log.d(TAG, "Creating http client ktor")
+        return HttpClient(Android) {
+            engine {
+                connectTimeout = 10_000
+                socketTimeout = 100_000
             }
         }
     }
@@ -170,6 +183,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
                 method = HttpMethod.Post
                 setBody(pushRequestBody)
             }
+
 
             pushProxConfig.countSuccessfulScrape()
         } catch (e: Exception) {

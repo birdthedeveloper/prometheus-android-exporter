@@ -103,49 +103,53 @@ dependencies {
 
     // room database end ---------------------------------------------------------------------------
 
+
+    // ktor
+    implementation "io.ktor:ktor-client-android:2.3.0"
+
     // custom - tests
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestUtil 'androidx.test:orchestrator:1.4.2'
 
-    // custom - work manager
+    //  - work manager
     implementation 'androidx.work:work-multiprocess:2.8.1'
 
     def core_version = "1.10.1"
 
-    // custom - prometheus client java library
+    //  - prometheus client java library
     implementation 'io.prometheus:simpleclient:0.16.0'
     implementation 'io.prometheus:simpleclient_common:0.16.0'
 
-    // custom - kotlin coroutines
+    //  - kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-RC"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0-RC"
 
-    // custom - ktor web client
+    //  - ktor web client
     implementation("io.ktor:ktor-client-core:2.3.0")
     implementation("io.ktor:ktor-client-cio:2.3.0")
 
-    // custom - ktor web server
+    //  - ktor web server
     implementation "io.ktor:ktor-server-cio:2.3.0"
     implementation "io.ktor:ktor-server-core:2.3.0"
     implementation "io.ktor:ktor-server-status-pages:2.3.0"
 
-    // custom - view model for Jetpack Compose
+    //  - view model for Jetpack Compose
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
     implementation "androidx.core:core-ktx:$core_version"
 
-    // custom - navigation for Jetpack Compose
+    //  - navigation for Jetpack Compose
     def nav_version = "2.5.3"
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
-    // custom - work manager
+    //  - work manager
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
-    // custom - yaml configuration parsing
+    //  - yaml configuration parsing
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.1")
     implementation("com.charleskorn.kaml:kaml:0.54.0")
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
 
-    // custom - protocol buffers
+    //  - protocol buffers
     implementation 'com.google.protobuf:protobuf-javalite:3.20.1'
     implementation 'com.google.protobuf:protobuf-kotlin-lite:3.20.1'
 

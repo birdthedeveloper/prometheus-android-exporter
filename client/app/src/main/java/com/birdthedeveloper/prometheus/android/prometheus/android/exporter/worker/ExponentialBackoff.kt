@@ -34,6 +34,7 @@ class ExponentialBackoff {
                     throw e
                 } catch (e: Exception) {
                     // check for suppressed exceptions
+                    Log.d(TAG, e.toString())
                     for (exception in e.suppressed) {
                         if (exception is CancellationException) {
                             throw exception
