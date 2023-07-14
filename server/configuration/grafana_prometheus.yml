@@ -1,3 +1,5 @@
+# Author: Martin Ptacek
+
 datasources:
   - name: Prometheus
     access: proxy

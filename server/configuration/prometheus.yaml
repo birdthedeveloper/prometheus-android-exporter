@@ -1,3 +1,5 @@
+# Author: Martin Ptacek
+
 # Prometheus global configuration file
 global:
   scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.

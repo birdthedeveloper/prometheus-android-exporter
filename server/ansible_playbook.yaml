@@ -1,3 +1,5 @@
+# Author: Martin Ptacek
+
 # run this playbook against new linux server
 
 - name: Install example server stack for prometheus-exporter-android

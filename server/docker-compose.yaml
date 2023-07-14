@@ -1,3 +1,5 @@
+# Author: Martin Ptacek
+
 # This docker compose file spins up the following containers:
 #   - nginx reverse proxy
 #   - prometheus time-series database

@@ -1,3 +1,5 @@
+// Author: Martin Ptacek
+
 package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
 
 import androidx.compose.foundation.layout.Column
