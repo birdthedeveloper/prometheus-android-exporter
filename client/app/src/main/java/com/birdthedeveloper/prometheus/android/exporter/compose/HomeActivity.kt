@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
+package com.birdthedeveloper.prometheus.android.exporter.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -176,7 +176,7 @@ private fun StartStopButton(
 private fun TabPage(
     promViewModel: PromViewModel,
 ) {
-    val tabs = mapOf(0 to "Prom Server", 1 to "PushProx", 2 to "Remote write")
+    val tabs = mapOf(0 to "Prom Server", 1 to "PushProx", 2 to "Batch exporter")
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column {

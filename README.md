@@ -28,7 +28,7 @@ CTRL + SHIFT + ALT + L
 Client application is configurable via a configuration file.
 Place such file on your android device at a following path:
 ```
-data/user/0/com.birdthedeveloper.prometheus.android.prometheus.android.exporter/files/
+data/user/0/com.birdthedeveloper.prometheus.android.exporter/files/
 ```
 The name of such configuration file can be either `config.yaml` or `config.yml`
 

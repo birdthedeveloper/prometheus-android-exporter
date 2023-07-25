@@ -11,11 +11,11 @@ apply plugin: 'com.google.protobuf'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace 'com.birdthedeveloper.prometheus.android.prometheus.android.exporter'
+    namespace 'com.birdthedeveloper.prometheus.android.exporter'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.birdthedeveloper.prometheus.android.prometheus.android.exporter"
+        applicationId "com.birdthedeveloper.prometheus.android.exporter"
         minSdk 26
         targetSdk 33
         versionCode 1

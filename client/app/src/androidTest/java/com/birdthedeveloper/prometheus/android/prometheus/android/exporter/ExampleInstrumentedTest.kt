@@ -1,4 +1,4 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter
+package com.birdthedeveloper.prometheus.android.exporter
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -20,7 +20,7 @@ class ExampleInstrumentedTest {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals(
-            "com.birdthedeveloper.prometheus.android.prometheus.android.exporter",
+            "com.birdthedeveloper.prometheus.android.exporter",
             appContext.packageName
         )
     }

@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
+package com.birdthedeveloper.prometheus.android.exporter.compose
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -15,7 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.ui.theme.PrometheusAndroidExporterTheme
+import com.birdthedeveloper.prometheus.android.exporter.ui.theme.PrometheusAndroidExporterTheme
 
 class MainActivity : ComponentActivity() {
 

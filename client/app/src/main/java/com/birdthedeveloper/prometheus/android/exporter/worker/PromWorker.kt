@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
+package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import android.app.NotificationManager
 import android.content.Context
@@ -10,8 +10,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.R
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose.PromConfiguration
+import com.birdthedeveloper.prometheus.android.exporter.R
+import com.birdthedeveloper.prometheus.android.exporter.compose.PromConfiguration
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exemplars.ExemplarConfig
 import io.prometheus.client.exporter.common.TextFormat

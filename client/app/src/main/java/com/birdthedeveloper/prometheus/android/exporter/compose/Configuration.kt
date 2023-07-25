@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
+package com.birdthedeveloper.prometheus.android.exporter.compose
 
 import android.content.Context
 import android.util.Log
@@ -102,7 +102,7 @@ data class PromConfiguration(
     }
 
     companion object {
-        // data/user/0/com.birdthedeveloper.prometheus.android.prometheus.android.exporter/files
+        // data/user/0/com.birdthedeveloper.prometheus.android.exporter/files
         private const val filename: String = "config.yaml"
         private const val alternativeFilename: String = "config.yml"
         fun configFileExists(context: Context): Boolean {

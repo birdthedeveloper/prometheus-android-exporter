@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.compose
+package com.birdthedeveloper.prometheus.android.exporter.compose
 
 import android.content.Context
 import android.util.Log
@@ -16,7 +16,7 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
-import com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker.PromWorker
+import com.birdthedeveloper.prometheus.android.exporter.worker.PromWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

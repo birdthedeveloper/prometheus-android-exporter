@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
+package com.birdthedeveloper.prometheus.android.exporter.worker
 
 private const val TAG = "SCRAPE_RECORDER"
 

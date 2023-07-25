@@ -1,6 +1,6 @@
 // Author: Martin Ptacek
 
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
+package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import android.util.Log
 import io.ktor.http.HttpStatusCode

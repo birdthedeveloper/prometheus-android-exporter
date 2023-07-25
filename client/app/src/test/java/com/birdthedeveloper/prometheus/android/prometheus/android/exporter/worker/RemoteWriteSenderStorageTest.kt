@@ -1,4 +1,4 @@
-package com.birdthedeveloper.prometheus.android.prometheus.android.exporter.worker
+package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import org.junit.Assert.*
 import org.junit.Test
