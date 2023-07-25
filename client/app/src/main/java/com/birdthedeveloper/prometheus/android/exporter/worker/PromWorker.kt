@@ -4,7 +4,9 @@ package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -127,19 +129,18 @@ class PromWorker(
         val inputConfiguration: PromConfiguration = PromConfiguration.fromWorkData(inputData)
         Log.d(TAG, "Launching PromWorker with the following config: $inputConfiguration")
 
-        // set foreground - //TODO is this right for the use case?
-        //setForeground(createForegroundInfo())
-
         startServicesInOneThread(inputConfiguration)
 
         return Result.success()
     }
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        return createForegroundInfo()
+    }
 
-    //TODO foreground notification
     private fun createForegroundInfo(): ForegroundInfo {
-        val id = "channel_id"
-        val title = "title"
-        val cancel = "cancel_download"
+        val id = "id1"
+        val title = "title1"
+        val cancel = "cancel1"
         // This PendingIntent can be used to cancel the worker
         val intent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(getId())
@@ -147,7 +148,7 @@ class PromWorker(
         val notification = NotificationCompat.Builder(applicationContext, id)
             .setContentTitle(title)
             .setTicker(title)
-            .setContentText("progress")
+            .setContentText("progress1")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             // Add the cancel action to the notification which can
@@ -155,7 +156,12 @@ class PromWorker(
             .addAction(android.R.drawable.ic_delete, cancel, intent)
             .build()
 
-        return ForegroundInfo(1, notification)
+        return ForegroundInfo(0, notification)
+    }
+
+    companion object {
+        const val KEY_INPUT_URL = "KEY_INPUT_URL"
+        const val KEY_OUTPUT_FILE_NAME = "KEY_OUTPUT_FILE_NAME"
     }
 
 }
