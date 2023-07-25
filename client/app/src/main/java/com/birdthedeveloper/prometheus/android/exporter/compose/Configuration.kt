@@ -47,24 +47,24 @@ data class PromConfigFile(
 
 @Serializable
 data class PromServerConfigFile(
-    val enabled: Boolean?,
-    val port: Int?,
+    val enabled: Boolean? = null,
+    val port: Int? = null,
 )
 
 @Serializable
 data class PushProxConfigFile(
-    val enabled: Boolean?,
-    val fqdn: String?,
-    val proxy_url: String?
+    val enabled: Boolean? = null,
+    val fqdn: String? = null,
+    val proxy_url: String? = null,
 )
 
 @Serializable
 data class RemoteWriteConfigFile(
-    val enabled: Boolean?,
-    val scrape_interval: Int?,
-    val remote_write_endpoint: String?,
-    val max_samples_per_export: Int?,
-    val export_interval: Int?,
+    val enabled: Boolean? = null,
+    val scrape_interval: Int? = null,
+    val remote_write_endpoint: String? = null,
+    val max_samples_per_export: Int? = null,
+    val export_interval: Int? = null,
 )
 
 // configuration of a work manager worker
