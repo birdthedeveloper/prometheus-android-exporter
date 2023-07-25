@@ -64,8 +64,8 @@ class PromWorker(
 
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private suspend fun startServicesInOneThread(config: PromConfiguration) {
-        val backgroundDispatcher = newFixedThreadPoolContext(2, "Prom worker")
-        val threadContext =  backgroundDispatcher.limitedParallelism(2)
+        val backgroundDispatcher = newFixedThreadPoolContext(1, "Prom worker")
+        val threadContext =  backgroundDispatcher.limitedParallelism(1)
 
         try{
             withContext(threadContext) {
