@@ -21,9 +21,9 @@ private const val defaultRemoteWriteExportInterval: Int = 120 // seconds
 // serialization classes for parsing YAML configuration file
 @Serializable
 data class PromConfigFile(
-    val prometheus_server: PromServerConfigFile?,
-    val pushprox: PushProxConfigFile?,
-    val remote_write: RemoteWriteConfigFile?,
+    val prometheus_server: PromServerConfigFile? = null,
+    val pushprox: PushProxConfigFile? = null,
+    val remote_write: RemoteWriteConfigFile? = null,
 ) {
     fun toPromConfiguration(): PromConfiguration {
         return PromConfiguration(
