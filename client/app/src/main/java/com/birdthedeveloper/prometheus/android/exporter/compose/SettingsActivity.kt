@@ -77,6 +77,7 @@ fun LicensePage(
             }
         )
         Text(
+            //TODO license
             modifier = Modifier.padding(all = 8.dp),
             text = "License todo"
         )

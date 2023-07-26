@@ -7,7 +7,7 @@ services:
     container_name: prometheus_remote_receive
     image: bitnami/prometheus:2.43.0
     restart: on-failure
-    command: --config.file=/etc/prometheus/prometheus.yml --enable-feature=remote-write-receiver #TODO
+    command: --config.file=/etc/prometheus/prometheus.yml --enable-feature=remote-write-receiver
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:

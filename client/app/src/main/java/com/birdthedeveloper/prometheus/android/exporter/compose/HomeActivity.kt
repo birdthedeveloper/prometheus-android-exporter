@@ -411,7 +411,6 @@ private fun ConfigFileSuccessPage(
     val uiState: PromUiState by promViewModel.uiState.collectAsState()
 
     Column {
-        //TODO implement this
         Text("Config file success:", modifier = Modifier.padding(vertical = 20.dp))
         Text(uiState.promConfig.toStructuredText())
     }

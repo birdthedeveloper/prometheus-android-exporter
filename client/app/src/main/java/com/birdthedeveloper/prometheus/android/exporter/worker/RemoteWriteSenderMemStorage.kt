@@ -125,7 +125,6 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
         }
     }
 
-    //TODO use this thing
     override fun removeNumberOfScrapedSamples(number: Int) {
         if (number > 0) {
             for (i in 1..number) {

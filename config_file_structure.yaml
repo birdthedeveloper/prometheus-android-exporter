@@ -1,31 +1,32 @@
 # Author: Martin Ptacek
 
-# This is a configuration file example for prometheus android exporter.
+# This is a configuration file example for Prometheu Android Exporter.
 
-#TODO format this thing
-
-# Settings specific to exporting metrics using a HTTP server
+# Settings specific to exporting metrics using a HTTP server (Prometheus exporter mode)
 prometheus_server:
 
   enabled: true # default
   port: 10101 # default
 
-# Settings specific to pushing metrics to pushprox proxy
+# Settings specific to pushing metrics to PushProx proxy server
 # This is handy for traversing network topologies such as NAT
 pushprox:
 
   enabled: false # default
+
   # fully qualified domain name
-  # example: com.example.test
+  # example: test.example.com
   fqdn: # string, no default value provided
 
+  # example: http://example.com:8080
   proxy_url: # string, no default value provided
 
-# Settings specific to backfilling metrics using prometheus remote write
+# Settings for the batch exporter mode
+# specific to backfilling metrics using prometheus remote write
 # 
 # Please note that remote_write may be limited by a receiving backend on 
 # how old the backfilled time series can be.
-# For prometheus this limit is set to 1 hour
+# For prometheus this limit is set to roughly 1 hour
 remote_write:
 
   # scrape interval in seconds
@@ -37,7 +38,11 @@ remote_write:
   # example: http://localhost:9090/
   remote_write_endpoint:
 
-  # default value is 500 scrapes 
-  max_samples_per_export: 500
+  max_samples_per_export: 500 # default
 
   export_interval: 60 # default
+
+  # instance and job target labels, no defaults are provided
+  # string values
+  instance:
+  job: 

@@ -46,7 +46,6 @@ class PromWorker(
         ExemplarConfig.disableExemplars() // prometheus client library configuration
     }
 
-    //TODO foreground notification
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as
                 NotificationManager
@@ -110,7 +109,7 @@ class PromWorker(
                             getContext = {context}
                         )
                     )
-                    Log.d(TAG, "PushProx launching now") //TODO is singleThreadContext a problem??
+                    Log.d(TAG, "PushProx launching now")
                     launch {
                         Log.d(TAG, "PushProx launched")
                         pushProxClient.start()
