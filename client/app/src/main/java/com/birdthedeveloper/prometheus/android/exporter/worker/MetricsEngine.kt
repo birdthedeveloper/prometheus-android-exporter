@@ -253,4 +253,7 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
     fun getAndroidManufacturer() : String {
         return Build.MANUFACTURER
     }
+
+    //TODO has_celular
+    //TODO has_wifi
 }
