@@ -34,7 +34,7 @@ data class PromConfigFile(
             pushproxFqdn = this.pushprox?.fqdn ?: "",
             remoteWriteEnabled = this.remote_write?.enabled ?: false,
             remoteWriteEndpoint = this.remote_write?.remote_write_endpoint ?: "",
-            prometheusServerEnabled = this.prometheus_server?.enabled ?: true,
+            prometheusServerEnabled = this.prometheus_server?.enabled ?: false,
             prometheusServerPort = (this.prometheus_server?.port
                 ?: defaultPrometheusServerPort).toString(),
             remoteWriteMaxSamplesPerExport = (this.remote_write?.max_samples_per_export
