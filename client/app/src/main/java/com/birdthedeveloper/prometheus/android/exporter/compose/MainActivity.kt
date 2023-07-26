@@ -51,7 +51,6 @@ class MainActivity : ComponentActivity() {
             composable("settings") {
                 SettingsPage(
                     navController = navController,
-                    promViewModel = promViewModel,
                 )
             }
             composable("homepage") {

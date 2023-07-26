@@ -22,7 +22,6 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun SettingsPage(
-    promViewModel: PromViewModel,
     navController: NavHostController,
 ) {
     Column(
