@@ -8,29 +8,50 @@ import io.prometheus.client.GaugeMetricFamily
 
 private const val TAG = "ANDROID_EXPORTER"
 
-class AndroidCustomExporter(metricEngine: MetricsEngine) : Collector() {
-    private val metricsEngineRef = metricEngine
+class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector() {
 
     override fun collect(): List<MetricFamilySamples> {
         Log.d(TAG, "Collecting metrics now")
         val mfs: MutableList<MetricFamilySamples> = ArrayList()
 
+        //TODO scrape_duration gauge
+
         // metrics definitions
-        collectBatteryStatus(mfs)
+//        collectBatteryStatus(mfs)
+        collectGps(mfs)
+        collectSteps(mfs)
 
         Log.d(TAG, "Metrics collected")
         return mfs
     }
 
-    private fun collectBatteryStatus(mfs: MutableList<MetricFamilySamples>) {
+//    private fun collectBatteryStatus(mfs: MutableList<MetricFamilySamples>) {
+//        //TODO
+//        val batteryPercentageGauge = GaugeMetricFamily(
+//            "battery_percentage", //TODO convert to ratio
+//            "Current battery percentage", listOf(),
+//        )
+//
+//        val batteryPercentage: Double = metricsEngineRef.batteryChargeRatio().toDouble()
+//        batteryPercentageGauge.addMetric(listOf(), batteryPercentage)
+//        mfs.add(batteryPercentageGauge)
+//    }
+
+    private fun collectGps(mfs: MutableList<MetricFamilySamples>){
         //TODO
-        val batteryPercentageGauge = GaugeMetricFamily(
-            "battery_percentage", //TODO convert to ratio
-            "Current battery percentage", listOf(),
+    }
+
+    private fun collectSteps(mfs: MutableList<MetricFamilySamples>){
+        val gauge = GaugeMetricFamily(
+            "steps",
+            "Number of steps", listOf(),
         )
 
-        val batteryPercentage: Double = metricsEngineRef.batteryChargeRatio().toDouble()
-        batteryPercentageGauge.addMetric(listOf(), batteryPercentage)
-        mfs.add(batteryPercentageGauge)
+        Log.d(TAG, metricEngine.hwSensorsValues().numberOfSteps.toString())
+        metricEngine.hwSensorsValues().numberOfSteps?.let{
+            gauge.addMetric(listOf(), it.toDouble())
+            mfs.add(gauge)
+            Log.d(TAG, "heeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        }
     }
 }

@@ -4,6 +4,7 @@ package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import android.app.NotificationManager
 import android.content.Context
+import android.hardware.SensorManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
