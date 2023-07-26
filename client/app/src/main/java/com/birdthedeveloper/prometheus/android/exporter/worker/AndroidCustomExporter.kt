@@ -18,7 +18,7 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
 
         // metrics definitions
 //        collectBatteryStatus(mfs)
-        collectGps(mfs)
+//        collectGps(mfs)
         collectSteps(mfs)
 
         Log.d(TAG, "Metrics collected")
@@ -37,9 +37,9 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
 //        mfs.add(batteryPercentageGauge)
 //    }
 
-    private fun collectGps(mfs: MutableList<MetricFamilySamples>){
-        //TODO
-    }
+//    private fun collectGps(mfs: MutableList<MetricFamilySamples>){
+//        //TODO
+//    }
 
     private fun collectSteps(mfs: MutableList<MetricFamilySamples>){
         val gauge = GaugeMetricFamily(
@@ -51,7 +51,6 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         metricEngine.hwSensorsValues().numberOfSteps?.let{
             gauge.addMetric(listOf(), it.toDouble())
             mfs.add(gauge)
-            Log.d(TAG, "heeeeeeeeeeeeeeeeeeeeeeeeeeeee")
         }
     }
 }
