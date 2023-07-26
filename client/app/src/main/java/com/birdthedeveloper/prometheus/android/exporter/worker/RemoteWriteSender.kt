@@ -3,8 +3,6 @@
 package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
@@ -21,7 +19,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.IndexOutOfBoundsException
 
 private const val TAG: String = "REMOTE_WRITE_SENDER"
 
@@ -35,8 +32,8 @@ internal class LastTimeRingBuffer(private val scrapeInterval: Int) {
 
     companion object {
         private const val hysteresisMemory: Int = 3
-        private const val hysteresisCoefficient : Double = 1.2
-        private const val scrapeTimeCoefficient : Double = 2.2
+        private const val hysteresisCoefficient: Double = 1.2
+        private const val scrapeTimeCoefficient: Double = 2.2
     }
 
     fun setLastTime(timestamp: Long) {
@@ -50,15 +47,15 @@ internal class LastTimeRingBuffer(private val scrapeInterval: Int) {
         }
 
         val bufferIndex: Int = (firstIndex - index)
-        return if (bufferIndex < 0){
+        return if (bufferIndex < 0) {
             buffer[hysteresisMemory + bufferIndex]
-        }else{
+        } else {
             buffer[bufferIndex]
         }
     }
 
     fun checkScrapeDidNotHappenInTime(): Boolean {
-        val now : Long = System.currentTimeMillis()
+        val now: Long = System.currentTimeMillis()
         return getTimeByIndex(0) < now - scrapeTimeCoefficient * scrapeInterval * 1000
     }
 
@@ -76,7 +73,7 @@ internal class LastTimeRingBuffer(private val scrapeInterval: Int) {
     }
 }
 
-class TryExportMetricsAgainException(message : String) : Exception(message)
+class TryExportMetricsAgainException(message: String) : Exception(message)
 
 data class RemoteWriteConfiguration(
     val scrapeInterval: Int,
@@ -99,7 +96,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         Log.d(TAG, "performScrapeAndSaveIt start")
 
         val scrapedMetrics = config.collectorRegistry.metricFamilySamples()
-        val metricsScrape : MetricsScrape = MetricsScrape.fromMfs(scrapedMetrics)
+        val metricsScrape: MetricsScrape = MetricsScrape.fromMfs(scrapedMetrics)
 
         storage.writeScrapedSample(metricsScrape)
         channel.send(Unit)
@@ -107,12 +104,12 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         Log.d(TAG, "performScrapeAndSaveIt end")
     }
 
-    private fun insertInitialDummyScrape(){
+    private fun insertInitialDummyScrape() {
         lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
     }
 
     private suspend fun scraper(channel: Channel<Unit>) {
-        val checkDelay : Long = 1000L
+        val checkDelay = 1000L
 
         insertInitialDummyScrape()
 
@@ -144,7 +141,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     }
 
     private fun conditionsForRemoteWrite(): Boolean {
-        val ctx : Context = config.getContext()
+        val ctx: Context = config.getContext()
         return Util.deviceIsConnectedToInternet(ctx) && (timeHasPassed() || enoughSamplesScraped())
     }
 
@@ -163,7 +160,10 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                 ExponentialBackoff.runWithBackoff({
                     sendRequestToRemoteWrite(body, config.maxSamplesPerExport)
                 }, {
-                   Log.d(TAG, "exportToRemoteWriteEndpointException, ${it.message}, ${it}, ${it.stackTraceToString()}")
+                    Log.d(
+                        TAG,
+                        "exportToRemoteWriteEndpointException, ${it.message}, ${it}, ${it.stackTraceToString()}"
+                    )
                 }, "Remote Write", false)
                 Log.d(TAG, "Exponential backoff to export remote write finish")
             }
@@ -226,7 +226,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
         lastTimeRingBuffer.setLastTime(System.currentTimeMillis())
     }
 
-    private suspend fun sendRequestToRemoteWrite(body: ByteArray, numOfMetricScrapes : Int) {
+    private suspend fun sendRequestToRemoteWrite(body: ByteArray, numOfMetricScrapes: Int) {
         Log.d(TAG, "Exporting remote write to prometheus now")
         val response = client.post(config.remoteWriteEndpoint) {
             setBody(body)
@@ -245,11 +245,13 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                 // this export was successful
                 storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
             }
+
             HttpStatusCode.BadRequest -> {
                 // probably some error or race condition has occured
                 // give up trying to send this data
                 storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
             }
+
             else -> {
                 throw TryExportMetricsAgainException("Status code: ${response.status.description}")
             }

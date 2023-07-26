@@ -27,7 +27,7 @@ data class PrometheusServerConfig(
 )
 
 // Expose metrics on given port using Ktor http server
-class PrometheusServer() {
+class PrometheusServer {
     companion object {
         suspend fun start(config: PrometheusServerConfig) {
             Log.d(TAG, "Starting prometheus server")
@@ -87,7 +87,7 @@ class PrometheusServer() {
                         call.respondText(getLandingPage())
                     }
                     get("/metrics") {
-                        val response : String = config.performScrape()
+                        val response: String = config.performScrape()
                         call.respondText(response)
                         config.countSuccessfulScrape()
                         Log.d(TAG, "Successful scrape")

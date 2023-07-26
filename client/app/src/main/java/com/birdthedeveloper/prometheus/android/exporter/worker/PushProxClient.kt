@@ -16,7 +16,6 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private const val TAG = "PUSHPROX_CLIENT"
@@ -28,7 +27,7 @@ data class PushProxConfig(
     val registry: CollectorRegistry,
     val performScrape: () -> String,
     val countSuccessfulScrape: suspend () -> Unit,
-    val getContext : () -> Context,
+    val getContext: () -> Context,
 )
 
 /**
@@ -72,7 +71,7 @@ data class PushProxContext(
     val pollUrl: String,
     val pushUrl: String,
     val fqdn: String,
-    val getContext : () -> Context,
+    val getContext: () -> Context,
 )
 
 // This is a stripped down kotlin implementation of github.com/prometheus-community/PushProx client
@@ -98,7 +97,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
         }
     }
 
-    private fun createClient() : HttpClient {
+    private fun createClient(): HttpClient {
         Log.d(TAG, "Creating http client ktor")
         return HttpClient(Android) {
             engine {
@@ -118,8 +117,8 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
             modifiedProxyURL = "http://$modifiedProxyURL"
         }
 
-        val pollURL: String = "$modifiedProxyURL/poll"
-        val pushURL: String = "$modifiedProxyURL/push"
+        val pollURL = "$modifiedProxyURL/poll"
+        val pushURL = "$modifiedProxyURL/push"
 
         return PushProxContext(
             client,
@@ -132,7 +131,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
     // Continuously poll from pushprox gateway
     private suspend fun doPoll(context: PushProxContext) {
-        if(Util.deviceIsConnectedToInternet(context.getContext())){
+        if (Util.deviceIsConnectedToInternet(context.getContext())) {
             Log.d(TAG, "Polling now")
             val response: HttpResponse = context.client.post(context.pollUrl) {
                 setBody(context.fqdn)
@@ -140,7 +139,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
             val responseBody: String = response.body()
             doPush(context, responseBody)
             Log.d(TAG, "Polling finished")
-        }else{
+        } else {
             Log.d(TAG, "Skipping poll because network not available")
         }
     }
@@ -189,7 +188,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
             pushProxConfig.countSuccessfulScrape()
         } catch (e: Exception) {
-            if (e is CancellationException){
+            if (e is CancellationException) {
                 throw e
             }
             counters.pushError()

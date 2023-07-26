@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         navController: NavHostController = rememberNavController(),
         promViewModel: PromViewModel
     ) {
-        val startDestination: String = "homepage"
+        val startDestination = "homepage"
         NavHost(
             navController = navController,
             startDestination = startDestination,

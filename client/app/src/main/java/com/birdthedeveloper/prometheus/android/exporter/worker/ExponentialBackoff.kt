@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlin.math.min
 import kotlin.math.pow
 
-private const val TAG : String = "EXPONENTIAL_BACKOFF"
+private const val TAG: String = "EXPONENTIAL_BACKOFF"
 
 class ExponentialBackoff {
     companion object {

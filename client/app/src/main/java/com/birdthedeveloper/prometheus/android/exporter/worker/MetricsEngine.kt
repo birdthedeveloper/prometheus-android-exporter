@@ -7,13 +7,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.SensorManager
 import android.os.BatteryManager
-import androidx.core.content.ContextCompat.getSystemService
 
 class MetricsEngine(private val context: Context) {
-    private lateinit var sensorManager : SensorManager;
+    private lateinit var sensorManager: SensorManager;
+
     init {
         //sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
+
     public fun batteryChargeRatio(): Float {
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
             context.registerReceiver(null, intFilter)
@@ -37,7 +38,6 @@ class MetricsEngine(private val context: Context) {
     public fun somethingTodo(): Float {
         TODO("aa")
     }
-
 
 
 //TODO

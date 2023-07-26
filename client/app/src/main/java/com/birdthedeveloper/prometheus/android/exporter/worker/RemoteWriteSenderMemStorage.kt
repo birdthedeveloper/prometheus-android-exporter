@@ -10,30 +10,30 @@ import java.util.Queue
 // HashMap<List of labels including name, List of TimeSeries samples to this TimeSeries>
 private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<TimeSeriesSample>>
 
-private const val TAG : String = "REMOTE_WRITE_SENDER_MEMORY_SIMPLE_STORAGE";
+private const val TAG: String = "REMOTE_WRITE_SENDER_MEMORY_SIMPLE_STORAGE"
 
 class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     private val data: Queue<MetricsScrape> = LinkedList()
 
-    private fun filterExpiredMetrics(metrics : MutableList<MetricsScrape>){
-        val now : Long = System.currentTimeMillis()
-        val oldestMetricTimeMs : Long = now - maxMetricsAge * 1000
-        var howManyMetricsRemove : Int = 0
+    private fun filterExpiredMetrics(metrics: MutableList<MetricsScrape>) {
+        val now: Long = System.currentTimeMillis()
+        val oldestMetricTimeMs: Long = now - maxMetricsAge * 1000
+        var howManyMetricsRemove = 0
 
         // count how many metrics to remove
-        for (i in 0 until metrics.size){
-            val scrape : MetricsScrape = metrics[i]
-            if(scrape.timeSeriesList.isNotEmpty()){
-                if(scrape.timeSeriesList.first().sample.timeStampMs < oldestMetricTimeMs){
+        for (i in 0 until metrics.size) {
+            val scrape: MetricsScrape = metrics[i]
+            if (scrape.timeSeriesList.isNotEmpty()) {
+                if (scrape.timeSeriesList.first().sample.timeStampMs < oldestMetricTimeMs) {
                     howManyMetricsRemove++
-                }else{
-                    break; // I suppose scrapes were performed one after another
+                } else {
+                    break // I suppose scrapes were performed one after another
                 }
             }
         }
 
         // remove metrics
-        for (i in 1..howManyMetricsRemove){
+        for (i in 1..howManyMetricsRemove) {
             metrics.removeFirst()
         }
     }
@@ -56,7 +56,8 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     }
 
     private fun hashmapToProtobufWriteRequest(hashMap: ConverterHashMap): RemoteWrite.WriteRequest {
-        val writeRequestBuilder: RemoteWrite.WriteRequest.Builder = RemoteWrite.WriteRequest.newBuilder()
+        val writeRequestBuilder: RemoteWrite.WriteRequest.Builder =
+            RemoteWrite.WriteRequest.newBuilder()
 
         for (entry in hashMap) {
             val timeSeries = hashMapEntryToProtobufTimeSeries(entry.key, entry.value)
@@ -84,9 +85,10 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
 
         filterExpiredMetrics(scrapedMetrics)
 
-        val writeRequest: RemoteWrite.WriteRequest = metricsScrapeListToProtobuf(scrapedMetrics.toList())
+        val writeRequest: RemoteWrite.WriteRequest =
+            metricsScrapeListToProtobuf(scrapedMetrics.toList())
         val bytes: ByteArray = writeRequest.toByteArray()
-        return RemoteWriteSenderStorage.encodeWithSnappy(bytes)
+        return encodeWithSnappy(bytes)
     }
 
     private fun metricsScrapeListToProtobuf(input: List<MetricsScrape>): RemoteWrite.WriteRequest {
@@ -97,24 +99,22 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
         val hashmap: ConverterHashMap = HashMap()
 
         for (metricsScrape in input) {
-            for (timeSeries in metricsScrape.timeSeriesList){
+            for (timeSeries in metricsScrape.timeSeriesList) {
                 processStorageTimeSeries(hashmap, timeSeries)
             }
         }
 
-        val result: RemoteWrite.WriteRequest = hashmapToProtobufWriteRequest(hashmap)
-
-        return result
+        return hashmapToProtobufWriteRequest(hashmap)
     }
 
-    private fun processStorageTimeSeries(hashMap: ConverterHashMap, timeSeries: StorageTimeSeries){
+    private fun processStorageTimeSeries(hashMap: ConverterHashMap, timeSeries: StorageTimeSeries) {
 
         // add remote write label to labels
         // this label ensures timeseries uniqueness among those scraped by pushprox or promserver
         // and those scraped by Remote Write
         val labels: MutableList<TimeSeriesLabel> = timeSeries.labels.toMutableList()
         labels.add(remoteWriteLabel)
-        val immutableLabels : List<TimeSeriesLabel> = labels.toList()
+        val immutableLabels: List<TimeSeriesLabel> = labels.toList()
 
         if (hashMap[immutableLabels] == null) {
             // this time series does not yet exist
@@ -128,9 +128,9 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
     override fun removeNumberOfScrapedSamples(number: Int) {
         if (number > 0) {
             for (i in 1..number) {
-                if(data.isEmpty()){
-                    break;
-                }else{
+                if (data.isEmpty()) {
+                    break
+                } else {
                     data.remove()
                 }
             }

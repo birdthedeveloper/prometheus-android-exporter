@@ -7,8 +7,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 
 class Util {
-    companion object{
-        fun deviceIsConnectedToInternet(context : Context) : Boolean{
+    companion object {
+        fun deviceIsConnectedToInternet(context: Context): Boolean {
             val connectivityManager = context
                 .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 

@@ -4,9 +4,7 @@ package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -20,14 +18,12 @@ import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import java.io.StringWriter
 
-private const val TAG : String = "PROM_WORKER"
+private const val TAG: String = "PROM_WORKER"
 
 class PromWorker(
     private val context: Context,
@@ -64,9 +60,9 @@ class PromWorker(
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private suspend fun startServicesInOneThread(config: PromConfiguration) {
         val backgroundDispatcher = newFixedThreadPoolContext(1, "Prom worker")
-        val threadContext =  backgroundDispatcher.limitedParallelism(1)
+        val threadContext = backgroundDispatcher.limitedParallelism(1)
 
-        try{
+        try {
             withContext(threadContext) {
 
                 if (config.remoteWriteEnabled) {
@@ -106,7 +102,7 @@ class PromWorker(
                             pushProxFqdn = config.pushproxFqdn,
                             registry = collectorRegistry,
                             countSuccessfulScrape = ::countSuccessfulScrape,
-                            getContext = {context}
+                            getContext = { context }
                         )
                     )
                     Log.d(TAG, "PushProx launching now")
@@ -116,7 +112,7 @@ class PromWorker(
                     }
                 }
             }
-        }finally {
+        } finally {
             withContext(NonCancellable) {
                 Log.v(TAG, "Canceling prom worker")
                 backgroundDispatcher.close()
@@ -132,6 +128,7 @@ class PromWorker(
 
         return Result.success()
     }
+
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return createForegroundInfo()
     }

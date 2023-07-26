@@ -115,7 +115,7 @@ data class PromConfiguration(
         fun fromWorkData(data: Data): PromConfiguration {
             val jsonString: String = data.getString("json")
                 ?: throw Exception("PromConfiguration serialization not working correctly!")
-            return Json.decodeFromString<PromConfiguration>(jsonString)
+            return Json.decodeFromString(jsonString)
         }
 
         fun loadFromConfigFile(context: Context): PromConfiguration {

@@ -2,17 +2,12 @@
 
 package com.birdthedeveloper.prometheus.android.exporter.worker
 
-import android.util.Log
 import io.prometheus.client.Collector.MetricFamilySamples
 import kotlinx.serialization.Serializable
 import org.iq80.snappy.Snappy
 import remote.write.RemoteWrite.Label
 import remote.write.RemoteWrite.Sample
-import remote.write.RemoteWrite.TimeSeries
-import remote.write.RemoteWrite.WriteRequest
 import java.util.Enumeration
-import java.util.LinkedList
-import java.util.Queue
 
 private const val TAG: String = "REMOTE_WRITE_SENDER_STORAGE"
 
@@ -23,19 +18,19 @@ private const val TAG: String = "REMOTE_WRITE_SENDER_STORAGE"
 
 // data classes, the same structure as MetricFamilySamples
 data class MetricsScrape(
-    val timeSeriesList : List<StorageTimeSeries>
-){
+    val timeSeriesList: List<StorageTimeSeries>
+) {
     companion object {
-        fun fromMfs(input : Enumeration<MetricFamilySamples>) : MetricsScrape {
-            val timeSeriesList : MutableList<StorageTimeSeries> = mutableListOf()
+        fun fromMfs(input: Enumeration<MetricFamilySamples>): MetricsScrape {
+            val timeSeriesList: MutableList<StorageTimeSeries> = mutableListOf()
 
-            for (family in input){
-                for (sample in family.samples){
-                    if (sample != null){
-                        val labels : MutableList<TimeSeriesLabel> = mutableListOf()
+            for (family in input) {
+                for (sample in family.samples) {
+                    if (sample != null) {
+                        val labels: MutableList<TimeSeriesLabel> = mutableListOf()
 
                         // name label
-                        val sampleName : String = sample.name
+                        val sampleName: String = sample.name
                         val sampleNameLabel = TimeSeriesLabel(
                             name = "__name__",
                             value = sampleName
@@ -77,8 +72,8 @@ data class MetricsScrape(
 }
 
 data class StorageTimeSeries(
-    val sample : TimeSeriesSample,
-    val labels : List<TimeSeriesLabel>,
+    val sample: TimeSeriesSample,
+    val labels: List<TimeSeriesLabel>,
 )
 
 @Serializable
@@ -107,13 +102,14 @@ data class TimeSeriesSample(
 }
 
 abstract class RemoteWriteSenderStorage {
-    companion object{
-        const val maxMetricsAge : Int = 58 * 60 // 58 minutes
+    companion object {
+        const val maxMetricsAge: Int = 58 * 60 // 58 minutes
 
         val remoteWriteLabel: TimeSeriesLabel = TimeSeriesLabel(
             name = "backfill",
             value = "true",
         )
+
         fun encodeWithSnappy(data: ByteArray): ByteArray {
             return Snappy.compress(data)
         }
