@@ -32,6 +32,7 @@ android {
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {
@@ -79,6 +80,7 @@ dependencies {
 
     // ktor
     implementation "io.ktor:ktor-client-android:2.3.0"
+    implementation "io.ktor:ktor-client-cio:2.3.0"
 
     // custom - tests
     androidTestImplementation 'androidx.test:runner:1.5.2'
