@@ -86,7 +86,8 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
     val hwPropertiesManager = context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE) as HardwarePropertiesManager
 
     init {
-        registerAllHwEventHandlers()
+        //TODO
+        //registerAllHwEventHandlers()
     }
 
     fun hwSensorsValues(): HwSensorsCache {
@@ -107,7 +108,7 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
     }
 
     fun dispose() {
-        sensorManager.unregisterListener(this)
+        //sensorManager.unregisterListener(this)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -256,4 +257,5 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
 
     //TODO has_celular
     //TODO has_wifi
+    //TODO prefix metrics with exporter name - android_ ...
 }

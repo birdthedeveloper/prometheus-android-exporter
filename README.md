@@ -73,3 +73,5 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 ``` 
 
 ## List of exported metrics:
+
+TODO: add grafana dashboard json here

@@ -47,10 +47,7 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
             "Number of steps", listOf(),
         )
 
-        Log.d(TAG, metricEngine.hwSensorsValues().numberOfSteps.toString())
-        metricEngine.hwSensorsValues().numberOfSteps?.let{
-            gauge.addMetric(listOf(), it.toDouble())
-            mfs.add(gauge)
-        }
+        gauge.addMetric(listOf(), 1.0)
+        mfs.add(gauge)
     }
 }

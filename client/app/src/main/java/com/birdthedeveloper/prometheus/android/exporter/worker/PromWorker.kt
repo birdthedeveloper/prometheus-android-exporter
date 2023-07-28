@@ -2,6 +2,7 @@
 
 package com.birdthedeveloper.prometheus.android.exporter.worker
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
@@ -125,6 +126,8 @@ class PromWorker(
         val inputConfiguration: PromConfiguration = PromConfiguration.fromWorkData(inputData)
         Log.d(TAG, "Launching PromWorker with the following config: $inputConfiguration")
 
+        //setForeground(createForegroundInfo())
+
         startServicesInOneThread(inputConfiguration)
 
         return Result.success()
@@ -134,23 +137,31 @@ class PromWorker(
         return createForegroundInfo()
     }
 
+    //TODO format this thing
     private fun createForegroundInfo(): ForegroundInfo {
+        // create a notification channel first
+        val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channel_id = "CHANNEL_ID"
+        val channel = NotificationChannel("CHANNEL_ID",
+                "YOUR_CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT)
+        channel.description = "YOUR_NOTIFICATION_CHANNEL_DESCRIPTION"
+        mNotificationManager.createNotificationChannel(channel)
+
+
         val id = "id1"
-        val title = "title1"
+        val title = "Prometheus android exporter running"
         val cancel = "cancel1"
         // This PendingIntent can be used to cancel the worker
         val intent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(getId())
 
-        val notification = NotificationCompat.Builder(applicationContext, id)
+        val notification = NotificationCompat.Builder(applicationContext, channel_id)
             .setContentTitle(title)
             .setTicker(title)
-            .setContentText("progress1")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             // Add the cancel action to the notification which can
             // be used to cancel the worker
-            .addAction(android.R.drawable.ic_delete, cancel, intent)
             .build()
 
         return ForegroundInfo(0, notification)

@@ -337,12 +337,11 @@ private fun RemoteWritePage(
         TextField(
             value = uiState.promConfig.remoteWriteMaxSamplesPerExport,
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = {
                 promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteMaxSamplesPerExport, it)
             },
             label = {
-                Text(text = "Max number of samples per export")
+                Text(text = "Target label instance")
             },
             enabled = uiState.exporterState == ExporterState.NotRunning,
         )
@@ -350,12 +349,11 @@ private fun RemoteWritePage(
         TextField(
             value = uiState.promConfig.remoteWriteExportInterval,
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = {
                 promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteExportInterval, it)
             },
             label = {
-                Text(text = "Export interval in seconds")
+                Text(text = "Target label job")
             },
             enabled = uiState.exporterState == ExporterState.NotRunning,
         )
