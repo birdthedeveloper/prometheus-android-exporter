@@ -59,7 +59,6 @@ class MainActivity : ComponentActivity() {
                     promViewModel = promViewModel
                 )
             }
-            composable("license") { LicensePage(navController = navController) }
         }
     }
 }
