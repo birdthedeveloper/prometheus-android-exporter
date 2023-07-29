@@ -17,6 +17,8 @@ private const val defaultPrometheusServerPort: Int = 10101
 private const val defaultRemoteWriteScrapeInterval: Int = 30 // seconds
 private const val defaultRemoteWriteMaxSamplesPerExport: Int = 60 // seconds
 private const val defaultRemoteWriteExportInterval: Int = 120 // seconds
+private const val defaultRemoteWriteJobLabel: String = "test job"
+private const val defaultRemoteWriteInstanceLabel: String = "test instance"
 
 // serialization classes for parsing YAML configuration file
 @Serializable
@@ -41,6 +43,8 @@ data class PromConfigFile(
                 ?: defaultRemoteWriteMaxSamplesPerExport).toString(),
             remoteWriteExportInterval = (this.remote_write?.export_interval
                 ?: defaultRemoteWriteExportInterval).toString(),
+            remoteWriteInstanceLabel = this.remote_write?.instance ?: defaultRemoteWriteInstanceLabel,
+            remoteWriteJobLabel = this.remote_write?.job ?: defaultRemoteWriteJobLabel,
         )
     }
 }
@@ -65,6 +69,8 @@ data class RemoteWriteConfigFile(
     val remote_write_endpoint: String? = null,
     val max_samples_per_export: Int? = null,
     val export_interval: Int? = null,
+    val job: String? = null,
+    val instance: String? = null,
 )
 
 // configuration of a work manager worker
@@ -81,6 +87,8 @@ data class PromConfiguration(
     val remoteWriteEndpoint: String = "",
     val remoteWriteExportInterval: String = defaultRemoteWriteExportInterval.toString(),
     val remoteWriteMaxSamplesPerExport: String = defaultRemoteWriteMaxSamplesPerExport.toString(),
+    val remoteWriteInstanceLabel: String = defaultRemoteWriteInstanceLabel,
+    val remoteWriteJobLabel: String = defaultRemoteWriteJobLabel,
 ) {
 
     fun toStructuredText(): String {
@@ -98,6 +106,8 @@ data class PromConfiguration(
                 export_interval: $remoteWriteExportInterval
                 max_samples_per_export: $remoteWriteMaxSamplesPerExport
                 remote_write_endpoint: "$remoteWriteEndpoint"
+                instance: "$remoteWriteInstanceLabel"
+                job: "$remoteWriteJobLabel"
         """.trimIndent()
     }
 

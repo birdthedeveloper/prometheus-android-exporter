@@ -12,7 +12,7 @@ private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<
 
 private const val TAG: String = "REMOTE_WRITE_SENDER_MEMORY_SIMPLE_STORAGE"
 
-class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
+class RemoteWriteSenderSimpleMemoryStorage(val targetLabels: Map<String, String>) : RemoteWriteSenderStorage() {
     private val data: Queue<MetricsScrape> = LinkedList()
 
     private fun filterExpiredMetrics(metrics: MutableList<MetricsScrape>) {
@@ -107,6 +107,17 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
         return hashmapToProtobufWriteRequest(hashmap)
     }
 
+    private fun addTargetLabels(labels: MutableList<TimeSeriesLabel>){
+        targetLabels.forEach {
+            val label = TimeSeriesLabel(
+                value = it.value,
+                name = it.key,
+            )
+
+            labels.add(label)
+        }
+    }
+
     private fun processStorageTimeSeries(hashMap: ConverterHashMap, timeSeries: StorageTimeSeries) {
 
         // add remote write label to labels
@@ -114,6 +125,7 @@ class RemoteWriteSenderSimpleMemoryStorage : RemoteWriteSenderStorage() {
         // and those scraped by Remote Write
         val labels: MutableList<TimeSeriesLabel> = timeSeries.labels.toMutableList()
         labels.add(remoteWriteLabel)
+        addTargetLabels(labels)
         val immutableLabels: List<TimeSeriesLabel> = labels.toList()
 
         if (hashMap[immutableLabels] == null) {

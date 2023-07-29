@@ -335,10 +335,10 @@ private fun RemoteWritePage(
         )
 
         TextField(
-            value = uiState.promConfig.remoteWriteMaxSamplesPerExport,
+            value = uiState.promConfig.remoteWriteInstanceLabel,
             singleLine = true,
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteMaxSamplesPerExport, it)
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteInstanceLabel, it)
             },
             label = {
                 Text(text = "Target label instance")
@@ -347,10 +347,10 @@ private fun RemoteWritePage(
         )
 
         TextField(
-            value = uiState.promConfig.remoteWriteExportInterval,
+            value = uiState.promConfig.remoteWriteJobLabel,
             singleLine = true,
             onValueChange = {
-                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteExportInterval, it)
+                promViewModel.updatePromConfig(UpdatePromConfig.RemoteWriteJobLabel, it)
             },
             label = {
                 Text(text = "Target label job")

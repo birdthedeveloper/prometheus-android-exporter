@@ -42,6 +42,8 @@ enum class UpdatePromConfig {
     RemoteWriteEndpoint,
     RemoteWriteExportInterval,
     RemoteWriteMaxSamplesPerExport,
+    RemoteWriteJobLabel,
+    RemoteWriteInstanceLabel,
 }
 
 enum class ExporterState {
@@ -388,6 +390,23 @@ class PromViewModel : ViewModel() {
                     )
                 )
             }
+
+            UpdatePromConfig.RemoteWriteInstanceLabel -> _uiState.update {current ->
+                current.copy(
+                    promConfig = current.promConfig.copy(
+                        remoteWriteInstanceLabel = value as String
+                    )
+                )
+            }
+
+            UpdatePromConfig.RemoteWriteJobLabel -> _uiState.update {current ->
+                current.copy(
+                    promConfig = current.promConfig.copy(
+                        remoteWriteJobLabel = value as String
+                    )
+                )
+            }
+
         }
     }
 }

@@ -142,6 +142,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
             Log.d(TAG, "Polling finished")
         } else {
             Log.d(TAG, "Skipping poll because network not available")
+            throw Exception("Device is not connected to any network")
         }
     }
 
@@ -177,24 +178,30 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
         }
 
         // push metrics to pushprox
-        try {
-            val scrapeId: String = getIdFromResponseBody(pollResponseBody)
-            val pushRequestBody: String = composeRequestBody(scrapedMetrics, scrapeId)
+        // only try to push metrics if device is connected to the network
+        if (Util.deviceIsConnectedToInternet(context.getContext())){
+            try {
+                val scrapeId: String = getIdFromResponseBody(pollResponseBody)
+                val pushRequestBody: String = composeRequestBody(scrapedMetrics, scrapeId)
 
-            context.client.request(context.pushUrl) {
-                method = HttpMethod.Post
-                setBody(pushRequestBody)
+                context.client.request(context.pushUrl) {
+                    method = HttpMethod.Post
+                    setBody(pushRequestBody)
+                }
+
+
+                pushProxConfig.countSuccessfulScrape()
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    throw e
+                }
+                counters.pushError()
+                Log.v(TAG, "Push exception $e")
+                return
             }
-
-
-            pushProxConfig.countSuccessfulScrape()
-        } catch (e: Exception) {
-            if (e is CancellationException) {
-                throw e
-            }
+        }else{
             counters.pushError()
-            Log.v(TAG, "Push exception $e")
-            return
+            Log.d(TAG, "device is not connected to any network")
         }
     }
 

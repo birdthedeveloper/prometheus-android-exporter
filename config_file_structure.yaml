@@ -42,7 +42,7 @@ remote_write:
 
   export_interval: 60 # default
 
-  # instance and job target labels, no defaults are provided
+  # instance and job target labels, defaults are provided
   # string values
-  instance:
-  job: 
+  instance: "test instance"
+  job: "test job"

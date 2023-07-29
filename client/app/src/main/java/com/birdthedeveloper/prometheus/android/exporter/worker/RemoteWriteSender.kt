@@ -81,12 +81,13 @@ data class RemoteWriteConfiguration(
     val collectorRegistry: CollectorRegistry,
     val maxSamplesPerExport: Int,
     val exportInterval: Int,
+    val targetLabels: Map<String, String>,
     val getContext: () -> Context,
 )
 
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private val lastTimeRingBuffer = LastTimeRingBuffer(config.scrapeInterval)
-    private val storage: RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage()
+    private val storage: RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage(config.targetLabels)
     private var scrapesAreBeingSent: Boolean = false
     private lateinit var client: HttpClient
     private var lastTimeRemoteWriteSent: Long = 0
@@ -228,33 +229,40 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
     private suspend fun sendRequestToRemoteWrite(body: ByteArray, numOfMetricScrapes: Int) {
         Log.d(TAG, "Exporting remote write to prometheus now")
-        val response = client.post(config.remoteWriteEndpoint) {
-            setBody(body)
-            headers {
-                append(HttpHeaders.ContentEncoding, "snappy")
-                append(HttpHeaders.ContentType, "application/protobuf")
-                append(HttpHeaders.UserAgent, "Prometheus Android Exporter")
-                header("X-Prometheus-Remote-Write-Version", "0.1.0")
-            }
-        }
 
-        Log.d(TAG, "Response status: ${response.status}")
-
-        when (response.status) {
-            HttpStatusCode.NoContent -> {
-                // this export was successful
-                storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+        // only send the request if device is online, otherwise throw exception
+        // ExponentialBackoff will catch the exception
+        if (Util.deviceIsConnectedToInternet(config.getContext())){
+            val response = client.post(config.remoteWriteEndpoint) {
+                setBody(body)
+                headers {
+                    append(HttpHeaders.ContentEncoding, "snappy")
+                    append(HttpHeaders.ContentType, "application/protobuf")
+                    append(HttpHeaders.UserAgent, "Prometheus Android Exporter")
+                    header("X-Prometheus-Remote-Write-Version", "0.1.0")
+                }
             }
 
-            HttpStatusCode.BadRequest -> {
-                // probably some error or race condition has occured
-                // give up trying to send this data
-                storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
-            }
+            Log.d(TAG, "Response status: ${response.status}")
 
-            else -> {
-                throw TryExportMetricsAgainException("Status code: ${response.status.description}")
+            when (response.status) {
+                HttpStatusCode.NoContent -> {
+                    // this export was successful
+                    storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+                }
+
+                HttpStatusCode.BadRequest -> {
+                    // probably some error or race condition has occured
+                    // give up trying to send this data
+                    storage.removeNumberOfScrapedSamples(numOfMetricScrapes)
+                }
+
+                else -> {
+                    throw TryExportMetricsAgainException("Status code: ${response.status.description}")
+                }
             }
+        }else{
+            throw TryExportMetricsAgainException("Device is not connected to any network")
         }
     }
 }

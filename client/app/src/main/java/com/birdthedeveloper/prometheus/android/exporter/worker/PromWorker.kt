@@ -74,6 +74,10 @@ class PromWorker(
                             collectorRegistry = collectorRegistry,
                             exportInterval = config.remoteWriteExportInterval.toInt(),
                             maxSamplesPerExport = config.remoteWriteMaxSamplesPerExport.toInt(),
+                            targetLabels = mapOf(
+                                "job" to config.remoteWriteJobLabel,
+                                "instance" to config.remoteWriteInstanceLabel,
+                            ),
                         ) { context }
                     )
                     launch {
