@@ -125,7 +125,7 @@ class PromWorker(
         val inputConfiguration: PromConfiguration = PromConfiguration.fromWorkData(inputData)
         Log.d(TAG, "Launching PromWorker with the following config: $inputConfiguration")
 
-        //setForeground(createForegroundInfo())
+        setForeground(createForegroundInfo())
 
         startServicesInOneThread(inputConfiguration)
 
