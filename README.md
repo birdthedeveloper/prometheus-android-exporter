@@ -81,6 +81,9 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 `android_sensor_hinge_angle_degrees` - How much is the hinge opened
 `android_sensor_accelerometer{axis}` - Data from the accelerometer
 `android_sensor_magnetic_field_tesla{axis}` - Data from the magnetic field sensor in base units
+`android_sensor_gravity_acceleration` - Data from gravity acceleration sensor, in m/s^2 units
+`android_sensor_linear_acceleration` - Data from the Android linear acceleration sensor in m/s^2 units.
+
 
 
 ### Miscellaneous

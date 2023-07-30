@@ -179,6 +179,26 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
             addAxisSpecificGauge(gauge, baseUnits)
             mfs.add(gauge)
         }
+
+        metricEngine.hwSensorsValues().gravityAcceleration?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_gravity_acceleration",
+                "Gravity acceleration sensor data in m/s^2",
+                listOf("axis")
+            )
+            addAxisSpecificGauge(gauge, it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().linearAcceleration?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_linear_acceleration",
+                "Data from the Android linear acceleration sensor in m/s^2 units.",
+                listOf("axis")
+            )
+            addAxisSpecificGauge(gauge, it)
+            mfs.add(gauge)
+        }
     }
 
     private fun collectScrapeDuration(mfs : MutableList<MetricFamilySamples>, startTime : Long){

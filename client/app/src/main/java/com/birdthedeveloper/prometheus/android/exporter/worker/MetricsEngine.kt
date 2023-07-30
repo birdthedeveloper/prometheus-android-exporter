@@ -42,7 +42,7 @@ class HwSensorsCache(
     var pressureHectoPascal : Double? = null,
     var proximityCentimeters : Double? = null, //DONE
 
-    var gravityAcceleration : AxisSpecificGauge? = null,
+    var gravityAcceleration : AxisSpecificGauge? = null, //DONE
     var linearAcceleration : AxisSpecificGauge? = null,
     var rotationVectorValues : AxisSpecificGauge? = null,
     var rotationVectorCosinusThetaHalf : Double? = null,
