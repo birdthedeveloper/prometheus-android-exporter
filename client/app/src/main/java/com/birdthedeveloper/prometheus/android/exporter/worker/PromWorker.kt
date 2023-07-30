@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.birdthedeveloper.prometheus.android.exporter.R
 import com.birdthedeveloper.prometheus.android.exporter.compose.PromConfiguration
@@ -42,10 +41,6 @@ class PromWorker(
         androidCustomExporter.register<AndroidCustomExporter>(collectorRegistry)
         ExemplarConfig.disableExemplars() // prometheus client library configuration
     }
-
-    private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as
-                NotificationManager
 
     private fun performScrape(): String {
         val writer = StringWriter()
@@ -141,25 +136,18 @@ class PromWorker(
         return createForegroundInfo()
     }
 
-    //TODO format this thing
     private fun createForegroundInfo(): ForegroundInfo {
         // create a notification channel first
         val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channel_id = "CHANNEL_ID"
+        val channelId = "CHANNEL_ID"
         val channel = NotificationChannel("CHANNEL_ID",
-                "YOUR_CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT)
-        channel.description = "YOUR_NOTIFICATION_CHANNEL_DESCRIPTION"
+                "Android exporter channel", NotificationManager.IMPORTANCE_DEFAULT)
+        channel.description = "Prometheus Android Exporter"
         mNotificationManager.createNotificationChannel(channel)
 
-
-        val id = "id1"
         val title = "Prometheus android exporter running"
-        val cancel = "cancel1"
-        // This PendingIntent can be used to cancel the worker
-        val intent = WorkManager.getInstance(applicationContext)
-            .createCancelPendingIntent(getId())
 
-        val notification = NotificationCompat.Builder(applicationContext, channel_id)
+        val notification = NotificationCompat.Builder(applicationContext, channelId)
             .setContentTitle(title)
             .setTicker(title)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -170,10 +158,4 @@ class PromWorker(
 
         return ForegroundInfo(0, notification)
     }
-
-    companion object {
-        const val KEY_INPUT_URL = "KEY_INPUT_URL"
-        const val KEY_OUTPUT_FILE_NAME = "KEY_OUTPUT_FILE_NAME"
-    }
-
 }
