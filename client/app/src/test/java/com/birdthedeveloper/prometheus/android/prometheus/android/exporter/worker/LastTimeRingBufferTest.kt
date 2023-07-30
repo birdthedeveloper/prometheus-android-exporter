@@ -1,3 +1,5 @@
+// Author: Martin Ptacek
+
 package com.birdthedeveloper.prometheus.android.exporter.worker
 
 import org.junit.Assert

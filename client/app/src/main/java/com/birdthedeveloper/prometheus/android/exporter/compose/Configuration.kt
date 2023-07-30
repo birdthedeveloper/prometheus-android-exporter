@@ -43,7 +43,8 @@ data class PromConfigFile(
                 ?: defaultRemoteWriteMaxSamplesPerExport).toString(),
             remoteWriteExportInterval = (this.remote_write?.export_interval
                 ?: defaultRemoteWriteExportInterval).toString(),
-            remoteWriteInstanceLabel = this.remote_write?.instance ?: defaultRemoteWriteInstanceLabel,
+            remoteWriteInstanceLabel = this.remote_write?.instance
+                ?: defaultRemoteWriteInstanceLabel,
             remoteWriteJobLabel = this.remote_write?.job ?: defaultRemoteWriteJobLabel,
         )
     }
@@ -112,7 +113,7 @@ data class PromConfiguration(
     }
 
     companion object {
-        // data/user/0/com.birdthedeveloper.prometheus.android.exporter/files
+        // data/user/0/com.birdthedeveloper.prometheus.android.exporter/files/
         private const val filename: String = "config.yaml"
         private const val alternativeFilename: String = "config.yml"
         fun configFileExists(context: Context): Boolean {

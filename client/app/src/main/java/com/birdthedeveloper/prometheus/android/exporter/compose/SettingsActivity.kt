@@ -38,8 +38,15 @@ fun SettingsPage(
             }
         )
 
-       Text( modifier = Modifier.padding(all = 20.dp),
-           text = "This application is licensed under the Apache 2.0 license.", textAlign = TextAlign.Center,)
-        Text(modifier = Modifier.padding(all = 20.dp),text = "Author: Martin Ptacek, 2023", textAlign = TextAlign.Center,)
+        Text(
+            modifier = Modifier.padding(all = 20.dp),
+            text = "This application is licensed under the Apache 2.0 license.",
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            modifier = Modifier.padding(all = 20.dp),
+            text = "Author: Martin Ptacek, 2023",
+            textAlign = TextAlign.Center,
+        )
     }
 }

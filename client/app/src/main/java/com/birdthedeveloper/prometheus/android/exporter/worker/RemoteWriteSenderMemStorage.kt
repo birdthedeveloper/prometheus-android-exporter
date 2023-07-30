@@ -12,29 +12,32 @@ private typealias ConverterHashMap = HashMap<List<TimeSeriesLabel>, MutableList<
 
 private const val TAG: String = "REMOTE_WRITE_SENDER_MEMORY_SIMPLE_STORAGE"
 
-class RemoteWriteSenderSimpleMemoryStorage(val targetLabels: Map<String, String>) : RemoteWriteSenderStorage() {
+class RemoteWriteSenderSimpleMemoryStorage(val targetLabels: Map<String, String>) :
+    RemoteWriteSenderStorage() {
     private val data: Queue<MetricsScrape> = LinkedList()
 
-    private fun filterExpiredMetrics(metrics: MutableList<MetricsScrape>) {
-        val now: Long = System.currentTimeMillis()
-        val oldestMetricTimeMs: Long = now - maxMetricsAge * 1000
-        var howManyMetricsRemove = 0
+    companion object {
+        fun filterExpiredMetrics(metrics: MutableList<MetricsScrape>) {
+            val now: Long = System.currentTimeMillis()
+            val oldestMetricTimeMs: Long = now - maxMetricsAge * 1000
+            var howManyMetricsRemove = 0
 
-        // count how many metrics to remove
-        for (i in 0 until metrics.size) {
-            val scrape: MetricsScrape = metrics[i]
-            if (scrape.timeSeriesList.isNotEmpty()) {
-                if (scrape.timeSeriesList.first().sample.timeStampMs < oldestMetricTimeMs) {
-                    howManyMetricsRemove++
-                } else {
-                    break // I suppose scrapes were performed one after another
+            // count how many metrics to remove
+            for (i in 0 until metrics.size) {
+                val scrape: MetricsScrape = metrics[i]
+                if (scrape.timeSeriesList.isNotEmpty()) {
+                    if (scrape.timeSeriesList.first().sample.timeStampMs < oldestMetricTimeMs) {
+                        howManyMetricsRemove++
+                    } else {
+                        break // I suppose scrapes were performed one after another
+                    }
                 }
             }
-        }
 
-        // remove metrics
-        for (i in 1..howManyMetricsRemove) {
-            metrics.removeFirst()
+            // remove metrics
+            for (i in 1..howManyMetricsRemove) {
+                metrics.removeFirst()
+            }
         }
     }
 
@@ -107,7 +110,7 @@ class RemoteWriteSenderSimpleMemoryStorage(val targetLabels: Map<String, String>
         return hashmapToProtobufWriteRequest(hashmap)
     }
 
-    private fun addTargetLabels(labels: MutableList<TimeSeriesLabel>){
+    private fun addTargetLabels(labels: MutableList<TimeSeriesLabel>) {
         targetLabels.forEach {
             val label = TimeSeriesLabel(
                 value = it.value,

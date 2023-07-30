@@ -252,6 +252,13 @@ class PromViewModel : ViewModel() {
                     "Scrape interval must be smaller than Export interval!"
                 )
             }
+
+            // check target labels
+            if (config.remoteWriteInstanceLabel.isEmpty() || config.remoteWriteJobLabel.isEmpty()) {
+                return displayConfigValidationDialog(
+                    "Job target label and Instance target label must be set!"
+                )
+            }
         }
 
         // validate settings for prometheus server
@@ -391,7 +398,7 @@ class PromViewModel : ViewModel() {
                 )
             }
 
-            UpdatePromConfig.RemoteWriteInstanceLabel -> _uiState.update {current ->
+            UpdatePromConfig.RemoteWriteInstanceLabel -> _uiState.update { current ->
                 current.copy(
                     promConfig = current.promConfig.copy(
                         remoteWriteInstanceLabel = value as String
@@ -399,7 +406,7 @@ class PromViewModel : ViewModel() {
                 )
             }
 
-            UpdatePromConfig.RemoteWriteJobLabel -> _uiState.update {current ->
+            UpdatePromConfig.RemoteWriteJobLabel -> _uiState.update { current ->
                 current.copy(
                     promConfig = current.promConfig.copy(
                         remoteWriteJobLabel = value as String

@@ -24,35 +24,35 @@ import android.util.Log
 private const val TAG = "METRICS_ENGINE"
 
 data class AxisSpecificGauge(
-    val x : Double,
-    val y : Double,
-    val z : Double,
+    val x: Double,
+    val y: Double,
+    val z: Double,
 )
 
 class HwSensorsCache(
-    var headingDegrees : Double? = null,
-    var headingAccuracyDegrees : Double? = null,
-    var hingeAngleDegrees : Double? = null,
-    var offbodyDetect : Double? = null,
-    var ambientTemperatureCelsius : Double? = null,
-    var relativeHumidityPercent : Double? = null,
+    var headingDegrees: Double? = null,
+    var headingAccuracyDegrees: Double? = null,
+    var hingeAngleDegrees: Double? = null,
+    var offbodyDetect: Double? = null,
+    var ambientTemperatureCelsius: Double? = null,
+    var relativeHumidityPercent: Double? = null,
 
-    var accelerometer : AxisSpecificGauge? = null,
-    var magneticFieldMicroTesla : AxisSpecificGauge? = null,
+    var accelerometer: AxisSpecificGauge? = null,
+    var magneticFieldMicroTesla: AxisSpecificGauge? = null,
     var gyroscopeRadiansPerSecond: AxisSpecificGauge? = null,
 
-    var ambientLightLux : Double? = null,
-    var pressureHectoPascal : Double? = null,
-    var proximityCentimeters : Double? = null,
+    var ambientLightLux: Double? = null,
+    var pressureHectoPascal: Double? = null,
+    var proximityCentimeters: Double? = null,
 
-    var gravityAcceleration : AxisSpecificGauge? = null,
-    var linearAcceleration : AxisSpecificGauge? = null,
-    var rotationVectorValues : AxisSpecificGauge? = null,
-    var rotationVectorCosinusThetaHalf : Double? = null,
-    var rotationVectorAccuracyRadians : Double? = null,
+    var gravityAcceleration: AxisSpecificGauge? = null,
+    var linearAcceleration: AxisSpecificGauge? = null,
+    var rotationVectorValues: AxisSpecificGauge? = null,
+    var rotationVectorCosinusThetaHalf: Double? = null,
+    var rotationVectorAccuracyRadians: Double? = null,
 );
 
-private val supportedSensors : List<Int> = listOf(
+private val supportedSensors: List<Int> = listOf(
     Sensor.TYPE_HEADING,
     Sensor.TYPE_HINGE_ANGLE,
     Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT,
@@ -69,18 +69,19 @@ private val supportedSensors : List<Int> = listOf(
     Sensor.TYPE_ROTATION_VECTOR,
 )
 
-val temperatureTypes : Map<Int, String> = mapOf(
+val temperatureTypes: Map<Int, String> = mapOf(
     HardwarePropertiesManager.DEVICE_TEMPERATURE_BATTERY to "battery",
     HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU to "cpu",
     HardwarePropertiesManager.DEVICE_TEMPERATURE_GPU to "gpu",
     HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN to "skin",
 
-)
+    )
 
 class MetricsEngine(private val context: Context) : SensorEventListener {
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val hwSensorsCache = HwSensorsCache()
-    private val hwPropertiesManager = context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE) as HardwarePropertiesManager
+    private val hwPropertiesManager =
+        context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE) as HardwarePropertiesManager
 
     init {
         registerAllHwEventHandlers()
@@ -204,7 +205,6 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return batteryRatio.toDouble()
     }
 
-    //TODO
     fun getBatteryIsCharging(): Boolean {
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
             context.registerReceiver(null, intFilter)
@@ -222,7 +222,7 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return SystemClock.elapsedRealtime() / 1000.0
     }
 
-    fun getAndroidOsVersion(): String{
+    fun getAndroidOsVersion(): String {
         return Build.VERSION.RELEASE
     }
 
@@ -230,38 +230,40 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return Build.MODEL
     }
 
-    fun getAndroidManufacturer() : String {
+    fun getAndroidManufacturer(): String {
         return Build.MANUFACTURER
     }
 
-    fun getHasCellularConnected() : Boolean? {
+    fun getHasCellularConnected(): Boolean? {
         val connectivityManager = context
             .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 
-        return if (connectivityManager != null){
+        return if (connectivityManager != null) {
 
             val network = connectivityManager.activeNetwork
             val cap = connectivityManager.getNetworkCapabilities(network)
 
             cap != null && cap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 
-        }else{
+        } else {
             null
         }
     }
 
-    fun getHasWiFiConnected() : Boolean? {
+    fun getHasWiFiConnected(): Boolean? {
         val connectivityManager = context
             .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
 
-        return if (connectivityManager != null){
+        return if (connectivityManager != null) {
 
             val network = connectivityManager.activeNetwork
             val cap = connectivityManager.getNetworkCapabilities(network)
 
-            cap != null && (cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE))
+            cap != null && (cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || cap.hasTransport(
+                NetworkCapabilities.TRANSPORT_WIFI_AWARE
+            ))
 
-        }else{
+        } else {
             null
         }
     }

@@ -7,7 +7,6 @@ import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.post
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -179,7 +178,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
 
         // push metrics to pushprox
         // only try to push metrics if device is connected to the network
-        if (Util.deviceIsConnectedToInternet(context.getContext())){
+        if (Util.deviceIsConnectedToInternet(context.getContext())) {
             try {
                 val scrapeId: String = getIdFromResponseBody(pollResponseBody)
                 val pushRequestBody: String = composeRequestBody(scrapedMetrics, scrapeId)
@@ -199,7 +198,7 @@ class PushProxClient(private val pushProxConfig: PushProxConfig) {
                 Log.v(TAG, "Push exception $e")
                 return
             }
-        }else{
+        } else {
             counters.pushError()
             Log.d(TAG, "device is not connected to any network")
         }

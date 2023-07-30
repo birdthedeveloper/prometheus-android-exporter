@@ -2,10 +2,8 @@
 
 package com.birdthedeveloper.prometheus.android.exporter.worker
 
-import android.os.CpuUsageInfo
 import android.util.Log
 import io.prometheus.client.Collector
-import io.prometheus.client.Gauge
 import io.prometheus.client.GaugeMetricFamily
 
 private const val TAG = "ANDROID_EXPORTER"
@@ -34,7 +32,7 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         return mfs
     }
 
-    private fun collectBatteryChargeRatio(mfs : MutableList<MetricFamilySamples>){
+    private fun collectBatteryChargeRatio(mfs: MutableList<MetricFamilySamples>) {
         val gauge = GaugeMetricFamily(
             "android_battery_charge_ratio",
             "Current battery charge",
@@ -44,7 +42,7 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         mfs.add(gauge)
     }
 
-    private fun collectUptimeInSeconds(mfs : MutableList<MetricFamilySamples>){
+    private fun collectUptimeInSeconds(mfs: MutableList<MetricFamilySamples>) {
         val gauge = GaugeMetricFamily(
             "android_uptime_seconds",
             "Android uptime in seconds",
@@ -54,11 +52,11 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         mfs.add(gauge)
     }
 
-    private fun collectHasWiFiConnection(mfs : MutableList<MetricFamilySamples>){
+    private fun collectHasWiFiConnection(mfs: MutableList<MetricFamilySamples>) {
         metricEngine.getHasWiFiConnected()?.let {
-            val result : Double = if (it) {
+            val result: Double = if (it) {
                 1.0
-            }else{
+            } else {
                 0.0
             }
 
@@ -72,10 +70,10 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         }
     }
 
-    private fun collectBatteryIsCharging(mfs: MutableList<MetricFamilySamples>){
-        val result = if (metricEngine.getBatteryIsCharging()){
+    private fun collectBatteryIsCharging(mfs: MutableList<MetricFamilySamples>) {
+        val result = if (metricEngine.getBatteryIsCharging()) {
             1.0
-        }else{
+        } else {
             0.0
         }
 
@@ -88,11 +86,11 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         mfs.add(gauge)
     }
 
-    private fun collectHasCellularConnection(mfs : MutableList<MetricFamilySamples>){
+    private fun collectHasCellularConnection(mfs: MutableList<MetricFamilySamples>) {
         metricEngine.getHasCellularConnected()?.let {
-            val result : Double = if (it) {
+            val result: Double = if (it) {
                 1.0
-            }else{
+            } else {
                 0.0
             }
 
@@ -106,22 +104,24 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         }
     }
 
-    private fun collectAndroidInfo(mfs : MutableList<MetricFamilySamples>){
+    private fun collectAndroidInfo(mfs: MutableList<MetricFamilySamples>) {
         val gauge = GaugeMetricFamily(
             "android_system_info",
             "Static information about the android phone",
-            listOf("manufacturer", "model", "os_release","cpu_core_count")
+            listOf("manufacturer", "model", "os_release", "cpu_core_count")
         )
-        gauge.addMetric(listOf(
-            metricEngine.getAndroidManufacturer(),
-            metricEngine.getAndroidModel(),
-            metricEngine.getAndroidOsVersion(),
-            metricEngine.getNumberOfCpuCores().toString(),
-        ), 1.0)
+        gauge.addMetric(
+            listOf(
+                metricEngine.getAndroidManufacturer(),
+                metricEngine.getAndroidModel(),
+                metricEngine.getAndroidOsVersion(),
+                metricEngine.getNumberOfCpuCores().toString(),
+            ), 1.0
+        )
         mfs.add(gauge)
     }
 
-    private fun collectHardwareSensors(mfs : MutableList<MetricFamilySamples>){
+    private fun collectHardwareSensors(mfs: MutableList<MetricFamilySamples>) {
         metricEngine.hwSensorsValues().headingDegrees?.let {
             val gauge = GaugeMetricFamily(
                 "android_sensor_heading_degrees",
@@ -284,7 +284,7 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
                 "Data from the Android Rotation Vector sensor, how is the device rotated, without a unit",
                 listOf(),
             )
-            gauge.addMetric(listOf(),it)
+            gauge.addMetric(listOf(), it)
             mfs.add(gauge)
         }
 
@@ -294,12 +294,12 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
                 "Accuracy of the Android rotation vector sensor, in radians",
                 listOf(),
             )
-            gauge.addMetric(listOf(),it)
+            gauge.addMetric(listOf(), it)
             mfs.add(gauge)
         }
     }
 
-    private fun collectScrapeDuration(mfs : MutableList<MetricFamilySamples>, startTime : Long){
+    private fun collectScrapeDuration(mfs: MutableList<MetricFamilySamples>, startTime: Long) {
         val gauge = GaugeMetricFamily(
             "android_scrape_duration_seconds",
             "Duration of the metric scrape",
@@ -311,7 +311,7 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         mfs.add(gauge)
     }
 
-    private fun addAxisSpecificGauge(gauge: GaugeMetricFamily, data : AxisSpecificGauge){
+    private fun addAxisSpecificGauge(gauge: GaugeMetricFamily, data: AxisSpecificGauge) {
         gauge.addMetric(listOf("x"), data.x)
         gauge.addMetric(listOf("y"), data.y)
         gauge.addMetric(listOf("z"), data.z)

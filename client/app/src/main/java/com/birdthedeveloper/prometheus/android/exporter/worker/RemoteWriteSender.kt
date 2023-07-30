@@ -87,7 +87,8 @@ data class RemoteWriteConfiguration(
 
 class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
     private val lastTimeRingBuffer = LastTimeRingBuffer(config.scrapeInterval)
-    private val storage: RemoteWriteSenderStorage = RemoteWriteSenderSimpleMemoryStorage(config.targetLabels)
+    private val storage: RemoteWriteSenderStorage =
+        RemoteWriteSenderSimpleMemoryStorage(config.targetLabels)
     private var scrapesAreBeingSent: Boolean = false
     private lateinit var client: HttpClient
     private var lastTimeRemoteWriteSent: Long = 0
@@ -232,7 +233,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
 
         // only send the request if device is online, otherwise throw exception
         // ExponentialBackoff will catch the exception
-        if (Util.deviceIsConnectedToInternet(config.getContext())){
+        if (Util.deviceIsConnectedToInternet(config.getContext())) {
             val response = client.post(config.remoteWriteEndpoint) {
                 setBody(body)
                 headers {
@@ -261,7 +262,7 @@ class RemoteWriteSender(private val config: RemoteWriteConfiguration) {
                     throw TryExportMetricsAgainException("Status code: ${response.status.description}")
                 }
             }
-        }else{
+        } else {
             throw TryExportMetricsAgainException("Device is not connected to any network")
         }
     }
