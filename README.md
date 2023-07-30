@@ -72,6 +72,7 @@ opening the app and hitting "Start" button.
 - Folder `local` contains simple docker-compose.yaml files to spin up prometheus database on localhost
     quickly for testing purposes with desired configuration.
 - Configuration options for the YAML file are described in `config_file_structure.yaml`.
+- Grafana dashboard as an exported json is present in file `grafana_dashboard.json`.
 
 
 ## Some helpful information for development

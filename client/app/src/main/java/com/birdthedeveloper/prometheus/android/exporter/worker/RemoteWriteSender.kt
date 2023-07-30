@@ -33,7 +33,7 @@ internal class LastTimeRingBuffer(private val scrapeInterval: Int) {
     companion object {
         private const val hysteresisMemory: Int = 3
         private const val hysteresisCoefficient: Double = 1.2
-        private const val scrapeTimeCoefficient: Double = 2.2
+        private const val scrapeTimeCoefficient: Double = 1.7
     }
 
     fun setLastTime(timestamp: Long) {
