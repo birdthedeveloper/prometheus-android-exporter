@@ -13,23 +13,24 @@ private const val TAG = "ANDROID_EXPORTER"
 class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector() {
 
     override fun collect(): List<MetricFamilySamples> {
+        val startTime = System.currentTimeMillis()
         Log.d(TAG, "Collecting metrics now")
+
         val mfs: MutableList<MetricFamilySamples> = ArrayList()
 
-        val startTime = System.currentTimeMillis()
 
         // metrics definitions
         collectBatteryChargeRatio(mfs)
         collectUptimeInSeconds(mfs)
-//        collectDeviceTemperatures(mfs)
-//        collectCpuUsage(mfs)
         collectHasWiFiConnection(mfs)
         collectHasCellularConnection(mfs)
         collectAndroidInfo(mfs)
+        collectBatteryIsCharging(mfs)
         collectHardwareSensors(mfs)
-        collectScrapeDuration(mfs, startTime)
+
 
         Log.d(TAG, "Metrics collected")
+        collectScrapeDuration(mfs, startTime)
         return mfs
     }
 
@@ -53,43 +54,6 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         mfs.add(gauge)
     }
 
-    //TODO this does not work
-    private fun collectCpuUsage(mfs : MutableList<MetricFamilySamples>){
-        var coreIndex= 0
-        val cpuUsage : Array<CpuUsageInfo> = metricEngine.getCpuUsage()
-        val gaugeActive = GaugeMetricFamily(
-            "android_cpu_active_seconds",
-            "Active CPU time in seconds since last system booted",
-            listOf("core"),
-        )
-        val gaugeTotal = GaugeMetricFamily(
-            "android_cpu_total_seconds",
-            "Total CPU time in seconds since last system booted",
-            listOf("core")
-        )
-
-        cpuUsage.forEach {
-            gaugeActive.addMetric(listOf((coreIndex++).toString()), it.active / 1000.0)
-            gaugeActive.addMetric(listOf((coreIndex++).toString()), it.total / 1000.0)
-        }
-
-        mfs.addAll(listOf(gaugeTotal, gaugeActive))
-    }
-
-    //TODO does not work
-    private fun collectDeviceTemperatures(mfs : MutableList<MetricFamilySamples>){
-        val deviceTemperatures = metricEngine.getDeviceTemperatures()
-        val gauge = GaugeMetricFamily(
-            "android_system_temperature_celsius{where}` - ",
-            "Temperature on the device",
-            listOf("where")
-        )
-        deviceTemperatures.entries.forEach{
-            gauge.addMetric(listOf(it.key), it.value)
-        }
-        mfs.add(gauge)
-    }
-
     private fun collectHasWiFiConnection(mfs : MutableList<MetricFamilySamples>){
         metricEngine.getHasWiFiConnected()?.let {
             val result : Double = if (it) {
@@ -106,6 +70,22 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
             gauge.addMetric(listOf(), result)
             mfs.add(gauge)
         }
+    }
+
+    private fun collectBatteryIsCharging(mfs: MutableList<MetricFamilySamples>){
+        val result = if (metricEngine.getBatteryIsCharging()){
+            1.0
+        }else{
+            0.0
+        }
+
+        val gauge = GaugeMetricFamily(
+            "android_battery_is_charging",
+            "Android battery state",
+            listOf(),
+        )
+        gauge.addMetric(listOf(), result)
+        mfs.add(gauge)
     }
 
     private fun collectHasCellularConnection(mfs : MutableList<MetricFamilySamples>){

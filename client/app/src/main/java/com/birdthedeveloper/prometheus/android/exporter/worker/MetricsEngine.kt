@@ -2,6 +2,7 @@
 
 package com.birdthedeveloper.prometheus.android.exporter.worker
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -192,7 +193,6 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
             context.registerReceiver(null, intFilter)
         }
-        //val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
 
         val batteryRatio: Float? = batteryStatus?.let { intent ->
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
@@ -204,30 +204,22 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return batteryRatio.toDouble()
     }
 
+    //TODO
+    fun getBatteryIsCharging(): Boolean {
+        val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
+            context.registerReceiver(null, intFilter)
+        }
+        val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        return status == BatteryManager.BATTERY_STATUS_CHARGING
+                || status == BatteryManager.BATTERY_STATUS_FULL
+    }
+
     fun getNumberOfCpuCores(): Int {
         return Os.sysconf(OsConstants._SC_NPROCESSORS_CONF).toInt()
     }
 
     fun getUptimeInSeconds(): Double {
         return SystemClock.elapsedRealtime() / 1000.0
-    }
-
-    fun getCpuUsage() : Array<CpuUsageInfo> {
-        return hwPropertiesManager.cpuUsages
-    }
-
-    fun getDeviceTemperatures() : Map<String, Double> {
-        val result = mutableMapOf<String, Double>()
-        temperatureTypes.keys.forEach { type ->
-            val array = hwPropertiesManager.getDeviceTemperatures(
-                type,
-                HardwarePropertiesManager.TEMPERATURE_CURRENT
-            )
-            if(array.isNotEmpty()){
-                result[temperatureTypes[type]!!] = array[0].toDouble()
-            }
-        }
-        return result
     }
 
     fun getAndroidOsVersion(): String{

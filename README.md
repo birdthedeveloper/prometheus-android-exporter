@@ -95,14 +95,11 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 `android_cellular_network_connected` - Whether cellular network is connected
 `android_wifi_connected` - Whether WiFi is connected
 
-
 ### Miscellaneous
 `android_battery_charge_ratio` - Current battery charge
+`android_battery_is_charging` - Whether the battery is charging
 `android_system_info{manufacturer, model, os_release, cpu_core_count}` - Information about Android system
 `android_uptime_seconds` - Phone uptime in seconds
-`android_cpu_active_seconds{core}` - Active CPU time in seconds since last time system booted
-`android_cpu_total_seconds{core}` - Total CPU time in seconds since last time system booted
-`android_system_temperature_celsius{where}` - Temperature on the device
 `android_scrape_duration_seconds` - Duration of the metric scrape
 
 ### PushProx client mode specific metrics
