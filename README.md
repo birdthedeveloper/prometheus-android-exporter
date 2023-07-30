@@ -24,7 +24,8 @@ Application is configurable either via its UI or via YAML configuration file.
 Each tab on the homepage of the application corresponds to one application mode.
 For example, to configure PushProx client to traverse NAT while still following the pull model,
 I can open the application, go to tab "PushProx", fill out FQDN - fully qualified domain name and PushProx
-URL, switch this mode on by tapping on the switch, and tap "Start".
+URL, switch this mode on by tapping on the switch, and tap "Start". FQDN is the identifier of the device
+for Prometheus instance, must be in a format of a valid domain or subdomain name.
 
 ### File configuration
 Client application is configurable via a configuration file.
@@ -43,7 +44,7 @@ opening the app and hitting "Start" button.
 ## Repository contents
 - `.circleci` contains configuration file for continuous integration pipeline, that runs
   on the CircleCI platform. This CI pipeline runs linter, unit tests, and builds the project for each commit.
-- Folder `client` contains Jetpack Compose Android Prometheus Exporter written in Kotlin.
+- Folder `client` contains Jetpack Compose Prometheus Android Exporter written in Kotlin.
   This is a Android Studio project.
   Inside the Android project, inside the java/com/birdthedeveloper/prometheus/android/exporter 
   folder are the following Kotlin files:
@@ -57,8 +58,8 @@ opening the app and hitting "Start" button.
     - `worker/ExponentialBackoff.kt`: here is implemented a simple exponential backoff strategy, used when sending HTTP requests using either batch exporter or PushProx client mode.
     - `worker/MetricsEngine.kt`: functions for accessing hardware sensors and other metrics.
     - `worker/PrometheusServer.kt`: implementation of the Prometheus exporter - HTTP server via Ktor.
-    - `worker/PromWorker.kt`: implementation of the Android WorkManager worker. This worker consumes configuration from either 
-    - `worker/PushProxClient.kt`: in the file is implemented the PushProx client mode
+    - `worker/PromWorker.kt`: implementation of the Android WorkManager worker. This worker consumes configuration from either UI or YAML configuration file and starts the configured application modes as Kotlin coroutines.
+    - `worker/PushProxClient.kt`: in the file is implemented the PushProx client mode.
     - `worker/RemoteWriteSender.kt`: in this file is implemented the batch exporter mode.
     - `worker/RemoteWriteSenderMemStorage.kt`: memory store for metrics when the device is offline. Used by the batch exporter.
     - `worker/RemoteWriteSenderStorage.kt`: abstract class that serves as a contract for the batch exporter storage.
@@ -76,10 +77,10 @@ opening the app and hitting "Start" button.
 ## Some helpful information for development
 
 ### ADB port forwarding
-ADB port forwarding is usefull when running the client application 
-on an android emulator and prometheus database on the host
-ADB port forwarding allows to map specific host's port to emulator's port
-Syntax is as follows (for port 8080)
+ADB port forwarding is useful when running the client application 
+on an android emulator and a Prometheus database on the host.
+ADB port forwarding allows to map specific host's port to emulator's port.
+Syntax is as follows (for port 8080):
 ```
 $ adb forward tcp:8080 tcp:8080
 ```
@@ -89,7 +90,7 @@ To configure new VPS linux server for Prometheus with PushProx proxy, you can us
 ansible playbook. 
 This playbook is meant to be use against freshly provisioned RedHat Linux or Rocky Linux or Alma Linux server. 
 
-To run locally, just use the included docker-compose.yaml file as a template.
+If you wish to run locally instead, just use the included docker-compose.yaml file as a template.
 
 ### TL;DR
 ```
