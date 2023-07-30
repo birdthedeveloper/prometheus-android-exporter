@@ -12,11 +12,11 @@ exporting them later while online using the Prometheus remote write protocol.
 
 ## Operation
 This application can operate in three modes (simultaneously):
-- as a Prometheus exporter by exposing metrics on HTTP port 10101
+- as a Prometheus exporter by exp osing metrics on HTTP default port 10101 or configured port.
 - as a PushProx proxy client, to traverse NAT and other network barriers while still following
-    the pull model
+    the pull model.
 - as a batch exporter, which can store metrics to memory while device is offline and later export
-    them to Prometheus via remote write protocol while device becomes online
+    them to Prometheus via remote write protocol while device becomes online.
 
 Application is configurable either via its UI or via YAML configuration file.
 
@@ -107,34 +107,35 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 ## List of exported metrics:
 
 ### Android hardware sensors
-`android_sensor_heading_degrees` - Data from the Android heading sensor
-`android_sensor_proximity_metres` - Data from the proximity sensor
-`android_sensor_heading_accuracy_degrees` - Data from Android the heading sensor
-`android_sensor_hinge_angle_degrees` - How much is the hinge opened
-`android_sensor_accelerometer{axis}` - Data from the accelerometer
-`android_sensor_magnetic_field_tesla{axis}` - Data from the magnetic field sensor in base units
-`android_sensor_gravity_acceleration{axis}` - Data from gravity acceleration sensor, in m/s^2 units
-`android_sensor_linear_acceleration{axis}` - Data from the Android linear acceleration sensor in m/s^2 units.
-`android_sensor_pressure_pascal` - Data from the Android pressure in pascals
-`android_sensor_ambient_light_lux` - Data from Android ambient light sensor in lux
-`android_sensor_gyroscope_radians_per_second_squared{axis}` - Data from Android gyroscope in radians/second^2
-`android_sensor_ambient_temperature_celsius` - Ambient temperature in celsius
-`android_sensor_rotation_vector{axis}` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
-`android_sensor_rotation_vector_cosinus_theta_half` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
-`android_sensor_rotation_vector_accuracy_radians` - Android rotation vector sensor accuracy in radians
+- `android_sensor_heading_degrees` - Data from the Android heading sensor
+- `android_sensor_proximity_metres` - Data from the proximity sensor
+- `android_sensor_heading_accuracy_degrees` - Data from Android the heading sensor
+- `android_sensor_hinge_angle_degrees` - How much is the hinge opened
+- `android_sensor_accelerometer{axis}` - Data from the accelerometer
+- `android_sensor_magnetic_field_tesla{axis}` - Data from the magnetic field sensor in base units
+- `android_sensor_gravity_acceleration{axis}` - Data from gravity acceleration sensor, in m/s^2 units
+- `android_sensor_linear_acceleration{axis}` - Data from the Android linear acceleration sensor in m/s^2 units.
+- `android_sensor_pressure_pascal` - Data from the Android pressure in pascals
+- `android_sensor_ambient_light_lux` - Data from Android ambient light sensor in lux
+- `android_sensor_gyroscope_radians_per_second_squared{axis}` - Data from Android gyroscope in radians/second^2
+- `android_sensor_ambient_temperature_celsius` - Ambient temperature in celsius
+- `android_sensor_rotation_vector{axis}` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
+- `android_sensor_rotation_vector_cosinus_theta_half` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
+- `android_sensor_rotation_vector_accuracy_radians` - Android rotation vector sensor accuracy in radians
 
 ### Android network
-`android_cellular_network_connected` - Whether cellular network is connected
-`android_wifi_connected` - Whether WiFi is connected
+- `android_cellular_network_connected` - Whether cellular network is connected
+- `android_wifi_connected` - Whether WiFi is connected
 
 ### Miscellaneous
-`android_battery_charge_ratio` - Current battery charge
-`android_battery_is_charging` - Whether the battery is charging
-`android_system_info{manufacturer, model, os_release, cpu_core_count}` - Information about Android system
-`android_uptime_seconds` - Phone uptime in seconds
-`android_scrape_duration_seconds` - Duration of the metric scrape
+- `android_battery_charge_ratio` - Current battery charge
+- `android_battery_is_charging` - Whether the battery is charging
+- `android_system_info{manufacturer, model, os_release, cpu_core_count}` - Information about Android system
+- `android_uptime_seconds` - Phone uptime in seconds
+- `android_scrape_duration_seconds` - Duration of the metric scrape
 
 ### PushProx client mode specific metrics
-`pushprox_client_poll_errors_total` - Number of errored /poll requests
-`pushprox_client_scrape_errors_total` - Total number of scrape errors the PushProx client mode has encountered
-`pushprox_client_push_errors_total` - Total number of errored /push requests
+- `pushprox_client_poll_errors_total` - Number of errored /poll requests
+- `pushprox_client_scrape_errors_total` - Total number of scrape errors the PushProx client mode has encountered
+- `pushprox_client_push_errors_total` - Total number of errored /push requests
+ 
