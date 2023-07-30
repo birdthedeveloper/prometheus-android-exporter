@@ -91,11 +91,39 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
     }
 
     private fun collectHasWiFiConnection(mfs : MutableList<MetricFamilySamples>){
+        metricEngine.getHasWiFiConnected()?.let {
+            val result : Double = if (it) {
+                1.0
+            }else{
+                0.0
+            }
 
+            val gauge = GaugeMetricFamily(
+                "android_wifi_connected",
+                "Whether WiFi is connected",
+                listOf()
+            )
+            gauge.addMetric(listOf(), result)
+            mfs.add(gauge)
+        }
     }
 
     private fun collectHasCellularConnection(mfs : MutableList<MetricFamilySamples>){
+        metricEngine.getHasCellularConnected()?.let {
+            val result : Double = if (it) {
+                1.0
+            }else{
+                0.0
+            }
 
+            val gauge = GaugeMetricFamily(
+                "android_cellular_network_connected",
+                "Whether cellular network is connected",
+                listOf()
+            )
+            gauge.addMetric(listOf(), result)
+            mfs.add(gauge)
+        }
     }
 
     private fun collectAndroidInfo(mfs : MutableList<MetricFamilySamples>){

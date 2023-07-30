@@ -9,6 +9,8 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.BatteryManager
 import android.os.Build
 import android.os.CpuUsageInfo
@@ -240,11 +242,35 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return Build.MANUFACTURER
     }
 
-    fun getHasCellularConnected() : Boolean {
-        TODO()
+    fun getHasCellularConnected() : Boolean? {
+        val connectivityManager = context
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+
+        return if (connectivityManager != null){
+
+            val network = connectivityManager.activeNetwork
+            val cap = connectivityManager.getNetworkCapabilities(network)
+
+            cap != null && cap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+
+        }else{
+            null
+        }
     }
 
-    fun getHasWiFiConnected() : Boolean {
-        TODO()
+    fun getHasWiFiConnected() : Boolean? {
+        val connectivityManager = context
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+
+        return if (connectivityManager != null){
+
+            val network = connectivityManager.activeNetwork
+            val cap = connectivityManager.getNetworkCapabilities(network)
+
+            cap != null && (cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE))
+
+        }else{
+            null
+        }
     }
 }

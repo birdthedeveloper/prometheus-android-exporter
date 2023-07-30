@@ -91,6 +91,10 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 `android_sensor_rotation_vector_cosinus_theta_half` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
 `android_sensor_rotation_vector_accuracy_radians` - Android rotation vector sensor accuracy in radians
 
+### Android network
+`android_cellular_network_connected` - Whether cellular network is connected
+`android_wifi_connected` - Whether WiFi is connected
+
 
 ### Miscellaneous
 `android_battery_charge_ratio` - Current battery charge
