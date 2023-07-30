@@ -1,4 +1,7 @@
+# author: Martin Ptacek
 # CI/CD configuration file
+
+# Run linter ant the tests and build it
 
 version: 2.1
 

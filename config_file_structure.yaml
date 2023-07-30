@@ -1,6 +1,8 @@
 # Author: Martin Ptacek
 
-# This is a configuration file example for Prometheu Android Exporter.
+# This is a configuration file documentation for Prometheu Android Exporter.
+# Place this file at /data/user/0/com.birdthedeveloper.prometheus.Android.exporter/files/config.yaml
+# to the android device
 
 # Settings specific to exporting metrics using a HTTP server (Prometheus exporter mode)
 prometheus_server:
