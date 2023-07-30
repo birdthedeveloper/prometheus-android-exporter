@@ -1,1 +1,2192 @@
-{  "annotations": {    "list": [      {        "builtIn": 1,        "datasource": {          "type": "grafana",          "uid": "-- Grafana --"        },        "enable": true,        "hide": true,        "iconColor": "rgba(0, 211, 255, 1)",        "name": "Annotations & Alerts",        "target": {          "limit": 100,          "matchAny": false,          "tags": [],          "type": "dashboard"        },        "type": "dashboard"      }    ]  },  "editable": true,  "fiscalYearStartMonth": 0,  "graphTooltip": 0,  "id": 1,  "links": [],  "liveNow": false,  "panels": [    {      "collapsed": false,      "gridPos": {        "h": 1,        "w": 24,        "x": 0,        "y": 0      },      "id": 12,      "panels": [],      "title": "Miscellaneous",      "type": "row"    },    {      "datasource": {        "type": "prometheus",        "uid": "PBFA97CFB590B2093"      },      "description": "",      "fieldConfig": {        "defaults": {          "color": {            "mode": "thresholds"          },          "mappings": [],          "thresholds": {            "mode": "absolute",            "steps": [              {                "color": "green",                "value": null              },              {                "color": "red",                "value": 80              }            ]          }        },        "overrides": []      },      "gridPos": {        "h": 5,        "w": 8,        "x": 0,        "y": 1      },      "id": 52,      "options": {        "colorMode": "value",        "graphMode": "none",        "justifyMode": "auto",        "orientation": "auto",        "reduceOptions": {          "calcs": [            "lastNotNull"          ],          "fields": "",          "values": false        },        "text": {},        "textMode": "name"      },      "pluginVersion": "8.5.22",      "targets": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "editorMode": "code",          "expr": "avg(android_system_info)without(backfill)",          "legendFormat": "{{os_release}}",          "range": true,          "refId": "A"        }      ],      "title": "Android system version",      "type": "stat"    },    {      "datasource": {        "type": "prometheus",        "uid": "PBFA97CFB590B2093"      },      "description": "",      "fieldConfig": {        "defaults": {          "color": {            "mode": "thresholds"          },          "mappings": [],          "thresholds": {            "mode": "absolute",            "steps": [              {                "color": "green",                "value": null              },              {                "color": "red",                "value": 80              }            ]          }        },        "overrides": []      },      "gridPos": {        "h": 5,        "w": 8,        "x": 8,        "y": 1      },      "id": 46,      "libraryPanel": {        "meta": {          "connectedDashboards": 0,          "created": "2023-07-30T18:40:18.797791441Z",          "createdBy": {            "avatarUrl": "/avatar/46d229b033af06a191ff2267bca9ae56",            "id": 1,            "name": "admin"          },          "folderName": "",          "folderUid": "",          "updated": "2023-07-30T18:40:18.797791511Z",          "updatedBy": {            "avatarUrl": "/avatar/46d229b033af06a191ff2267bca9ae56",            "id": 1,            "name": "admin"          }        },        "name": "Cpu core count",        "uid": "pFM9wEqVz",        "version": 1      },      "options": {        "colorMode": "value",        "graphMode": "none",        "justifyMode": "auto",        "orientation": "auto",        "reduceOptions": {          "calcs": [            "lastNotNull"          ],          "fields": "",          "values": false        },        "text": {},        "textMode": "name"      },      "pluginVersion": "8.5.22",      "targets": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "editorMode": "code",          "expr": "avg(android_system_info)without(backfill)",          "legendFormat": "{{cpu_core_count}}",          "range": true,          "refId": "A"        }      ],      "title": "Cpu core count",      "type": "stat"    },    {      "datasource": {        "type": "prometheus",        "uid": "PBFA97CFB590B2093"      },      "fieldConfig": {        "defaults": {          "color": {            "mode": "thresholds"          },          "mappings": [],          "thresholds": {            "mode": "absolute",            "steps": [              {                "color": "green",                "value": null              }            ]          },          "unit": "s"        },        "overrides": []      },      "gridPos": {        "h": 5,        "w": 8,        "x": 16,        "y": 1      },      "id": 44,      "options": {        "colorMode": "value",        "graphMode": "none",        "justifyMode": "auto",        "orientation": "auto",        "reduceOptions": {          "calcs": [            "lastNotNull"          ],          "fields": "",          "values": false        },        "textMode": "auto"      },      "pluginVersion": "8.5.22",      "targets": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "expr": "android_uptime_seconds",          "refId": "A"        }      ],      "title": "Android system uptime",      "type": "stat"    },    {      "datasource": {        "type": "prometheus",        "uid": "PBFA97CFB590B2093"      },      "description": "",      "fieldConfig": {        "defaults": {          "color": {            "mode": "thresholds"          },          "mappings": [],          "thresholds": {            "mode": "absolute",            "steps": [              {                "color": "green",                "value": null              },              {                "color": "red",                "value": 80              }            ]          }        },        "overrides": []      },      "gridPos": {        "h": 5,        "w": 12,        "x": 0,        "y": 6      },      "id": 48,      "options": {        "colorMode": "value",        "graphMode": "none",        "justifyMode": "auto",        "orientation": "auto",        "reduceOptions": {          "calcs": [            "lastNotNull"          ],          "fields": "",          "values": false        },        "text": {},        "textMode": "name"      },      "pluginVersion": "8.5.22",      "targets": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "editorMode": "code",          "expr": "avg(android_system_info)without(backfill)",          "legendFormat": "{{model}}",          "range": true,          "refId": "A"        }      ],      "title": "Android device model",      "type": "stat"    },    {      "datasource": {        "type": "prometheus",        "uid": "PBFA97CFB590B2093"      },      "description": "",      "fieldConfig": {        "defaults": {          "color": {            "mode": "thresholds"          },          "mappings": [],          "thresholds": {            "mode": "absolute",            "steps": [              {                "color": "green",                "value": null              },              {                "color": "red",                "value": 80              }            ]          }        },        "overrides": []      },      "gridPos": {        "h": 5,        "w": 12,        "x": 12,        "y": 6      },      "id": 50,      "options": {        "colorMode": "value",        "graphMode": "none",        "justifyMode": "auto",        "orientation": "auto",        "reduceOptions": {          "calcs": [            "lastNotNull"          ],          "fields": "",          "values": false        },        "text": {},        "textMode": "name"      },      "pluginVersion": "8.5.22",      "targets": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "editorMode": "code",          "expr": "avg(android_system_info)without(backfill)",          "legendFormat": "{{manufacturer}}",          "range": true,          "refId": "A"        }      ],      "title": "Manufacturer",      "type": "stat"    },    {      "datasource": {        "type": "prometheus",        "uid": "PBFA97CFB590B2093"      },      "fieldConfig": {        "defaults": {          "color": {            "mode": "palette-classic"          },          "custom": {            "axisLabel": "",            "axisPlacement": "auto",            "barAlignment": 0,            "drawStyle": "line",            "fillOpacity": 9,            "gradientMode": "opacity",            "hideFrom": {              "legend": false,              "tooltip": false,              "viz": false            },            "lineInterpolation": "linear",            "lineWidth": 1,            "pointSize": 5,            "scaleDistribution": {              "type": "linear"            },            "showPoints": "auto",            "spanNulls": false,            "stacking": {              "group": "A",              "mode": "none"            },            "thresholdsStyle": {              "mode": "off"            }          },          "mappings": [],          "thresholds": {            "mode": "absolute",            "steps": [              {                "color": "green",                "value": null              },              {                "color": "red",                "value": 80              }            ]          },          "unit": "s"        },        "overrides": []      },      "gridPos": {        "h": 9,        "w": 24,        "x": 0,        "y": 11      },      "id": 58,      "options": {        "legend": {          "calcs": [],          "displayMode": "list",          "placement": "bottom"        },        "tooltip": {          "mode": "single",          "sort": "none"        }      },      "targets": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "expr": "avg(android_scrape_duration_seconds)without(backfill)",          "refId": "A"        }      ],      "title": "Scrape duration",      "type": "timeseries"    },    {      "collapsed": true,      "gridPos": {        "h": 1,        "w": 24,        "x": 0,        "y": 20      },      "id": 10,      "panels": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "degree"            },            "overrides": []          },          "gridPos": {            "h": 8,            "w": 12,            "x": 0,            "y": 21          },          "id": 28,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_heading_accuracy_degrees) without(backfill)",              "refId": "A"            }          ],          "title": "Android heading sensor accuracy",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "degree"            },            "overrides": []          },          "gridPos": {            "h": 8,            "w": 12,            "x": 12,            "y": 21          },          "id": 24,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_heading_degrees)without(backfill)",              "refId": "A"            }          ],          "title": "Android heading sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 19,                "gradientMode": "opacity",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "lengthmm"            },            "overrides": []          },          "gridPos": {            "h": 8,            "w": 12,            "x": 0,            "y": 29          },          "id": 26,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_proximity_metres) without(backfill) * 10000",              "refId": "A"            }          ],          "title": "Andriod proximity sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "degree"            },            "overrides": []          },          "gridPos": {            "h": 8,            "w": 12,            "x": 12,            "y": 29          },          "id": 30,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_hinge_angle_degrees)without(backfill)",              "refId": "A"            }          ],          "title": "Android hinge angle",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "accMS2"            },            "overrides": []          },          "gridPos": {            "h": 13,            "w": 12,            "x": 0,            "y": 37          },          "id": 32,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_accelerometer) without(backfill)",              "refId": "A"            }          ],          "title": "Android accelerometer sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "μT"            },            "overrides": []          },          "gridPos": {            "h": 13,            "w": 12,            "x": 12,            "y": 37          },          "id": 34,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_magnetic_field_tesla) without(backfill) * 1000000",              "refId": "A"            }          ],          "title": "Android magnetic field sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "accMS2"            },            "overrides": []          },          "gridPos": {            "h": 13,            "w": 12,            "x": 0,            "y": 50          },          "id": 36,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_gravity_acceleration)without(backfill)",              "refId": "A"            }          ],          "title": "Android sensor gravity acceleration",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "accMS2"            },            "overrides": []          },          "gridPos": {            "h": 13,            "w": 12,            "x": 12,            "y": 50          },          "id": 38,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_linear_acceleration)without(backfill)",              "refId": "A"            }          ],          "title": "Android linear acceleration sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 8,                "gradientMode": "opacity",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "pressurehpa"            },            "overrides": []          },          "gridPos": {            "h": 11,            "w": 12,            "x": 0,            "y": 63          },          "id": 40,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_pressure_pascal)without(backfill) / 100.0",              "refId": "A"            }          ],          "title": "Android pressure sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 8,                "gradientMode": "opacity",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 8,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "lux"            },            "overrides": []          },          "gridPos": {            "h": 11,            "w": 12,            "x": 12,            "y": 63          },          "id": 42,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_ambient_light_lux)without(backfill)",              "refId": "A"            }          ],          "title": "Android ambient light sensor",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "celsius"            },            "overrides": []          },          "gridPos": {            "h": 12,            "w": 12,            "x": 0,            "y": 74          },          "id": 54,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_ambient_temperature_celsius)without(backfill)",              "refId": "A"            }          ],          "title": "Ambient temperature",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 12,            "w": 12,            "x": 12,            "y": 74          },          "id": 60,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_sensor_rotation_vector)without(backfill)",              "refId": "A"            }          ],          "title": "Android round vector sensor data",          "type": "timeseries"        }      ],      "title": "Hardware sensors",      "type": "row"    },    {      "collapsed": true,      "gridPos": {        "h": 1,        "w": 24,        "x": 0,        "y": 21      },      "id": 8,      "panels": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "thresholds"              },              "mappings": [                {                  "options": {                    "0": {                      "color": "dark-red",                      "index": 0,                      "text": "WiFi is disconnected"                    },                    "1": {                      "color": "dark-green",                      "index": 1,                      "text": "WiFi is connected"                    }                  },                  "type": "value"                }              ],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 8,            "w": 12,            "x": 0,            "y": 3          },          "id": 20,          "options": {            "colorMode": "value",            "graphMode": "area",            "justifyMode": "auto",            "orientation": "auto",            "reduceOptions": {              "calcs": [                "lastNotNull"              ],              "fields": "",              "values": false            },            "text": {              "titleSize": 4            },            "textMode": "auto"          },          "pluginVersion": "8.5.22",          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "android_wifi_connected",              "refId": "A"            }          ],          "title": "WiFi status",          "type": "stat"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "thresholds"              },              "mappings": [                {                  "options": {                    "0": {                      "color": "dark-red",                      "index": 1,                      "text": "Cellular network not being used right now"                    },                    "1": {                      "color": "dark-green",                      "index": 0,                      "text": "Using cellular network now"                    }                  },                  "type": "value"                }              ],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 8,            "w": 12,            "x": 12,            "y": 3          },          "id": 22,          "options": {            "colorMode": "value",            "graphMode": "area",            "justifyMode": "auto",            "orientation": "auto",            "reduceOptions": {              "calcs": [                "lastNotNull"              ],              "fields": "",              "values": false            },            "textMode": "auto"          },          "pluginVersion": "8.5.22",          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_cellular_network_connected)without(backfill)",              "refId": "A"            }          ],          "title": "Cellular network status",          "type": "stat"        }      ],      "title": "Network",      "type": "row"    },    {      "collapsed": true,      "gridPos": {        "h": 1,        "w": 24,        "x": 0,        "y": 22      },      "id": 6,      "panels": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 10,            "w": 8,            "x": 0,            "y": 12          },          "id": 14,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "rate(avg(pushprox_client_scrape_errors_total) without(backfill)[5m])",              "refId": "A"            }          ],          "title": "PushProx scrape errors",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 10,            "w": 8,            "x": 8,            "y": 12          },          "id": 16,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "rate(avg(pushprox_client_push_errors_total) without (backfill)[5m])",              "refId": "A"            }          ],          "title": "PushProx push errors rate",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 0,                "gradientMode": "none",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 10,            "w": 8,            "x": 16,            "y": 12          },          "id": 18,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "rate(avg(pushprox_client_poll_errors_total) without(backfill)[5m])",              "refId": "A"            }          ],          "title": "PushProx poll errors rate",          "type": "timeseries"        }      ],      "title": "PushProx",      "type": "row"    },    {      "collapsed": true,      "gridPos": {        "h": 1,        "w": 24,        "x": 0,        "y": 23      },      "id": 4,      "panels": [        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "fieldConfig": {            "defaults": {              "color": {                "mode": "palette-classic"              },              "custom": {                "axisLabel": "",                "axisPlacement": "auto",                "barAlignment": 0,                "drawStyle": "line",                "fillOpacity": 22,                "gradientMode": "opacity",                "hideFrom": {                  "legend": false,                  "tooltip": false,                  "viz": false                },                "lineInterpolation": "linear",                "lineWidth": 1,                "pointSize": 5,                "scaleDistribution": {                  "type": "linear"                },                "showPoints": "auto",                "spanNulls": false,                "stacking": {                  "group": "A",                  "mode": "none"                },                "thresholdsStyle": {                  "mode": "off"                }              },              "mappings": [],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              },              "unit": "percent"            },            "overrides": []          },          "gridPos": {            "h": 12,            "w": 14,            "x": 0,            "y": 5          },          "id": 2,          "options": {            "legend": {              "calcs": [],              "displayMode": "list",              "placement": "bottom"            },            "tooltip": {              "mode": "single",              "sort": "none"            }          },          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_battery_charge_ratio{}) without(backfill) * 100",              "hide": false,              "refId": "B"            }          ],          "title": "Current battery percentage",          "type": "timeseries"        },        {          "datasource": {            "type": "prometheus",            "uid": "PBFA97CFB590B2093"          },          "description": "",          "fieldConfig": {            "defaults": {              "color": {                "mode": "thresholds"              },              "mappings": [                {                  "options": {                    "0": {                      "color": "orange",                      "index": 1,                      "text": "Discharging"                    },                    "1": {                      "color": "green",                      "index": 0,                      "text": "Charging now"                    }                  },                  "type": "value"                }              ],              "thresholds": {                "mode": "absolute",                "steps": [                  {                    "color": "green",                    "value": null                  },                  {                    "color": "red",                    "value": 80                  }                ]              }            },            "overrides": []          },          "gridPos": {            "h": 12,            "w": 10,            "x": 14,            "y": 5          },          "id": 56,          "options": {            "colorMode": "value",            "graphMode": "area",            "justifyMode": "auto",            "orientation": "auto",            "reduceOptions": {              "calcs": [                "lastNotNull"              ],              "fields": "",              "values": false            },            "textMode": "auto"          },          "pluginVersion": "8.5.22",          "targets": [            {              "datasource": {                "type": "prometheus",                "uid": "PBFA97CFB590B2093"              },              "expr": "avg(android_battery_is_charging)without(backfill)",              "refId": "A"            }          ],          "title": "Battery status",          "type": "stat"        }      ],      "title": "Battery",      "type": "row"    }  ],  "refresh": "30s",  "schemaVersion": 36,  "style": "dark",  "tags": [],  "templating": {    "list": []  },  "time": {    "from": "now-5m",    "to": "now"  },  "timepicker": {},  "timezone": "",  "title": "New dashboard",  "uid": "6BJUVE34z",  "version": 4,  "weekStart": ""}
+{
+    "__inputs": [
+      {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "description": "",
+        "type": "datasource",
+        "pluginId": "prometheus",
+        "pluginName": "Prometheus"
+      }
+    ],
+    "__elements": [],
+    "__requires": [
+      {
+        "type": "grafana",
+        "id": "grafana",
+        "name": "Grafana",
+        "version": "8.5.22"
+      },
+      {
+        "type": "datasource",
+        "id": "prometheus",
+        "name": "Prometheus",
+        "version": "1.0.0"
+      },
+      {
+        "type": "panel",
+        "id": "stat",
+        "name": "Stat",
+        "version": ""
+      },
+      {
+        "type": "panel",
+        "id": "timeseries",
+        "name": "Time series",
+        "version": ""
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 12,
+        "panels": [],
+        "title": "Miscellaneous",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 8,
+          "x": 0,
+          "y": 1
+        },
+        "id": 52,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "name"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "avg(android_system_info)without(backfill)",
+            "legendFormat": "{{os_release}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Android system version",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 8,
+          "x": 8,
+          "y": 1
+        },
+        "id": 46,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "name"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "avg(android_system_info)without(backfill)",
+            "legendFormat": "{{cpu_core_count}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Cpu core count",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 8,
+          "x": 16,
+          "y": 1
+        },
+        "id": 44,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "android_uptime_seconds",
+            "refId": "A"
+          }
+        ],
+        "title": "Android system uptime",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 12,
+          "x": 0,
+          "y": 6
+        },
+        "id": 48,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "name"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "avg(android_system_info)without(backfill)",
+            "legendFormat": "{{model}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Android device model",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 5,
+          "w": 12,
+          "x": 12,
+          "y": 6
+        },
+        "id": 50,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "name"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "editorMode": "code",
+            "expr": "avg(android_system_info)without(backfill)",
+            "legendFormat": "{{manufacturer}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Manufacturer",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 9,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 11
+        },
+        "id": 58,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_scrape_duration_seconds)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Scrape duration",
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 20
+        },
+        "id": 10,
+        "panels": [],
+        "title": "Hardware sensors",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "degree"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 21
+        },
+        "id": 28,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_heading_accuracy_degrees) without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android heading sensor accuracy",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "degree"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 21
+        },
+        "id": 24,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_heading_degrees)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android heading sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 19,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "lengthmm"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 29
+        },
+        "id": 26,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_proximity_metres) without(backfill) * 10000",
+            "refId": "A"
+          }
+        ],
+        "title": "Andriod proximity sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "degree"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 29
+        },
+        "id": 30,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_hinge_angle_degrees)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android hinge angle",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "accMS2"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 13,
+          "w": 12,
+          "x": 0,
+          "y": 37
+        },
+        "id": 32,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_accelerometer) without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android accelerometer sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "μT"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 13,
+          "w": 12,
+          "x": 12,
+          "y": 37
+        },
+        "id": 34,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_magnetic_field_tesla) without(backfill) * 1000000",
+            "refId": "A"
+          }
+        ],
+        "title": "Android magnetic field sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "accMS2"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 13,
+          "w": 12,
+          "x": 0,
+          "y": 50
+        },
+        "id": 36,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_gravity_acceleration)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android sensor gravity acceleration",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "accMS2"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 13,
+          "w": 12,
+          "x": 12,
+          "y": 50
+        },
+        "id": 38,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_linear_acceleration)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android linear acceleration sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 8,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "pressurehpa"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 12,
+          "x": 0,
+          "y": 63
+        },
+        "id": 40,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_pressure_pascal)without(backfill) / 100.0",
+            "refId": "A"
+          }
+        ],
+        "title": "Android pressure sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 8,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 8,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "lux"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 12,
+          "x": 12,
+          "y": 63
+        },
+        "id": 42,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_ambient_light_lux)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android ambient light sensor",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "celsius"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 12,
+          "x": 0,
+          "y": 74
+        },
+        "id": 54,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_ambient_temperature_celsius)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Ambient temperature",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 12,
+          "x": 12,
+          "y": 74
+        },
+        "id": 60,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_sensor_rotation_vector)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Android round vector sensor data",
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 86
+        },
+        "id": 8,
+        "panels": [],
+        "title": "Network",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "dark-red",
+                    "index": 0,
+                    "text": "WiFi is disconnected"
+                  },
+                  "1": {
+                    "color": "dark-green",
+                    "index": 1,
+                    "text": "WiFi is connected"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 87
+        },
+        "id": 20,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {
+            "titleSize": 4
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "android_wifi_connected",
+            "refId": "A"
+          }
+        ],
+        "title": "WiFi status",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "dark-red",
+                    "index": 1,
+                    "text": "Cellular network not being used right now"
+                  },
+                  "1": {
+                    "color": "dark-green",
+                    "index": 0,
+                    "text": "Using cellular network now"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 87
+        },
+        "id": 22,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_cellular_network_connected)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Cellular network status",
+        "type": "stat"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 95
+        },
+        "id": 6,
+        "panels": [],
+        "title": "PushProx",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 8,
+          "x": 0,
+          "y": 96
+        },
+        "id": 14,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "rate(avg(pushprox_client_scrape_errors_total) without(backfill)[5m])",
+            "refId": "A"
+          }
+        ],
+        "title": "PushProx scrape errors",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 8,
+          "x": 8,
+          "y": 96
+        },
+        "id": 16,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "rate(avg(pushprox_client_push_errors_total) without (backfill)[5m])",
+            "refId": "A"
+          }
+        ],
+        "title": "PushProx push errors rate",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 8,
+          "x": 16,
+          "y": 96
+        },
+        "id": 18,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "rate(avg(pushprox_client_poll_errors_total) without(backfill)[5m])",
+            "refId": "A"
+          }
+        ],
+        "title": "PushProx poll errors rate",
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 106
+        },
+        "id": 4,
+        "panels": [],
+        "title": "Battery",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 22,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 14,
+          "x": 0,
+          "y": 107
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_battery_charge_ratio{}) without(backfill) * 100",
+            "hide": false,
+            "refId": "B"
+          }
+        ],
+        "title": "Current battery percentage",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "orange",
+                    "index": 1,
+                    "text": "Discharging"
+                  },
+                  "1": {
+                    "color": "green",
+                    "index": 0,
+                    "text": "Charging now"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 10,
+          "x": 14,
+          "y": 107
+        },
+        "id": 56,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "pluginVersion": "8.5.22",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "expr": "avg(android_battery_is_charging)without(backfill)",
+            "refId": "A"
+          }
+        ],
+        "title": "Battery status",
+        "type": "stat"
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 36,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "New dashboard",
+    "uid": "6BJUVE34z",
+    "version": 6,
+    "weekStart": ""
+  }
