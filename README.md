@@ -74,4 +74,9 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 
 ## List of exported metrics:
 
-TODO: add grafana dashboard json here
+`android_battery_charge_ratio` - Current battery charge
+`android_system_info{manufacturer, model, os_release, cpu_core_count}` - Information about Android system
+`android_uptime_seconds` - Phone uptime in seconds
+`android_cpu_active_seconds{core}` - Active CPU time in seconds since last time system booted
+`android_cpu_total_seconds{core}` - Total CPU time in seconds since last time system booted
+`android_system_temperature_celsius{where}` - Temperature on the device

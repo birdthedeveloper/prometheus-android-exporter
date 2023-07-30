@@ -27,10 +27,6 @@ data class AxisSpecificGauge(
 )
 
 class HwSensorsCache(
-    var batteryChargeRatio : Double? = null,
-    var numberOfSteps : Int? = null,
-
-
     var headingDegrees : Double? = null,
     var headingAccuracyDegrees : Double? = null,
     var hingeAngleDegrees : Double? = null,
@@ -83,11 +79,10 @@ val temperatureTypes : Map<Int, String> = mapOf(
 class MetricsEngine(private val context: Context) : SensorEventListener {
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val hwSensorsCache = HwSensorsCache()
-    val hwPropertiesManager = context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE) as HardwarePropertiesManager
+    private val hwPropertiesManager = context.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE) as HardwarePropertiesManager
 
     init {
-        //TODO
-        //registerAllHwEventHandlers()
+        registerAllHwEventHandlers()
     }
 
     fun hwSensorsValues(): HwSensorsCache {
@@ -108,7 +103,7 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
     }
 
     fun dispose() {
-        //sensorManager.unregisterListener(this)
+        sensorManager.unregisterListener(this)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -193,15 +188,7 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         // Do nothing
     }
 
-
-//    - network availability
-//    - 4G, 5G
-//    - ram
-//    - scrape duration
-//    - bluetooth - mac bluetooth
-//    - storage information
-
-    fun batteryChargeRatio(): Float {
+    fun getBatteryChargeRatio(): Double {
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { intFilter ->
             context.registerReceiver(null, intFilter)
         }
@@ -213,8 +200,8 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
             level / scale.toFloat()
         }
 
-        batteryRatio ?: return -1.0f
-        return batteryRatio
+        batteryRatio ?: return -1.0
+        return batteryRatio.toDouble()
     }
 
     fun getNumberOfCpuCores(): Int {
@@ -225,7 +212,7 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return SystemClock.elapsedRealtime() / 1000.0
     }
 
-    fun cpuUsage() : Array<CpuUsageInfo> {
+    fun getCpuUsage() : Array<CpuUsageInfo> {
         return hwPropertiesManager.cpuUsages
     }
 
@@ -255,7 +242,11 @@ class MetricsEngine(private val context: Context) : SensorEventListener {
         return Build.MANUFACTURER
     }
 
-    //TODO has_celular
-    //TODO has_wifi
-    //TODO prefix metrics with exporter name - android_ ...
+    fun getHasCellularConnected() : Boolean {
+        TODO()
+    }
+
+    fun getHasWiFiConnected() : Boolean {
+        TODO()
+    }
 }
