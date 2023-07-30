@@ -74,9 +74,25 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 
 ## List of exported metrics:
 
+### Android hardware sensors
+`android_sensor_heading_degrees` - Data from the Android heading sensor
+`android_sensor_proximity_metres` - Data from the proximity sensor
+`android_sensor_heading_accuracy_degrees` - Data from Android the heading sensor
+`android_sensor_hinge_angle_degrees` - How much is the hinge opened
+`android_sensor_accelerometer{axis}` - Data from the accelerometer
+`android_sensor_magnetic_field_tesla{axis}` - Data from the magnetic field sensor in base units
+
+
+### Miscellaneous
 `android_battery_charge_ratio` - Current battery charge
 `android_system_info{manufacturer, model, os_release, cpu_core_count}` - Information about Android system
 `android_uptime_seconds` - Phone uptime in seconds
 `android_cpu_active_seconds{core}` - Active CPU time in seconds since last time system booted
 `android_cpu_total_seconds{core}` - Total CPU time in seconds since last time system booted
 `android_system_temperature_celsius{where}` - Temperature on the device
+`android_scrape_duration_seconds` - Duration of the metric scrape
+
+### PushProx client mode specific metrics
+`pushprox_client_poll_errors_total` - Number of errored /poll requests
+`pushprox_client_scrape_errors_total` - Total number of scrape errors the PushProx client mode has encountered
+`pushprox_client_push_errors_total` - Total number of errored /push requests

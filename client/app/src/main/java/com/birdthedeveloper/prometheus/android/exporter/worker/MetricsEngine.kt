@@ -27,20 +27,20 @@ data class AxisSpecificGauge(
 )
 
 class HwSensorsCache(
-    var headingDegrees : Double? = null,
-    var headingAccuracyDegrees : Double? = null,
-    var hingeAngleDegrees : Double? = null,
+    var headingDegrees : Double? = null, //DONE
+    var headingAccuracyDegrees : Double? = null, //DONE
+    var hingeAngleDegrees : Double? = null, //DONE
     var offbodyDetect : Double? = null,
     var ambientTemperatureCelsius : Double? = null,
     var relativeHumidityPercent : Double? = null,
 
-    var accelerometer : AxisSpecificGauge? = null,
-    var magneticFieldMicroTesla : AxisSpecificGauge? = null,
+    var accelerometer : AxisSpecificGauge? = null, //DONE
+    var magneticFieldMicroTesla : AxisSpecificGauge? = null, //DONE
     var gyroscopeRadiansPerSecond: AxisSpecificGauge? = null,
 
     var ambientLightLux : Double? = null,
     var pressureHectoPascal : Double? = null,
-    var proximityCentimeters : Double? = null,
+    var proximityCentimeters : Double? = null, //DONE
 
     var gravityAcceleration : AxisSpecificGauge? = null,
     var linearAcceleration : AxisSpecificGauge? = null,

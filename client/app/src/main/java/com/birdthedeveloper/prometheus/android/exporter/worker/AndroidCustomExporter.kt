@@ -16,32 +16,21 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         Log.d(TAG, "Collecting metrics now")
         val mfs: MutableList<MetricFamilySamples> = ArrayList()
 
-        //TODO scrape_duration gauge
         val startTime = System.currentTimeMillis()
 
         // metrics definitions
         collectBatteryChargeRatio(mfs)
         collectUptimeInSeconds(mfs)
+//        collectDeviceTemperatures(mfs)
 //        collectCpuUsage(mfs)
         collectHasWiFiConnection(mfs)
         collectHasCellularConnection(mfs)
-//        collectDeviceTemperatures(mfs)
         collectAndroidInfo(mfs)
-
+        collectHardwareSensors(mfs)
         collectScrapeDuration(mfs, startTime)
 
         Log.d(TAG, "Metrics collected")
         return mfs
-    }
-
-    private fun collectSteps(mfs: MutableList<MetricFamilySamples>){
-        val gauge = GaugeMetricFamily(
-            "steps",
-            "Number of steps", listOf(),
-        )
-
-        gauge.addMetric(listOf(), 1.0)
-        mfs.add(gauge)
     }
 
     private fun collectBatteryChargeRatio(mfs : MutableList<MetricFamilySamples>){
@@ -124,18 +113,72 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         mfs.add(gauge)
     }
 
-    private fun collectNumberOfCpuCores(mfs : MutableList<MetricFamilySamples>){
-        val gauge = GaugeMetricFamily(
-            "android_system_info",
-            "Static information about the android phone",
-            listOf("manufacturer", "model", "os_release",)
-        )
-        gauge.addMetric(listOf(
-            metricEngine.getAndroidManufacturer(),
-            metricEngine.getAndroidModel(),
-            metricEngine.getAndroidOsVersion(),
-        ), 1.0)
-        mfs.add(gauge)
+    private fun collectHardwareSensors(mfs : MutableList<MetricFamilySamples>){
+        metricEngine.hwSensorsValues().headingDegrees?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_heading_degrees",
+                "Heading sensor data",
+                listOf()
+            )
+            gauge.addMetric(listOf(), it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().proximityCentimeters?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_proximity_metres",
+                "Data from the proximity sensor",
+                listOf()
+            )
+            gauge.addMetric(listOf(), it / 100.0)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().headingAccuracyDegrees?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_heading_accuracy_degrees",
+                "Data from the heading sensor",
+                listOf()
+            )
+            gauge.addMetric(listOf(), it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().hingeAngleDegrees?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_hinge_angle_degrees",
+                "Information about how much is the hinge opened",
+                listOf()
+            )
+            gauge.addMetric(listOf(), it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().accelerometer?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_accelerometer",
+                "Accelerometer sensor data in m/s^2",
+                listOf("axis")
+            )
+            addAxisSpecificGauge(gauge, it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().magneticFieldMicroTesla?.let {
+            val coefficient = 1_000_000.0
+            val baseUnits = AxisSpecificGauge(
+                x = it.x / coefficient,
+                y = it.y / coefficient,
+                z = it.z / coefficient,
+            )
+            val gauge = GaugeMetricFamily(
+                "android_sensor_magnetic_field_tesla",
+                "Magnetic field sensor data in Tesla units",
+                listOf("axis")
+            )
+            addAxisSpecificGauge(gauge, baseUnits)
+            mfs.add(gauge)
+        }
     }
 
     private fun collectScrapeDuration(mfs : MutableList<MetricFamilySamples>, startTime : Long){
@@ -148,5 +191,11 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
         val differenceMilis = System.currentTimeMillis() - startTime
         gauge.addMetric(listOf(), differenceMilis / 1000.0)
         mfs.add(gauge)
+    }
+
+    private fun addAxisSpecificGauge(gauge: GaugeMetricFamily, data : AxisSpecificGauge){
+        gauge.addMetric(listOf("x"), data.x)
+        gauge.addMetric(listOf("y"), data.y)
+        gauge.addMetric(listOf("z"), data.z)
     }
 }
