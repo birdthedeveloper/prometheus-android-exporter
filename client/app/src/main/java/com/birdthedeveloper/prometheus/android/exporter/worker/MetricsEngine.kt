@@ -27,29 +27,27 @@ data class AxisSpecificGauge(
 )
 
 class HwSensorsCache(
-    var headingDegrees : Double? = null, //DONE
-    var headingAccuracyDegrees : Double? = null, //DONE
-    var hingeAngleDegrees : Double? = null, //DONE
+    var headingDegrees : Double? = null,
+    var headingAccuracyDegrees : Double? = null,
+    var hingeAngleDegrees : Double? = null,
     var offbodyDetect : Double? = null,
     var ambientTemperatureCelsius : Double? = null,
     var relativeHumidityPercent : Double? = null,
 
-    var accelerometer : AxisSpecificGauge? = null, //DONE
-    var magneticFieldMicroTesla : AxisSpecificGauge? = null, //DONE
+    var accelerometer : AxisSpecificGauge? = null,
+    var magneticFieldMicroTesla : AxisSpecificGauge? = null,
     var gyroscopeRadiansPerSecond: AxisSpecificGauge? = null,
 
     var ambientLightLux : Double? = null,
     var pressureHectoPascal : Double? = null,
-    var proximityCentimeters : Double? = null, //DONE
+    var proximityCentimeters : Double? = null,
 
-    var gravityAcceleration : AxisSpecificGauge? = null, //DONE
+    var gravityAcceleration : AxisSpecificGauge? = null,
     var linearAcceleration : AxisSpecificGauge? = null,
     var rotationVectorValues : AxisSpecificGauge? = null,
     var rotationVectorCosinusThetaHalf : Double? = null,
     var rotationVectorAccuracyRadians : Double? = null,
 );
-
-//TODO for cpu, use HardwarePropertiesManager
 
 private val supportedSensors : List<Int> = listOf(
     Sensor.TYPE_HEADING,

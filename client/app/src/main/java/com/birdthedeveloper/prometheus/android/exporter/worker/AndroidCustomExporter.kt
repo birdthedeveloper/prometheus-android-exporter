@@ -199,6 +199,96 @@ class AndroidCustomExporter(private val metricEngine: MetricsEngine) : Collector
             addAxisSpecificGauge(gauge, it)
             mfs.add(gauge)
         }
+
+        metricEngine.hwSensorsValues().pressureHectoPascal?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_pressure_pascal",
+                "Data from the Android pressure in pascals",
+                listOf(),
+            )
+            gauge.addMetric(listOf(), it * 100.0)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().ambientLightLux?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_ambient_light_lux",
+                "Data from Android ambient light sensor in lux",
+                listOf(),
+            )
+            gauge.addMetric(listOf(), it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().gyroscopeRadiansPerSecond?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_gyroscope_radians_per_second_squared",
+                "Data from Android gyroscope in radians/second^2",
+                listOf("axis"),
+            )
+            addAxisSpecificGauge(gauge, it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().ambientTemperatureCelsius?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_ambient_temperature_celsius",
+                "Data from Android temperature sensor",
+                listOf(),
+            )
+            gauge.addMetric(listOf(), it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().relativeHumidityPercent?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_relative_humidity_ratio",
+                "Android relative humidity sensor data",
+                listOf(),
+            )
+            gauge.addMetric(listOf(), it / 100.0)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().offbodyDetect?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_offbody_detect",
+                "Whether the Android device is off the body",
+                listOf(),
+            )
+            gauge.addMetric(listOf(), it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().rotationVectorValues?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_rotation_vector",
+                "Data from the Android Rotation Vector sensor, how is the device rotated, without a unit",
+                listOf("axis"),
+            )
+            addAxisSpecificGauge(gauge, it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().rotationVectorCosinusThetaHalf?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_rotation_vector_cosinus_theta_half",
+                "Data from the Android Rotation Vector sensor, how is the device rotated, without a unit",
+                listOf(),
+            )
+            gauge.addMetric(listOf(),it)
+            mfs.add(gauge)
+        }
+
+        metricEngine.hwSensorsValues().rotationVectorAccuracyRadians?.let {
+            val gauge = GaugeMetricFamily(
+                "android_sensor_rotation_vector_accuracy_radians",
+                "Accuracy of the Android rotation vector sensor, in radians",
+                listOf(),
+            )
+            gauge.addMetric(listOf(),it)
+            mfs.add(gauge)
+        }
     }
 
     private fun collectScrapeDuration(mfs : MutableList<MetricFamilySamples>, startTime : Long){

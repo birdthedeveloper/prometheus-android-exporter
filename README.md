@@ -83,7 +83,13 @@ $ ansible-playbook ansible_playbook.yaml --tags config
 `android_sensor_magnetic_field_tesla{axis}` - Data from the magnetic field sensor in base units
 `android_sensor_gravity_acceleration` - Data from gravity acceleration sensor, in m/s^2 units
 `android_sensor_linear_acceleration` - Data from the Android linear acceleration sensor in m/s^2 units.
-
+`android_sensor_pressure_pascal` - Data from the Android pressure in pascals
+`android_sensor_ambient_light_lux` - Data from Android ambient light sensor in lux
+`android_sensor_gyroscope_radians_per_second_squared` - Data from Android gyroscope in radians/second^2
+`android_sensor_ambient_temperature_celsius` - Ambient temperature in celsius
+`android_sensor_rotation_vector` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
+`android_sensor_rotation_vector_cosinus_theta_half` - Data from the Android Rotation Vector sensor, how is the device rotated, without a unit
+`android_sensor_rotation_vector_accuracy_radians` - Android rotation vector sensor accuracy in radians
 
 
 ### Miscellaneous
