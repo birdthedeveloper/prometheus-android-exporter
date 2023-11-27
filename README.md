@@ -6,7 +6,7 @@
 This is not yet available on Google Play. On some android phones, there are system policies preventing
 longer run of this exporter in background.
 If you are interested in this project and would like to contribute to it, please create an issue or 
-hit me up at martin.ptace@gmail.com. My bachelor thesis regarding this project is available here: [![Bachelor Thesis]](https://www.vut.cz/en/students/final-thesis/detail/144035)
+hit me up at martin.ptace@gmail.com. My bachelor thesis regarding this project is available here: [bachelor thesis](https://www.vut.cz/en/students/final-thesis/detail/144035)
 
 
 Prometheus exporter for Android phones.
