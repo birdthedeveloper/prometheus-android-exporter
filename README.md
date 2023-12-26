@@ -2,13 +2,6 @@
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/birdthedeveloper/prometheus-android-exporter/tree/master.svg?style=svg&circle-token=6a31d132a46fd4e7cf04dd49ef390f1776e38cfc)](https://dl.circleci.com/status-badge/redirect/gh/birdthedeveloper/prometheus-android-exporter/tree/master)
 
-## DISCLAIMER
-This is not yet available on Google Play. On some android phones, there are system policies preventing
-longer run of this exporter in background.
-If you are interested in this project and would like to contribute to it, please create an issue or 
-hit me up at martin.ptace@gmail.com. My bachelor thesis regarding this project is available here: [bachelor thesis](https://www.vut.cz/en/students/final-thesis/detail/144035)
-
-
 Prometheus exporter for Android phones.
 Prometheus Android Exporter is implemented in Kotlin in Jetpack Compose.
 Apart from simply exporting available metrics on the default HTTP port 10101, it can also traverse NAT
@@ -16,6 +9,15 @@ by connecting to the PushProx proxy.
 It also supports scraping metrics locally and storing them in memory while offline and
 exporting them later while online using the Prometheus remote write protocol.
 
+## DISCLAIMER
+This is not yet available on Google Play. On some android phones, there are system policies preventing
+longer run of this exporter in background.
+If you are interested in this project and would like to contribute to it, please create an issue or 
+hit me up at martin.ptace@gmail.com. My bachelor thesis regarding this project is available here: [bachelor thesis](https://www.vut.cz/en/students/final-thesis/detail/144035)
+
+## Compile locally
+To run the application locally, you will need to download Android Studio. Please read the appropriate
+documentation on how to run Android application in Android Studio online.
 
 ## Operation
 This application can operate in three modes (simultaneously):
